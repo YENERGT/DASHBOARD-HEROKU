@@ -1,4 +1,5 @@
 import { sampleInvoices, sampleExpenses } from '../data/sampleData';
+import googleSheetsService from './googleSheetsService';
 import {
   filterByDateRange,
   calculateMetrics,
@@ -9,28 +10,73 @@ import {
 
 /**
  * Servicio para manejar datos de facturas y gastos
- * En producción, esto se conectará a Google Sheets API
+ * Conectado con Google Sheets API
  */
 
 class DataService {
   constructor() {
-    // Por ahora usamos datos de ejemplo
-    // TODO: Conectar con Google Sheets API
-    this.invoices = sampleInvoices;
-    this.expenses = sampleExpenses;
+    this.invoices = [];
+    this.expenses = sampleExpenses; // Por ahora gastos siguen siendo de ejemplo
+    this.useRealData = true; // Cambiar a false para usar datos de ejemplo
+    this.isLoading = false;
+    this.lastFetch = null;
+    this.cacheTimeout = 5 * 60 * 1000; // 5 minutos de cache
+  }
+
+  /**
+   * Carga los datos de Google Sheets
+   */
+  async loadData() {
+    // Si ya tenemos datos recientes en cache, usarlos
+    if (this.invoices.length > 0 && this.lastFetch &&
+        (Date.now() - this.lastFetch) < this.cacheTimeout) {
+      console.log('📦 Using cached data');
+      return this.invoices;
+    }
+
+    // Evitar múltiples llamadas simultáneas
+    if (this.isLoading) {
+      console.log('⏳ Already loading data...');
+      return this.invoices;
+    }
+
+    this.isLoading = true;
+
+    try {
+      if (this.useRealData) {
+        console.log('📡 Fetching data from Google Sheets...');
+        this.invoices = await googleSheetsService.getSheetData();
+        this.lastFetch = Date.now();
+        console.log(`✅ Loaded ${this.invoices.length} invoices from Google Sheets`);
+      } else {
+        console.log('📝 Using sample data');
+        this.invoices = sampleInvoices;
+      }
+    } catch (error) {
+      console.error('❌ Error loading data from Google Sheets:', error);
+      console.log('⚠️ Falling back to sample data');
+      this.invoices = sampleInvoices;
+    } finally {
+      this.isLoading = false;
+    }
+
+    return this.invoices;
   }
 
   /**
    * Obtiene todas las facturas
    */
-  getAllInvoices() {
+  async getAllInvoices() {
+    await this.loadData();
     return this.invoices;
   }
 
   /**
    * Obtiene facturas por período
    */
-  getInvoicesByPeriod(periodType = 'day', date = new Date()) {
+  async getInvoicesByPeriod(periodType = 'day', date = new Date()) {
+    await this.loadData();
+
     const currentPeriod = getCurrentPeriod(date, periodType);
     const previousPeriod = getPreviousPeriod(date, periodType);
 
@@ -72,31 +118,40 @@ class DataService {
   /**
    * Obtiene métricas del día actual
    */
-  getTodayMetrics() {
-    return this.getInvoicesByPeriod('day', new Date());
+  async getTodayMetrics() {
+    return await this.getInvoicesByPeriod('day', new Date());
   }
 
   /**
    * Obtiene métricas del mes actual
    */
-  getMonthMetrics() {
-    return this.getInvoicesByPeriod('month', new Date());
+  async getMonthMetrics() {
+    return await this.getInvoicesByPeriod('month', new Date());
   }
 
   /**
    * Obtiene métricas del año actual
    */
-  getYearMetrics() {
-    return this.getInvoicesByPeriod('year', new Date());
+  async getYearMetrics() {
+    return await this.getInvoicesByPeriod('year', new Date());
   }
 
   /**
    * Obtiene últimas transacciones
    */
-  getRecentTransactions(limit = 10) {
+  async getRecentTransactions(limit = 10) {
+    await this.loadData();
     return [...this.invoices]
       .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
       .slice(0, limit);
+  }
+
+  /**
+   * Fuerza la recarga de datos desde Google Sheets
+   */
+  async refreshData() {
+    this.lastFetch = null;
+    return await this.loadData();
   }
 
   /**
@@ -146,8 +201,8 @@ class DataService {
   /**
    * Calcula el profit (ingresos - gastos)
    */
-  getProfitByPeriod(periodType = 'day', date = new Date()) {
-    const invoiceData = this.getInvoicesByPeriod(periodType, date);
+  async getProfitByPeriod(periodType = 'day', date = new Date()) {
+    const invoiceData = await this.getInvoicesByPeriod(periodType, date);
     const expenseData = this.getExpensesByPeriod(periodType, date);
 
     const currentProfit = invoiceData.current.total - expenseData.current.total;

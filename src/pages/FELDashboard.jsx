@@ -18,28 +18,32 @@ const FELDashboard = () => {
     loadData();
   }, [selectedPeriod]);
 
-  const loadData = () => {
-    let periodMetrics;
+  const loadData = async () => {
+    try {
+      let periodMetrics;
 
-    switch(selectedPeriod) {
-      case 'day':
-        periodMetrics = dataService.getTodayMetrics();
-        break;
-      case 'month':
-        periodMetrics = dataService.getMonthMetrics();
-        break;
-      case 'year':
-        periodMetrics = dataService.getYearMetrics();
-        break;
-      default:
-        periodMetrics = dataService.getTodayMetrics();
+      switch(selectedPeriod) {
+        case 'day':
+          periodMetrics = await dataService.getTodayMetrics();
+          break;
+        case 'month':
+          periodMetrics = await dataService.getMonthMetrics();
+          break;
+        case 'year':
+          periodMetrics = await dataService.getYearMetrics();
+          break;
+        default:
+          periodMetrics = await dataService.getTodayMetrics();
+      }
+
+      setMetrics(periodMetrics);
+
+      // Obtener top clientes del período actual
+      const clients = getTopClients(periodMetrics.current.data, 10, 'total');
+      setTopClients(clients);
+    } catch (error) {
+      console.error('Error loading data:', error);
     }
-
-    setMetrics(periodMetrics);
-
-    // Obtener top clientes del período actual
-    const clients = getTopClients(periodMetrics.current.data, 10, 'total');
-    setTopClients(clients);
   };
 
   if (!metrics) {

@@ -12,17 +12,25 @@ const Home = () => {
   const [channelData, setChannelData] = useState([]);
 
   useEffect(() => {
-    // Obtener métricas del día
-    const todayMetrics = dataService.getTodayMetrics();
-    setMetrics(todayMetrics);
+    const loadData = async () => {
+      try {
+        // Obtener métricas del día
+        const todayMetrics = await dataService.getTodayMetrics();
+        setMetrics(todayMetrics);
 
-    // Obtener últimas transacciones
-    const transactions = dataService.getRecentTransactions(5);
-    setRecentTransactions(transactions);
+        // Obtener últimas transacciones
+        const transactions = await dataService.getRecentTransactions(5);
+        setRecentTransactions(transactions);
 
-    // Obtener datos por canal
-    const channels = groupByChannel(todayMetrics.current.data);
-    setChannelData(channels);
+        // Obtener datos por canal
+        const channels = groupByChannel(todayMetrics.current.data);
+        setChannelData(channels);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+
+    loadData();
   }, []);
 
   if (!metrics) {
