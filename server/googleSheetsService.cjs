@@ -38,8 +38,9 @@ class GoogleSheetsService {
 
   /**
    * Obtiene datos del Google Sheet
+   * Hoja: REGISTRO (donde están los datos de FEL)
    */
-  async getSheetData(range = 'Sheet1!A2:P') {
+  async getSheetData(range = 'REGISTRO!A2:P') {
     try {
       if (!this.initialized) {
         await this.initialize();
