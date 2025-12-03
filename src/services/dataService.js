@@ -1,5 +1,5 @@
+import axios from 'axios';
 import { sampleInvoices, sampleExpenses } from '../data/sampleData';
-import googleSheetsService from './googleSheetsService';
 import {
   filterByDateRange,
   calculateMetrics,
@@ -8,23 +8,25 @@ import {
   calculateComparison
 } from '../utils/calculations';
 
+const API_URL = 'http://localhost:3001/api';
+
 /**
  * Servicio para manejar datos de facturas y gastos
- * Conectado con Google Sheets API
+ * Conectado con Backend API que consume Google Sheets
  */
 
 class DataService {
   constructor() {
     this.invoices = [];
-    this.expenses = sampleExpenses; // Por ahora gastos siguen siendo de ejemplo
-    this.useRealData = true; // Cambiar a false para usar datos de ejemplo
+    this.expenses = sampleExpenses;
+    this.useRealData = true;
     this.isLoading = false;
     this.lastFetch = null;
     this.cacheTimeout = 5 * 60 * 1000; // 5 minutos de cache
   }
 
   /**
-   * Carga los datos de Google Sheets
+   * Carga los datos desde el backend API
    */
   async loadData() {
     // Si ya tenemos datos recientes en cache, usarlos
@@ -44,16 +46,22 @@ class DataService {
 
     try {
       if (this.useRealData) {
-        console.log('📡 Fetching data from Google Sheets...');
-        this.invoices = await googleSheetsService.getSheetData();
-        this.lastFetch = Date.now();
-        console.log(`✅ Loaded ${this.invoices.length} invoices from Google Sheets`);
+        console.log('📡 Fetching data from backend API...');
+        const response = await axios.get(`${API_URL}/invoices`);
+
+        if (response.data.success) {
+          this.invoices = response.data.data;
+          this.lastFetch = Date.now();
+          console.log(`✅ Loaded ${this.invoices.length} invoices from API`);
+        } else {
+          throw new Error('API returned unsuccessful response');
+        }
       } else {
         console.log('📝 Using sample data');
         this.invoices = sampleInvoices;
       }
     } catch (error) {
-      console.error('❌ Error loading data from Google Sheets:', error);
+      console.error('❌ Error loading data from API:', error.message);
       console.log('⚠️ Falling back to sample data');
       this.invoices = sampleInvoices;
     } finally {
@@ -147,11 +155,25 @@ class DataService {
   }
 
   /**
-   * Fuerza la recarga de datos desde Google Sheets
+   * Fuerza la recarga de datos desde el backend
    */
   async refreshData() {
-    this.lastFetch = null;
-    return await this.loadData();
+    try {
+      console.log('🔄 Forcing data refresh...');
+      const response = await axios.post(`${API_URL}/invoices/refresh`);
+
+      if (response.data.success) {
+        this.invoices = response.data.data;
+        this.lastFetch = Date.now();
+        console.log(`✅ Refreshed ${this.invoices.length} invoices`);
+        return this.invoices;
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing data:', error.message);
+      // Intentar carga normal
+      this.lastFetch = null;
+      return await this.loadData();
+    }
   }
 
   /**

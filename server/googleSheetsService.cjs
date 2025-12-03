@@ -1,7 +1,8 @@
-import { google } from 'googleapis';
+const { google } = require('googleapis');
+require('dotenv').config();
 
 /**
- * Servicio para conectar con Google Sheets API
+ * Servicio para conectar con Google Sheets API (Backend)
  */
 class GoogleSheetsService {
   constructor() {
@@ -16,11 +17,10 @@ class GoogleSheetsService {
     if (this.initialized) return;
 
     try {
-      // Configurar autenticación con Service Account
       const auth = new google.auth.GoogleAuth({
         credentials: {
-          client_email: import.meta.env.VITE_GOOGLE_SERVICE_ACCOUNT_EMAIL,
-          private_key: import.meta.env.VITE_GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+          client_email: process.env.VITE_GOOGLE_SERVICE_ACCOUNT_EMAIL,
+          private_key: process.env.VITE_GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
         },
         scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
       });
@@ -45,7 +45,7 @@ class GoogleSheetsService {
         await this.initialize();
       }
 
-      const spreadsheetId = import.meta.env.VITE_GOOGLE_SHEETS_ID;
+      const spreadsheetId = process.env.VITE_GOOGLE_SHEETS_ID;
 
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId,
@@ -60,8 +60,6 @@ class GoogleSheetsService {
       }
 
       console.log(`✅ Retrieved ${rows.length} rows from Google Sheets`);
-
-      // Convertir filas a objetos con la estructura esperada
       return this.parseRows(rows);
     } catch (error) {
       console.error('❌ Error fetching Google Sheets data:', error);
@@ -71,40 +69,27 @@ class GoogleSheetsService {
 
   /**
    * Convierte las filas del sheet a objetos JavaScript
-   * Basado en la estructura:
-   * A: Pedido, B: Productos, C: Total General, D: Total IVA,
-   * E: NIT, F: Nombre NIT, G: UUID, H: Serie, I: No Autorización,
-   * J: Fecha, K: Estado, L: PDF URL, M: Dirección, N: Teléfono,
-   * O: Canal de Venta, P: Descuento
    */
   parseRows(rows) {
     return rows.map(row => {
       try {
-        // Parsear JSON si es necesario (columnas B y M pueden contener JSON)
         let productos = row[1] || '';
         let direccion = row[12] || '';
 
-        // Intentar parsear como JSON si parece ser un objeto
         try {
           if (productos.startsWith('{') || productos.startsWith('[')) {
             const prodObj = JSON.parse(productos);
-            // Si tiene items, extraer descripción
             if (prodObj.items && prodObj.items.length > 0) {
               productos = prodObj.items[0].description || productos;
             }
           }
-        } catch (e) {
-          // Si no es JSON válido, usar el valor tal cual
-        }
+        } catch (e) {}
 
         try {
           if (direccion.startsWith('{')) {
-            const dirObj = JSON.parse(direccion);
-            direccion = dirObj;
+            direccion = JSON.parse(direccion);
           }
-        } catch (e) {
-          // Si no es JSON válido, usar el valor tal cual
-        }
+        } catch (e) {}
 
         return {
           pedido: row[0] || '',
@@ -125,19 +110,11 @@ class GoogleSheetsService {
           descuento: parseFloat(row[15]) || 0
         };
       } catch (error) {
-        console.error('Error parsing row:', error, row);
+        console.error('Error parsing row:', error);
         return null;
       }
     }).filter(item => item !== null);
   }
-
-  /**
-   * Obtiene datos de un rango específico
-   */
-  async getRange(range) {
-    return await this.getSheetData(range);
-  }
 }
 
-// Exportar instancia única
-export default new GoogleSheetsService();
+module.exports = new GoogleSheetsService();
