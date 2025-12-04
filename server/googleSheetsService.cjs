@@ -75,6 +75,16 @@ class GoogleSheetsService {
   parseRows(rows) {
     return rows.map((row, index) => {
       try {
+        // Validar que la fila tenga fecha y serie (columnas críticas)
+        const fecha = row[9];
+        const serie = row[7];
+
+        // Omitir filas sin fecha o sin serie
+        if (!fecha || fecha.trim() === '' || !serie || serie.trim() === '') {
+          console.log(`⚠️ Skipping row ${index + 2} - Missing fecha or serie`);
+          return null;
+        }
+
         let productos = row[1] || '';
         let direccion = row[12] || '';
 
@@ -97,7 +107,7 @@ class GoogleSheetsService {
 
         // Parsear fecha - convertir a formato ISO y asegurar zona horaria Guatemala
         // Soporta formatos: "03/12/2025 13:21:29" y "2025-11-29 19:12:31"
-        let fechaISO = row[9] || new Date().toISOString();
+        let fechaISO = fecha;
         try {
           if (fechaISO.includes('/')) {
             // Formato: DD/MM/YYYY HH:mm:ss (03/12/2025 13:21:29)
