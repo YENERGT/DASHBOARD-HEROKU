@@ -81,6 +81,7 @@ class DataService {
 
   /**
    * Obtiene facturas por período
+   * Nota: Solo cuenta facturas con estado 'paid', excluye 'ANULADO'
    */
   async getInvoicesByPeriod(periodType = 'day', date = new Date()) {
     await this.loadData();
@@ -88,17 +89,18 @@ class DataService {
     const currentPeriod = getCurrentPeriod(date, periodType);
     const previousPeriod = getPreviousPeriod(date, periodType);
 
+    // Filtrar solo facturas pagadas (excluir ANULADO)
     const currentData = filterByDateRange(
       this.invoices.filter(inv => inv.estado === 'paid'),
       currentPeriod.start,
       currentPeriod.end
-    );
+    ).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); // Ordenar: más reciente primero
 
     const previousData = filterByDateRange(
       this.invoices.filter(inv => inv.estado === 'paid'),
       previousPeriod.start,
       previousPeriod.end
-    );
+    ).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); // Ordenar: más reciente primero
 
     const currentMetrics = calculateMetrics(currentData);
     const previousMetrics = calculateMetrics(previousData);

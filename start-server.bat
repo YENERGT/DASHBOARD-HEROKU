@@ -1,0 +1,6 @@
+@echo off
+echo Limpiando procesos Node.js antiguos...
+taskkill /F /IM node.exe >nul 2>&1
+timeout /t 2 >nul
+echo Iniciando servidor backend...
+node server/index.cjs

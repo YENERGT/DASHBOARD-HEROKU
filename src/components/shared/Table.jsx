@@ -30,7 +30,7 @@ const Table = ({ columns, data, className = '' }) => {
                       className="px-6 py-4 text-sm text-gray-300"
                     >
                       {column.render
-                        ? column.render(row[column.accessor], row)
+                        ? column.render(row[column.accessor], row, rowIndex)
                         : row[column.accessor]}
                     </td>
                   ))}

@@ -70,13 +70,15 @@ class GoogleSheetsService {
 
   /**
    * Convierte las filas del sheet a objetos JavaScript
+   * Nota: Zona horaria Guatemala (GMT-6)
    */
   parseRows(rows) {
-    return rows.map(row => {
+    return rows.map((row, index) => {
       try {
         let productos = row[1] || '';
         let direccion = row[12] || '';
 
+        // Parsear productos si es JSON
         try {
           if (productos.startsWith('{') || productos.startsWith('[')) {
             const prodObj = JSON.parse(productos);
@@ -86,11 +88,34 @@ class GoogleSheetsService {
           }
         } catch (e) {}
 
+        // Parsear dirección si es JSON
         try {
           if (direccion.startsWith('{')) {
             direccion = JSON.parse(direccion);
           }
         } catch (e) {}
+
+        // Parsear fecha - convertir a formato ISO y asegurar zona horaria Guatemala
+        let fechaISO = row[9] || new Date().toISOString();
+        try {
+          // Si la fecha viene en formato DD/MM/YYYY HH:mm:ss
+          if (fechaISO.includes('/')) {
+            const parts = fechaISO.split(' ');
+            const dateParts = parts[0].split('/');
+            const timeParts = parts[1] ? parts[1].split(':') : ['00', '00', '00'];
+
+            // Crear fecha en formato ISO (YYYY-MM-DDTHH:mm:ss)
+            fechaISO = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}T${timeParts[0].padStart(2, '0')}:${timeParts[1].padStart(2, '0')}:${timeParts[2].padStart(2, '0')}-06:00`;
+          } else if (!fechaISO.includes('T')) {
+            // Si viene en formato YYYY-MM-DD, agregar hora
+            fechaISO = `${fechaISO}T00:00:00-06:00`;
+          } else if (!fechaISO.includes('-06:00') && !fechaISO.includes('Z')) {
+            // Agregar zona horaria Guatemala si no la tiene
+            fechaISO = fechaISO.replace(/[+-]\d{2}:\d{2}$/, '') + '-06:00';
+          }
+        } catch (e) {
+          console.error(`Error parsing date for row ${index}:`, e);
+        }
 
         return {
           pedido: row[0] || '',
@@ -102,7 +127,7 @@ class GoogleSheetsService {
           uuid: row[6] || '',
           serie: row[7] || '',
           noAutorizacion: row[8] || '',
-          fecha: row[9] || new Date().toISOString(),
+          fecha: fechaISO,
           estado: row[10]?.toLowerCase() === 'paid' ? 'paid' : 'ANULADO',
           pdfUrl: row[11] || '',
           direccion: direccion,
@@ -111,7 +136,7 @@ class GoogleSheetsService {
           descuento: parseFloat(row[15]) || 0
         };
       } catch (error) {
-        console.error('Error parsing row:', error);
+        console.error(`Error parsing row ${index}:`, error);
         return null;
       }
     }).filter(item => item !== null);
