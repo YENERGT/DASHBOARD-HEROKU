@@ -96,25 +96,31 @@ class GoogleSheetsService {
         } catch (e) {}
 
         // Parsear fecha - convertir a formato ISO y asegurar zona horaria Guatemala
+        // Soporta formatos: "03/12/2025 13:21:29" y "2025-11-29 19:12:31"
         let fechaISO = row[9] || new Date().toISOString();
         try {
-          // Si la fecha viene en formato DD/MM/YYYY HH:mm:ss
           if (fechaISO.includes('/')) {
+            // Formato: DD/MM/YYYY HH:mm:ss (03/12/2025 13:21:29)
             const parts = fechaISO.split(' ');
             const dateParts = parts[0].split('/');
             const timeParts = parts[1] ? parts[1].split(':') : ['00', '00', '00'];
 
-            // Crear fecha en formato ISO (YYYY-MM-DDTHH:mm:ss)
             fechaISO = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}T${timeParts[0].padStart(2, '0')}:${timeParts[1].padStart(2, '0')}:${timeParts[2].padStart(2, '0')}-06:00`;
+          } else if (fechaISO.includes(' ') && !fechaISO.includes('T')) {
+            // Formato: YYYY-MM-DD HH:mm:ss (2025-11-29 19:12:31)
+            const [datePart, timePart] = fechaISO.split(' ');
+            const timeParts = timePart ? timePart.split(':') : ['00', '00', '00'];
+
+            fechaISO = `${datePart}T${timeParts[0].padStart(2, '0')}:${timeParts[1].padStart(2, '0')}:${timeParts[2].padStart(2, '0')}-06:00`;
           } else if (!fechaISO.includes('T')) {
-            // Si viene en formato YYYY-MM-DD, agregar hora
+            // Formato: YYYY-MM-DD (solo fecha, sin hora)
             fechaISO = `${fechaISO}T00:00:00-06:00`;
           } else if (!fechaISO.includes('-06:00') && !fechaISO.includes('Z')) {
-            // Agregar zona horaria Guatemala si no la tiene
+            // Ya tiene formato ISO pero sin zona horaria
             fechaISO = fechaISO.replace(/[+-]\d{2}:\d{2}$/, '') + '-06:00';
           }
         } catch (e) {
-          console.error(`Error parsing date for row ${index}:`, e);
+          console.error(`Error parsing date for row ${index}:`, fechaISO, e);
         }
 
         return {
