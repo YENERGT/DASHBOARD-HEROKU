@@ -19,8 +19,8 @@ class GoogleSheetsService {
     try {
       const auth = new google.auth.GoogleAuth({
         credentials: {
-          client_email: process.env.VITE_GOOGLE_SERVICE_ACCOUNT_EMAIL,
-          private_key: process.env.VITE_GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+          client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || process.env.VITE_GOOGLE_SERVICE_ACCOUNT_EMAIL,
+          private_key: (process.env.GOOGLE_PRIVATE_KEY || process.env.VITE_GOOGLE_PRIVATE_KEY)?.replace(/\\n/g, '\n'),
         },
         scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
       });
@@ -46,7 +46,7 @@ class GoogleSheetsService {
         await this.initialize();
       }
 
-      const spreadsheetId = process.env.VITE_GOOGLE_SHEETS_ID;
+      const spreadsheetId = process.env.VITE_GOOGLE_SHEETS_ID || process.env.GOOGLE_SHEETS_ID;
 
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId,
@@ -168,7 +168,7 @@ class GoogleSheetsService {
         await this.initialize();
       }
 
-      const spreadsheetId = process.env.VITE_GOOGLE_SHEETS_ID;
+      const spreadsheetId = process.env.VITE_GOOGLE_SHEETS_ID || process.env.GOOGLE_SHEETS_ID;
 
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId,
