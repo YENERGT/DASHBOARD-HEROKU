@@ -188,7 +188,7 @@ app.get('/api/health', (req, res) => {
 
 // En producción, servir el index.html de React para todas las rutas no-API
 if (process.env.NODE_ENV === 'production') {
-  app.get('/*', (req, res) => {
+  app.use((req, res) => {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
   });
 }
