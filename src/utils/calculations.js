@@ -176,3 +176,147 @@ export const getTopClients = (data, limit = 10, sortBy = 'total') => {
 
   return sorted.slice(0, limit);
 };
+
+/**
+ * Agrupa facturas por hora (para vista diaria)
+ */
+export const groupByHour = (data) => {
+  const hourlyData = {};
+
+  // Inicializar todas las horas del día (0-23)
+  for (let i = 0; i < 24; i++) {
+    hourlyData[i] = {
+      hour: `${i.toString().padStart(2, '0')}:00`,
+      Facturas: 0,
+      Monto: 0
+    };
+  }
+
+  // Agrupar datos por hora
+  data.forEach(item => {
+    const date = new Date(item.fecha);
+    const hour = date.getHours();
+
+    // Validar que la hora sea válida (0-23)
+    if (hourlyData[hour] !== undefined) {
+      hourlyData[hour].Facturas++;
+      hourlyData[hour].Monto += parseFloat(item.totalGeneral || 0);
+    }
+  });
+
+  return Object.values(hourlyData);
+};
+
+/**
+ * Agrupa facturas por día (para vista mensual)
+ */
+export const groupByDay = (data, year, month) => {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dailyData = {};
+
+  // Inicializar todos los días del mes
+  for (let i = 1; i <= daysInMonth; i++) {
+    dailyData[i] = {
+      day: i.toString(),
+      Facturas: 0,
+      Monto: 0
+    };
+  }
+
+  // Agrupar datos por día (solo del mes/año especificado)
+  data.forEach(item => {
+    const date = new Date(item.fecha);
+    const itemYear = date.getFullYear();
+    const itemMonth = date.getMonth();
+    const day = date.getDate();
+
+    // Solo procesar si la factura pertenece al mes/año correcto
+    if (itemYear === year && itemMonth === month && dailyData[day]) {
+      dailyData[day].Facturas++;
+      dailyData[day].Monto += parseFloat(item.totalGeneral || 0);
+    }
+  });
+
+  return Object.values(dailyData);
+};
+
+/**
+ * Agrupa facturas por mes (para vista anual)
+ */
+export const groupByMonth = (data) => {
+  const monthNames = [
+    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+  ];
+
+  const monthlyData = {};
+
+  // Inicializar todos los meses
+  for (let i = 0; i < 12; i++) {
+    monthlyData[i] = {
+      month: monthNames[i],
+      Facturas: 0,
+      Monto: 0
+    };
+  }
+
+  // Agrupar datos por mes
+  data.forEach(item => {
+    const date = new Date(item.fecha);
+    const month = date.getMonth();
+
+    // Validar que el mes sea válido (0-11)
+    if (monthlyData[month]) {
+      monthlyData[month].Facturas++;
+      monthlyData[month].Monto += parseFloat(item.totalGeneral || 0);
+    }
+  });
+
+  return Object.values(monthlyData);
+};
+
+/**
+ * Obtiene Top N empresas por gasto
+ */
+export const getTopExpensesByCompany = (data, limit = 10) => {
+  const grouped = data.reduce((acc, item) => {
+    const empresa = item.empresa || 'Sin especificar';
+
+    if (!acc[empresa]) {
+      acc[empresa] = {
+        empresa,
+        count: 0,
+        total: 0
+      };
+    }
+    acc[empresa].count++;
+    acc[empresa].total += parseFloat(item.monto || 0);
+    return acc;
+  }, {});
+
+  const sorted = Object.values(grouped).sort((a, b) => b.total - a.total);
+  return sorted.slice(0, limit);
+};
+
+/**
+ * Obtiene Top N productos por gasto
+ */
+export const getTopExpensesByProduct = (data, limit = 10) => {
+  const grouped = data.reduce((acc, item) => {
+    const producto = item.producto || 'Sin especificar';
+
+    if (!acc[producto]) {
+      acc[producto] = {
+        producto,
+        count: 0,
+        total: 0
+      };
+    }
+    acc[producto].count++;
+    acc[producto].total += parseFloat(item.monto || 0);
+    return acc;
+  }, {});
+
+  const sorted = Object.values(grouped).sort((a, b) => b.total - a.total);
+  return sorted.slice(0, limit);
+};

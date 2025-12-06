@@ -8,7 +8,8 @@ import {
   calculateComparison
 } from '../utils/calculations';
 
-const API_URL = 'http://localhost:3001/api';
+// Usar la URL de producción o localhost según el entorno
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin + '/api';
 
 /**
  * Servicio para manejar datos de facturas y gastos
@@ -18,10 +19,12 @@ const API_URL = 'http://localhost:3001/api';
 class DataService {
   constructor() {
     this.invoices = [];
-    this.expenses = sampleExpenses;
+    this.expenses = [];
     this.useRealData = true;
     this.isLoading = false;
+    this.isLoadingExpenses = false;
     this.lastFetch = null;
+    this.lastExpensesFetch = null;
     this.cacheTimeout = 5 * 60 * 1000; // 5 minutos de cache
   }
 
@@ -81,7 +84,7 @@ class DataService {
 
   /**
    * Obtiene facturas por período
-   * Nota: Solo cuenta facturas con estado 'paid', excluye 'ANULADO'
+   * Nota: Solo cuenta facturas con estado 'paid' para métricas, pero incluye TODAS en data
    */
   async getInvoicesByPeriod(periodType = 'day', date = new Date()) {
     await this.loadData();
@@ -89,31 +92,35 @@ class DataService {
     const currentPeriod = getCurrentPeriod(date, periodType);
     const previousPeriod = getPreviousPeriod(date, periodType);
 
-    // Filtrar solo facturas pagadas (excluir ANULADO)
-    const currentData = filterByDateRange(
-      this.invoices.filter(inv => inv.estado === 'paid'),
+    // Obtener TODAS las facturas del período (incluyendo anuladas) para mostrar en listados
+    const allCurrentData = filterByDateRange(
+      this.invoices,
       currentPeriod.start,
       currentPeriod.end
     ).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); // Ordenar: más reciente primero
 
-    const previousData = filterByDateRange(
-      this.invoices.filter(inv => inv.estado === 'paid'),
+    const allPreviousData = filterByDateRange(
+      this.invoices,
       previousPeriod.start,
       previousPeriod.end
     ).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); // Ordenar: más reciente primero
 
-    const currentMetrics = calculateMetrics(currentData);
-    const previousMetrics = calculateMetrics(previousData);
+    // Filtrar solo facturas pagadas para calcular métricas (excluir ANULADO de cálculos)
+    const currentPaidData = allCurrentData.filter(inv => inv.estado === 'paid');
+    const previousPaidData = allPreviousData.filter(inv => inv.estado === 'paid');
+
+    const currentMetrics = calculateMetrics(currentPaidData);
+    const previousMetrics = calculateMetrics(previousPaidData);
 
     return {
       current: {
         ...currentMetrics,
-        data: currentData,
+        data: allCurrentData, // Incluir TODAS las facturas (con anuladas)
         period: currentPeriod
       },
       previous: {
         ...previousMetrics,
-        data: previousData,
+        data: allPreviousData, // Incluir TODAS las facturas (con anuladas)
         period: previousPeriod
       },
       comparison: {
@@ -179,16 +186,87 @@ class DataService {
   }
 
   /**
+   * Fuerza la recarga de datos de gastos desde el backend
+   */
+  async refreshExpenses() {
+    try {
+      console.log('🔄 Forcing expenses data refresh...');
+      const response = await axios.post(`${API_URL}/expenses/refresh`);
+
+      if (response.data.success) {
+        this.expenses = response.data.data;
+        this.lastExpensesFetch = Date.now();
+        console.log(`✅ Refreshed ${this.expenses.length} expenses`);
+        return this.expenses;
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing expenses data:', error.message);
+      // Intentar carga normal
+      this.lastExpensesFetch = null;
+      return await this.loadExpenses();
+    }
+  }
+
+  /**
+   * Carga los datos de gastos desde el backend API
+   */
+  async loadExpenses() {
+    // Si ya tenemos datos recientes en cache, usarlos
+    if (this.expenses.length > 0 && this.lastExpensesFetch &&
+        (Date.now() - this.lastExpensesFetch) < this.cacheTimeout) {
+      console.log('📦 Using cached expenses data');
+      return this.expenses;
+    }
+
+    // Evitar múltiples llamadas simultáneas
+    if (this.isLoadingExpenses) {
+      console.log('⏳ Already loading expenses data...');
+      return this.expenses;
+    }
+
+    this.isLoadingExpenses = true;
+
+    try {
+      if (this.useRealData) {
+        console.log('📡 Fetching expenses data from backend API...');
+        const response = await axios.get(`${API_URL}/expenses`);
+
+        if (response.data.success) {
+          this.expenses = response.data.data;
+          this.lastExpensesFetch = Date.now();
+          console.log(`✅ Loaded ${this.expenses.length} expenses from API`);
+        } else {
+          throw new Error('API returned unsuccessful response');
+        }
+      } else {
+        console.log('📝 Using sample expenses data');
+        this.expenses = sampleExpenses;
+      }
+    } catch (error) {
+      console.error('❌ Error loading expenses from API:', error.message);
+      console.log('⚠️ Falling back to sample expenses data');
+      this.expenses = sampleExpenses;
+    } finally {
+      this.isLoadingExpenses = false;
+    }
+
+    return this.expenses;
+  }
+
+  /**
    * Obtiene todos los gastos
    */
-  getAllExpenses() {
+  async getAllExpenses() {
+    await this.loadExpenses();
     return this.expenses;
   }
 
   /**
    * Obtiene gastos por período
    */
-  getExpensesByPeriod(periodType = 'day', date = new Date()) {
+  async getExpensesByPeriod(periodType = 'day', date = new Date()) {
+    await this.loadExpenses();
+
     const currentPeriod = getCurrentPeriod(date, periodType);
     const previousPeriod = getPreviousPeriod(date, periodType);
 
@@ -196,29 +274,41 @@ class DataService {
       this.expenses,
       currentPeriod.start,
       currentPeriod.end
-    );
+    ).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); // Ordenar: más reciente primero
 
     const previousData = filterByDateRange(
       this.expenses,
       previousPeriod.start,
       previousPeriod.end
-    );
+    ).sort((a, b) => new Date(b.fecha) - new Date(a.fecha)); // Ordenar: más reciente primero
 
-    const currentTotal = currentData.reduce((sum, item) => sum + item.monto, 0);
-    const previousTotal = previousData.reduce((sum, item) => sum + item.monto, 0);
+    const currentTotal = currentData.reduce((sum, item) => sum + parseFloat(item.monto || 0), 0);
+    const previousTotal = previousData.reduce((sum, item) => sum + parseFloat(item.monto || 0), 0);
+    const currentCount = currentData.length;
+    const previousCount = previousData.length;
+    const currentAverage = currentCount > 0 ? currentTotal / currentCount : 0;
+    const previousAverage = previousCount > 0 ? previousTotal / previousCount : 0;
 
     return {
       current: {
-        total: currentTotal,
+        total: parseFloat(currentTotal.toFixed(2)),
+        count: currentCount,
+        average: parseFloat(currentAverage.toFixed(2)),
         data: currentData,
         period: currentPeriod
       },
       previous: {
-        total: previousTotal,
+        total: parseFloat(previousTotal.toFixed(2)),
+        count: previousCount,
+        average: parseFloat(previousAverage.toFixed(2)),
         data: previousData,
         period: previousPeriod
       },
-      comparison: calculateComparison(currentTotal, previousTotal)
+      comparison: {
+        total: calculateComparison(currentTotal, previousTotal),
+        count: calculateComparison(currentCount, previousCount),
+        average: calculateComparison(currentAverage, previousAverage)
+      }
     };
   }
 
@@ -227,7 +317,7 @@ class DataService {
    */
   async getProfitByPeriod(periodType = 'day', date = new Date()) {
     const invoiceData = await this.getInvoicesByPeriod(periodType, date);
-    const expenseData = this.getExpensesByPeriod(periodType, date);
+    const expenseData = await this.getExpensesByPeriod(periodType, date);
 
     const currentProfit = invoiceData.current.total - expenseData.current.total;
     const previousProfit = invoiceData.previous.total - expenseData.previous.total;

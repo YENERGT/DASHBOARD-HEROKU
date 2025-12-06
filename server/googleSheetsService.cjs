@@ -157,6 +157,114 @@ class GoogleSheetsService {
       }
     }).filter(item => item !== null);
   }
+
+  /**
+   * Obtiene datos de gastos del Google Sheet
+   * Hoja: PAGOS (donde están los gastos)
+   */
+  async getExpensesData(range = 'PAGOS!A2:D') {
+    try {
+      if (!this.initialized) {
+        await this.initialize();
+      }
+
+      const spreadsheetId = process.env.VITE_GOOGLE_SHEETS_ID;
+
+      const response = await this.sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range,
+      });
+
+      const rows = response.data.values;
+
+      if (!rows || rows.length === 0) {
+        console.warn('⚠️ No expense data found in Google Sheets');
+        return [];
+      }
+
+      console.log(`✅ Retrieved ${rows.length} expense rows from Google Sheets`);
+      return this.parseExpenseRows(rows);
+    } catch (error) {
+      console.error('❌ Error fetching expense data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convierte las filas de gastos a objetos JavaScript
+   * Columnas: A=empresa, B=fecha, C=monto, D=producto
+   */
+  parseExpenseRows(rows) {
+    return rows.map((row, index) => {
+      try {
+        const empresa = row[0];
+        const fecha = row[1];
+        const monto = row[2];
+
+        // Omitir filas sin datos críticos
+        if (!fecha || fecha.trim() === '' || !monto) {
+          console.log(`⚠️ Skipping expense row ${index + 2} - Missing fecha or monto`);
+          return null;
+        }
+
+        // Parsear producto si es JSON
+        let producto = '';
+        let precioProducto = 0;
+        try {
+          const productoData = row[3];
+          if (productoData && (productoData.startsWith('{') || productoData.startsWith('['))) {
+            const prodObj = JSON.parse(productoData);
+            producto = prodObj.nombre || '';
+            precioProducto = parseFloat(prodObj.precio) || 0;
+          } else {
+            producto = productoData || '';
+          }
+        } catch (e) {
+          producto = row[3] || '';
+        }
+
+        // Parsear fecha - formato YYYY-MM-DD
+        let fechaISO = fecha;
+        try {
+          if (fechaISO.includes('/')) {
+            // Formato: DD/MM/YYYY
+            const parts = fechaISO.split('/');
+            fechaISO = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}T12:00:00-06:00`;
+          } else if (!fechaISO.includes('T')) {
+            // Formato: YYYY-MM-DD
+            fechaISO = `${fechaISO}T12:00:00-06:00`;
+          } else if (!fechaISO.includes('-06:00') && !fechaISO.includes('Z')) {
+            fechaISO = fechaISO.replace(/[+-]\d{2}:\d{2}$/, '') + '-06:00';
+          }
+        } catch (e) {
+          console.error(`Error parsing expense date for row ${index}:`, fechaISO, e);
+        }
+
+        // Limpiar monto (remover Q, comas, etc)
+        let montoLimpio = 0;
+        try {
+          if (typeof monto === 'string') {
+            montoLimpio = parseFloat(monto.replace(/[Q,\s]/g, '')) || 0;
+          } else {
+            montoLimpio = parseFloat(monto) || 0;
+          }
+        } catch (e) {
+          console.error(`Error parsing monto for row ${index}:`, monto, e);
+        }
+
+        return {
+          empresa: empresa || 'Sin especificar',
+          fecha: fechaISO,
+          monto: montoLimpio,
+          producto: producto,
+          precioProducto: precioProducto
+        };
+      } catch (error) {
+        console.error(`Error parsing expense row ${index}:`, error);
+        return null;
+      }
+    }).filter(item => item !== null);
+  }
 }
 
 module.exports = new GoogleSheetsService();

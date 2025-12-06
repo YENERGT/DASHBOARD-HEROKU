@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Card from '../components/shared/Card';
 import Table from '../components/shared/Table';
 import PeriodSelector from '../components/shared/PeriodSelector';
+import DateSelector from '../components/shared/DateSelector';
+import PDFModal from '../components/shared/PDFModal';
 import dataService from '../services/dataService';
-import { formatCurrency, getTopClients } from '../utils/calculations';
+import { formatCurrency, getTopClients, groupByHour, groupByDay, groupByMonth } from '../utils/calculations';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer
@@ -11,35 +13,38 @@ import {
 
 const FELDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('day');
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [metrics, setMetrics] = useState(null);
   const [topClients, setTopClients] = useState([]);
+  const [searchNIT, setSearchNIT] = useState('');
+  const [pdfModal, setPdfModal] = useState({ isOpen: false, url: '', invoiceNumber: '' });
 
   useEffect(() => {
     loadData();
-  }, [selectedPeriod]);
+  }, [selectedPeriod, selectedDate]);
+
+  // Auto-actualización cada 2 minutos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('🔄 Actualizando datos automáticamente...');
+      loadData();
+    }, 120000); // 120000ms = 2 minutos
+
+    return () => clearInterval(interval);
+  }, [selectedPeriod, selectedDate]);
 
   const loadData = async () => {
     try {
       let periodMetrics;
 
-      switch(selectedPeriod) {
-        case 'day':
-          periodMetrics = await dataService.getTodayMetrics();
-          break;
-        case 'month':
-          periodMetrics = await dataService.getMonthMetrics();
-          break;
-        case 'year':
-          periodMetrics = await dataService.getYearMetrics();
-          break;
-        default:
-          periodMetrics = await dataService.getTodayMetrics();
-      }
+      // Usar la fecha seleccionada en lugar de "hoy"
+      periodMetrics = await dataService.getInvoicesByPeriod(selectedPeriod, selectedDate);
 
       setMetrics(periodMetrics);
 
-      // Obtener top clientes del período actual
-      const clients = getTopClients(periodMetrics.current.data, 10, 'total');
+      // Obtener top clientes del período actual (solo facturas pagadas)
+      const paidInvoices = periodMetrics.current.data.filter(inv => inv.estado === 'paid');
+      const clients = getTopClients(paidInvoices, 10, 'total');
       setTopClients(clients);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -96,24 +101,62 @@ const FELDashboard = () => {
     }
   ];
 
-  // Datos para gráfica de facturas
-  const invoiceComparisonData = [
-    {
-      name: getPeriodLabel(),
-      Facturas: metrics.current.count,
-      Promedio: metrics.current.average
-    },
-    {
-      name: getPreviousPeriodLabel(),
-      Facturas: metrics.previous.count,
-      Promedio: metrics.previous.average
+  // Datos dinámicos para gráfica de facturas según período
+  const getInvoiceAnalysisData = () => {
+    // Solo usar facturas pagadas para los gráficos
+    const paidInvoices = metrics.current.data.filter(inv => inv.estado === 'paid');
+
+    switch(selectedPeriod) {
+      case 'day':
+        // Mostrar datos por hora
+        return groupByHour(paidInvoices);
+      case 'month':
+        // Mostrar datos por día usando la fecha seleccionada
+        const year = selectedDate.getFullYear();
+        const month = selectedDate.getMonth();
+        return groupByDay(paidInvoices, year, month);
+      case 'year':
+        // Mostrar datos por mes
+        return groupByMonth(paidInvoices);
+      default:
+        return [];
     }
-  ];
+  };
+
+  const invoiceAnalysisData = getInvoiceAnalysisData();
+
+  // Obtener la clave del eje X según el período
+  const getXAxisKey = () => {
+    switch(selectedPeriod) {
+      case 'day':
+        return 'hour';
+      case 'month':
+        return 'day';
+      case 'year':
+        return 'month';
+      default:
+        return 'hour';
+    }
+  };
+
+  // Obtener el título de la gráfica según el período
+  const getChartTitle = () => {
+    switch(selectedPeriod) {
+      case 'day':
+        return 'Análisis de Facturas por Hora';
+      case 'month':
+        return 'Análisis de Facturas por Día';
+      case 'year':
+        return 'Análisis de Facturas por Mes';
+      default:
+        return 'Análisis de Facturas';
+    }
+  };
 
   const invoiceTableColumns = [
     {
-      header: 'Serie',
-      accessor: 'serie',
+      header: 'Pedido',
+      accessor: 'pedido',
       render: (value) => <span className="font-mono text-primary-400">{value}</span>
     },
     {
@@ -165,18 +208,35 @@ const FELDashboard = () => {
     {
       header: 'Acciones',
       accessor: 'pdfUrl',
-      render: (value) => (
-        <a
-          href={value}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary-400 hover:text-primary-300 transition-colors"
+      render: (value, row) => (
+        <button
+          onClick={() => setPdfModal({ isOpen: true, url: value, invoiceNumber: row.pedido })}
+          className="text-primary-400 hover:text-primary-300 transition-colors cursor-pointer"
         >
           📄 Ver PDF
-        </a>
+        </button>
       )
     }
   ];
+
+  // Filtrar y limitar facturas
+  const getFilteredInvoices = () => {
+    let invoices = metrics.current.data;
+
+    // Filtrar por NIT o Pedido si hay búsqueda
+    if (searchNIT.trim() !== '') {
+      const searchTerm = searchNIT.toLowerCase();
+      invoices = invoices.filter(invoice =>
+        (invoice.nit && invoice.nit.toLowerCase().includes(searchTerm)) ||
+        (invoice.pedido && invoice.pedido.toLowerCase().includes(searchTerm))
+      );
+      // Si hay búsqueda, mostrar todos los resultados sin límite
+      return invoices;
+    }
+
+    // Sin búsqueda, limitar a las últimas 20 transacciones
+    return invoices.slice(0, 20);
+  };
 
   const clientTableColumns = [
     {
@@ -207,23 +267,34 @@ const FELDashboard = () => {
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Header con selector de período */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Dashboard FEL</h1>
-          <p className="text-gray-400">
-            Análisis de ingresos y facturación - {metrics.current.period.label}
-          </p>
+    <div className="space-y-6 md:space-y-8">
+      {/* Header con selector de período y fecha */}
+      <div className="flex flex-col gap-3 md:gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2">Dashboard FEL</h1>
+            <p className="text-sm md:text-base text-gray-400">
+              Análisis de ingresos y facturación - {metrics.current.period.label}
+            </p>
+          </div>
+          <PeriodSelector
+            selectedPeriod={selectedPeriod}
+            onPeriodChange={setSelectedPeriod}
+          />
         </div>
-        <PeriodSelector
-          selectedPeriod={selectedPeriod}
-          onPeriodChange={setSelectedPeriod}
-        />
+
+        {/* Selector de fecha */}
+        <div className="flex justify-end">
+          <DateSelector
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            periodType={selectedPeriod}
+          />
+        </div>
       </div>
 
       {/* Métricas Principales con Comparativas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <Card
           title={`Ingresos ${getPeriodLabel()}`}
           value={formatCurrency(metrics.current.total)}
@@ -254,13 +325,15 @@ const FELDashboard = () => {
       </div>
 
       {/* Gráficas Comparativas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Gráfica de Ingresos Comparativos */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white mb-4">
+        <div className="bg-dark-card border border-dark-border rounded-lg p-4 md:p-6">
+          <h2 className="text-lg md:text-xl font-bold text-white mb-4">
             Comparativa de Ingresos: {getPeriodLabel()} vs {getPreviousPeriodLabel()}
           </h2>
-          <ResponsiveContainer width="100%" height={300}>
+          <div className="overflow-x-auto -mx-4 md:mx-0">
+            <div className="min-w-[400px] md:min-w-0 px-4 md:px-0">
+              <ResponsiveContainer width="100%" height={250} className="md:!h-[300px]">
             <BarChart data={comparisonData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis dataKey="name" stroke="#94a3b8" />
@@ -280,16 +353,21 @@ const FELDashboard = () => {
               <Bar dataKey="IVA" fill="#f59e0b" />
             </BarChart>
           </ResponsiveContainer>
+            </div>
+          </div>
         </div>
 
         {/* Gráfica de Facturas */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white mb-4">Análisis de Facturas</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={invoiceComparisonData}>
+        <div className="bg-dark-card border border-dark-border rounded-lg p-4 md:p-6">
+          <h2 className="text-lg md:text-xl font-bold text-white mb-4">{getChartTitle()}</h2>
+          <div className="overflow-x-auto -mx-4 md:mx-0">
+            <div className="min-w-[400px] md:min-w-0 px-4 md:px-0">
+              <ResponsiveContainer width="100%" height={250} className="md:!h-[300px]">
+            <LineChart data={invoiceAnalysisData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="name" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
+              <XAxis dataKey={getXAxisKey()} stroke="#94a3b8" />
+              <YAxis yAxisId="left" stroke="#94a3b8" />
+              <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#1e293b',
@@ -297,28 +375,85 @@ const FELDashboard = () => {
                   borderRadius: '8px',
                   color: '#e2e8f0'
                 }}
+                formatter={(value, name) => {
+                  if (name === 'Monto') {
+                    return formatCurrency(value);
+                  }
+                  return value;
+                }}
               />
               <Legend wrapperStyle={{ color: '#e2e8f0' }} />
-              <Line type="monotone" dataKey="Facturas" stroke="#8b5cf6" strokeWidth={2} />
-              <Line type="monotone" dataKey="Promedio" stroke="#ec4899" strokeWidth={2} />
+              <Line yAxisId="left" type="monotone" dataKey="Facturas" stroke="#8b5cf6" strokeWidth={2} />
+              <Line yAxisId="right" type="monotone" dataKey="Monto" stroke="#ec4899" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Top 10 Clientes */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-4">Top 10 Clientes por Monto</h2>
-        <Table columns={clientTableColumns} data={topClients} />
+        <h2 className="text-lg md:text-xl font-bold text-white mb-4">Top 10 Clientes por Monto</h2>
+        <div className="overflow-x-auto -mx-4 md:mx-0">
+          <div className="inline-block min-w-full align-middle px-4 md:px-0">
+            <Table columns={clientTableColumns} data={topClients} />
+          </div>
+        </div>
       </div>
 
       {/* Tabla Detallada de Facturas */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-4">
-          Facturas Detalladas - {getPeriodLabel()}
-        </h2>
-        <Table columns={invoiceTableColumns} data={metrics.current.data} />
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-4">
+          <h2 className="text-lg md:text-xl font-bold text-white">
+            Facturas Detalladas - {getPeriodLabel()}
+          </h2>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <label htmlFor="searchNIT" className="text-gray-400 text-sm hidden sm:block">
+              Buscar:
+            </label>
+            <input
+              id="searchNIT"
+              type="text"
+              value={searchNIT}
+              onChange={(e) => setSearchNIT(e.target.value)}
+              placeholder="NIT o Pedido..."
+              className="px-3 md:px-4 py-2 text-sm md:text-base bg-dark-card border border-dark-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-full sm:w-auto"
+            />
+            {searchNIT && (
+              <button
+                onClick={() => setSearchNIT('')}
+                className="px-3 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-sm md:text-base"
+                title="Limpiar búsqueda"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="text-xs md:text-sm text-gray-400 mb-2">
+          {searchNIT ? (
+            <>
+              Mostrando <span className="font-semibold text-primary-400">{getFilteredInvoices().length}</span> resultado(s) para: <span className="font-mono text-primary-400">{searchNIT}</span>
+            </>
+          ) : (
+            <>Mostrando las últimas 20 transacciones</>
+          )}
+        </div>
+        <div className="overflow-x-auto -mx-4 md:mx-0">
+          <div className="inline-block min-w-full align-middle px-4 md:px-0">
+            <Table columns={invoiceTableColumns} data={getFilteredInvoices()} />
+          </div>
+        </div>
       </div>
+
+      {/* Modal para visualizar PDF */}
+      <PDFModal
+        isOpen={pdfModal.isOpen}
+        onClose={() => setPdfModal({ isOpen: false, url: '', invoiceNumber: '' })}
+        pdfUrl={pdfModal.url}
+        invoiceNumber={pdfModal.invoiceNumber}
+      />
     </div>
   );
 };

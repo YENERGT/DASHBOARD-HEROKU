@@ -31,6 +31,14 @@ const Home = () => {
     };
 
     loadData();
+
+    // Auto-actualización cada 2 minutos
+    const interval = setInterval(() => {
+      console.log('🔄 Actualizando datos del Home automáticamente...');
+      loadData();
+    }, 120000); // 120000ms = 2 minutos
+
+    return () => clearInterval(interval);
   }, []);
 
   if (!metrics) {
