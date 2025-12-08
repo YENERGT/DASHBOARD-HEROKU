@@ -7,6 +7,13 @@ import {
   getPreviousPeriod,
   calculateComparison
 } from '../utils/calculations';
+import {
+  getMostSoldProduct,
+  getTopProducts,
+  getBrandStats,
+  getTopProductsByBrand,
+  getProductMetrics
+} from '../utils/productAnalysis';
 
 // Usar la URL de producción o localhost según el entorno
 const API_URL = import.meta.env.VITE_API_URL || window.location.origin + '/api';
@@ -348,6 +355,128 @@ class DataService {
       comparison: {
         profit: calculateComparison(currentProfit, previousProfit),
         margin: calculateComparison(currentMargin, previousMargin)
+      }
+    };
+  }
+
+  /**
+   * Obtiene el producto más vendido por período
+   */
+  async getMostSoldProductByPeriod(periodType = 'day', date = new Date()) {
+    await this.loadData();
+
+    const currentPeriod = getCurrentPeriod(date, periodType);
+    const previousPeriod = getPreviousPeriod(date, periodType);
+
+    const currentInvoices = filterByDateRange(
+      this.invoices.filter(inv => inv.estado === 'paid'),
+      currentPeriod.start,
+      currentPeriod.end
+    );
+
+    const previousInvoices = filterByDateRange(
+      this.invoices.filter(inv => inv.estado === 'paid'),
+      previousPeriod.start,
+      previousPeriod.end
+    );
+
+    const currentMostSold = getMostSoldProduct(currentInvoices);
+    const previousMostSold = getMostSoldProduct(previousInvoices);
+
+    return {
+      current: currentMostSold,
+      previous: previousMostSold,
+      comparison: {
+        cantidad: calculateComparison(currentMostSold.totalCantidad, previousMostSold.totalCantidad),
+        ventas: calculateComparison(currentMostSold.totalVentas, previousMostSold.totalVentas)
+      }
+    };
+  }
+
+  /**
+   * Obtiene top productos por período
+   */
+  async getTopProductsByPeriod(periodType = 'day', date = new Date(), limit = 10) {
+    await this.loadData();
+
+    const currentPeriod = getCurrentPeriod(date, periodType);
+
+    const currentInvoices = filterByDateRange(
+      this.invoices.filter(inv => inv.estado === 'paid'),
+      currentPeriod.start,
+      currentPeriod.end
+    );
+
+    return getTopProducts(currentInvoices, limit);
+  }
+
+  /**
+   * Obtiene estadísticas por marca por período
+   */
+  async getBrandStatsByPeriod(periodType = 'day', date = new Date()) {
+    await this.loadData();
+
+    const currentPeriod = getCurrentPeriod(date, periodType);
+
+    const currentInvoices = filterByDateRange(
+      this.invoices.filter(inv => inv.estado === 'paid'),
+      currentPeriod.start,
+      currentPeriod.end
+    );
+
+    return getBrandStats(currentInvoices);
+  }
+
+  /**
+   * Obtiene top productos por marca por período
+   */
+  async getTopProductsByBrandByPeriod(periodType = 'day', date = new Date(), topBrands = 5, topProducts = 3) {
+    await this.loadData();
+
+    const currentPeriod = getCurrentPeriod(date, periodType);
+
+    const currentInvoices = filterByDateRange(
+      this.invoices.filter(inv => inv.estado === 'paid'),
+      currentPeriod.start,
+      currentPeriod.end
+    );
+
+    return getTopProductsByBrand(currentInvoices, topBrands, topProducts);
+  }
+
+  /**
+   * Obtiene métricas generales de productos por período
+   */
+  async getProductMetricsByPeriod(periodType = 'day', date = new Date()) {
+    await this.loadData();
+
+    const currentPeriod = getCurrentPeriod(date, periodType);
+    const previousPeriod = getPreviousPeriod(date, periodType);
+
+    const currentInvoices = filterByDateRange(
+      this.invoices.filter(inv => inv.estado === 'paid'),
+      currentPeriod.start,
+      currentPeriod.end
+    );
+
+    const previousInvoices = filterByDateRange(
+      this.invoices.filter(inv => inv.estado === 'paid'),
+      previousPeriod.start,
+      previousPeriod.end
+    );
+
+    const currentMetrics = getProductMetrics(currentInvoices);
+    const previousMetrics = getProductMetrics(previousInvoices);
+
+    return {
+      current: currentMetrics,
+      previous: previousMetrics,
+      comparison: {
+        totalProductsSold: calculateComparison(currentMetrics.totalProductsSold, previousMetrics.totalProductsSold),
+        uniqueProducts: calculateComparison(currentMetrics.uniqueProducts, previousMetrics.uniqueProducts),
+        uniqueBrands: calculateComparison(currentMetrics.uniqueBrands, previousMetrics.uniqueBrands),
+        totalRevenue: calculateComparison(currentMetrics.totalRevenue, previousMetrics.totalRevenue),
+        averageProductPrice: calculateComparison(currentMetrics.averageProductPrice, previousMetrics.averageProductPrice)
       }
     };
   }

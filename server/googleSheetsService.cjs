@@ -86,17 +86,36 @@ class GoogleSheetsService {
         }
 
         let productos = row[1] || '';
+        let productosArray = []; // Array completo de productos para análisis
         let direccion = row[12] || '';
 
         // Parsear productos si es JSON
         try {
           if (productos.startsWith('{') || productos.startsWith('[')) {
             const prodObj = JSON.parse(productos);
-            if (prodObj.items && prodObj.items.length > 0) {
+
+            // Formato nuevo: {"json":[{"nombre":"...","precio":...,"cantidad":...}]}
+            if (prodObj.json && Array.isArray(prodObj.json)) {
+              productosArray = prodObj.json.map(p => ({
+                nombre: p.nombre || '',
+                numero: p.numero || 0,
+                precio: parseFloat(p.precio) || 0,
+                cantidad: parseInt(p.cantidad) || 0,
+                variante: p.variante || null,
+                descuento: parseFloat(p.descuento) || 0
+              }));
+
+              // Para compatibilidad, crear un string con los nombres
+              productos = productosArray.map(p => p.nombre).join(', ');
+            }
+            // Formato antiguo: {"items":[{"description":"..."}]}
+            else if (prodObj.items && prodObj.items.length > 0) {
               productos = prodObj.items[0].description || productos;
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error(`Error parsing products in row ${index + 2}:`, e);
+        }
 
         // Parsear dirección si es JSON
         try {
@@ -135,7 +154,8 @@ class GoogleSheetsService {
 
         return {
           pedido: row[0] || '',
-          productos: productos,
+          productos: productos, // String para compatibilidad
+          productosArray: productosArray, // Array completo para análisis detallado
           totalGeneral: parseFloat(row[2]) || 0,
           totalIVA: parseFloat(row[3]) || 0,
           nit: row[4] || 'CF',

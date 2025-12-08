@@ -7,7 +7,8 @@ const Layout = ({ children }) => {
   const navItems = [
     { path: '/', label: 'Inicio', icon: '🏠' },
     { path: '/dashboard-fel', label: 'Dashboard FEL', icon: '📊' },
-    { path: '/dashboard-gastos', label: 'Gastos', icon: '💰' }
+    { path: '/dashboard-gastos', label: 'Gastos', icon: '💰' },
+    { path: '/dashboard-productos', label: 'Productos', icon: '📦' }
   ];
 
   const isActive = (path) => {
