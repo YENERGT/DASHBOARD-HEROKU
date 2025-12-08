@@ -109,12 +109,42 @@ class GoogleSheetsService {
               productos = productosArray.map(p => p.nombre).join(', ');
             }
             // Formato antiguo: {"items":[{"description":"..."}]}
-            else if (prodObj.items && prodObj.items.length > 0) {
+            else if (prodObj.items && Array.isArray(prodObj.items)) {
               productos = prodObj.items[0].description || productos;
+              // Crear producto sintético desde items
+              productosArray = [{
+                nombre: productos,
+                numero: 0,
+                precio: parseFloat(row[2]) || 0, // totalGeneral
+                cantidad: 1,
+                variante: null,
+                descuento: parseFloat(row[15]) || 0
+              }];
             }
+          } else if (productos && productos.trim() !== '') {
+            // Formato texto plano - crear producto sintético
+            productosArray = [{
+              nombre: productos,
+              numero: 0,
+              precio: parseFloat(row[2]) || 0, // totalGeneral
+              cantidad: 1,
+              variante: null,
+              descuento: parseFloat(row[15]) || 0
+            }];
           }
         } catch (e) {
           console.error(`Error parsing products in row ${index + 2}:`, e);
+          // Si falla el parseo, crear producto sintético con el texto
+          if (productos && productos.trim() !== '') {
+            productosArray = [{
+              nombre: productos,
+              numero: 0,
+              precio: parseFloat(row[2]) || 0,
+              cantidad: 1,
+              variante: null,
+              descuento: 0
+            }];
+          }
         }
 
         // Parsear dirección si es JSON
