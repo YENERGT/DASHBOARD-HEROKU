@@ -14,6 +14,7 @@
     "heroku-postbuild": "npm run build"
   },
   "dependencies": {
+    "@shopify/shopify-api": "^12.2.0",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",

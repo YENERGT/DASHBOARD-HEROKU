@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const googleSheetsService = require('./googleSheetsService.cjs');
+const { createShopifyConfig, setupShopifyRoutes } = require('./shopifyAuth.cjs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -10,6 +11,20 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Configurar headers para permitir iframe en Shopify
+app.use((req, res, next) => {
+  // Permitir que la app sea embebida en iframe de Shopify
+  res.removeHeader('X-Frame-Options');
+  res.setHeader('Content-Security-Policy', "frame-ancestors https://*.myshopify.com https://admin.shopify.com");
+  next();
+});
+
+// Inicializar Shopify (si está configurado)
+const shopify = createShopifyConfig();
+if (shopify) {
+  setupShopifyRoutes(app, shopify);
+}
 
 // Servir archivos estáticos de React en producción
 if (process.env.NODE_ENV === 'production') {
@@ -205,5 +220,12 @@ app.listen(PORT, () => {
   console.log(`   - GET  http://localhost:${PORT}/api/expenses`);
   console.log(`   - POST http://localhost:${PORT}/api/expenses/refresh`);
   console.log(`   Sistema:`);
-  console.log(`   - GET  http://localhost:${PORT}/api/health\n`);
+  console.log(`   - GET  http://localhost:${PORT}/api/health`);
+
+  if (shopify) {
+    console.log(`   Shopify:`);
+    console.log(`   - GET  http://localhost:${PORT}/api/shopify/auth?shop=STORE.myshopify.com`);
+    console.log(`   - GET  http://localhost:${PORT}/shopify (embedded view)`);
+  }
+  console.log('');
 });
