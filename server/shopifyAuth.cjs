@@ -1,4 +1,4 @@
-const { shopifyApi, LATEST_API_VERSION } = require('@shopify/shopify-api');
+const { shopifyApi } = require('@shopify/shopify-api');
 require('@shopify/shopify-api/adapters/node');
 
 /**
@@ -20,7 +20,7 @@ function createShopifyConfig() {
     apiSecretKey: apiSecret,
     scopes: scopes.split(','),
     hostName: host.replace(/https?:\/\//, ''),
-    apiVersion: LATEST_API_VERSION,
+    apiVersion: '2026-01', // Usar la versión de Webhooks que configuraste en Shopify
     isEmbeddedApp: true,
     isCustomStoreApp: false,
   });
