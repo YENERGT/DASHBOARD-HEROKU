@@ -202,7 +202,7 @@ function setupShopifyRoutes(app, shopify) {
         </div>
         <iframe
           id="dashboard-iframe"
-          src="/"
+          src="/?shopify_embedded=1"
           allow="fullscreen"
         ></iframe>
 
