@@ -96,6 +96,7 @@ function setupShopifyRoutes(app, shopify) {
 
   /**
    * Ruta del dashboard embebido en Shopify
+   * Redirige a la raíz para que React maneje la app directamente
    */
   app.get('/shopify', (req, res) => {
     const { shop, host } = req.query;
@@ -134,124 +135,9 @@ function setupShopifyRoutes(app, shopify) {
       `);
     }
 
-    // Servir HTML con Shopify App Bridge
-    res.send(`
-      <!DOCTYPE html>
-      <html lang="es">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>APP GENERAL - Dashboard FEL</title>
-        <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
-        <style>
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          body, html {
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-            background: #f4f6f8;
-          }
-          iframe {
-            width: 100%;
-            height: 100vh;
-            border: none;
-            display: none;
-          }
-          .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: #202223;
-          }
-          .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #e3e3e3;
-            border-top: 4px solid #5c6ac4;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-          }
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          h2 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-          }
-          p {
-            font-size: 14px;
-            color: #6d7175;
-          }
-        </style>
-      </head>
-      <body>
-        <div id="loading" class="loading">
-          <div class="spinner"></div>
-          <h2>Cargando Dashboard FEL...</h2>
-          <p>Por favor espera un momento</p>
-        </div>
-        <iframe
-          id="dashboard-iframe"
-          src="/?shopify_embedded=1"
-          allow="fullscreen"
-        ></iframe>
-
-        <script>
-          // Inicializar Shopify App Bridge
-          const AppBridge = window['app-bridge'];
-          const createApp = AppBridge.default;
-
-          const app = createApp({
-            apiKey: '${process.env.SHOPIFY_API_KEY}',
-            host: '${host}',
-            forceRedirect: false
-          });
-
-          console.log('✅ Shopify App Bridge initialized');
-          console.log('🏪 Shop:', '${shop}');
-
-          // Manejar cuando el iframe carga
-          const iframe = document.getElementById('dashboard-iframe');
-          const loading = document.getElementById('loading');
-
-          iframe.onload = function() {
-            console.log('✅ Dashboard loaded successfully');
-            loading.style.display = 'none';
-            iframe.style.display = 'block';
-          };
-
-          iframe.onerror = function() {
-            console.error('❌ Error loading dashboard');
-            loading.innerHTML = \`
-              <div>
-                <h2 style="color: #d72c0d;">❌ Error al cargar el dashboard</h2>
-                <p>Por favor contacta al soporte técnico</p>
-              </div>
-            \`;
-          };
-
-          // Timeout de 10 segundos
-          setTimeout(() => {
-            if (loading.style.display !== 'none') {
-              console.log('⏱️ Timeout reached, showing iframe anyway');
-              iframe.style.display = 'block';
-              loading.style.display = 'none';
-            }
-          }, 10000);
-        </script>
-      </body>
-      </html>
-    `);
+    // Redirigir a la raíz con parámetros de Shopify
+    // React cargará el dashboard normalmente, sin iframe
+    res.redirect(`/?shop=${shop}&host=${host}&embedded=1`);
   });
 
   console.log('✅ Shopify routes configured:');
