@@ -184,7 +184,9 @@ const {
   getAllUsers,
   createUser,
   updateUserRole,
-  deactivateUser
+  deactivateUser,
+  reactivateUser,
+  deleteUserPermanently
 } = require('./database/supabase.cjs');
 
 /**
@@ -313,14 +315,73 @@ app.patch('/api/users/:id/role', isAdmin, async (req, res) => {
 });
 
 /**
+ * PATCH /api/users/:id/deactivate
+ * Inhabilitar usuario (soft delete) - solo admin
+ */
+app.patch('/api/users/:id/deactivate', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (id === req.user.id) {
+      return res.status(400).json({
+        success: false,
+        error: 'No puedes inhabilitarte a ti mismo'
+      });
+    }
+
+    const user = await deactivateUser(id);
+
+    console.log('✅ Usuario inhabilitado por', req.user.email, ':', user.email);
+
+    res.json({
+      success: true,
+      message: 'Usuario inhabilitado',
+      user: { id: user.id, email: user.email, active: user.active }
+    });
+  } catch (error) {
+    console.error('❌ Error deactivating user:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error al inhabilitar usuario'
+    });
+  }
+});
+
+/**
+ * PATCH /api/users/:id/reactivate
+ * Reactivar usuario inhabilitado - solo admin
+ */
+app.patch('/api/users/:id/reactivate', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await reactivateUser(id);
+
+    console.log('✅ Usuario reactivado por', req.user.email, ':', user.email);
+
+    res.json({
+      success: true,
+      message: 'Usuario reactivado',
+      user: { id: user.id, email: user.email, active: user.active }
+    });
+  } catch (error) {
+    console.error('❌ Error reactivating user:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Error al reactivar usuario'
+    });
+  }
+});
+
+/**
  * DELETE /api/users/:id
- * Desactivar usuario - solo admin
+ * Eliminar usuario permanentemente - solo admin
+ * Solo se puede eliminar usuarios ya inhabilitados
  */
 app.delete('/api/users/:id', isAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
-    // No permitir que el admin se elimine a sí mismo
     if (id === req.user.id) {
       return res.status(400).json({
         success: false,
@@ -328,19 +389,19 @@ app.delete('/api/users/:id', isAdmin, async (req, res) => {
       });
     }
 
-    const deletedUser = await deactivateUser(id);
+    const deletedUser = await deleteUserPermanently(id);
 
-    console.log('✅ Usuario desactivado por', req.user.email, ':', deletedUser.email);
+    console.log('✅ Usuario eliminado permanentemente por', req.user.email, ':', deletedUser.email);
 
     res.json({
       success: true,
-      message: 'Usuario desactivado'
+      message: 'Usuario eliminado permanentemente'
     });
   } catch (error) {
-    console.error('❌ Error deactivating user:', error);
+    console.error('❌ Error deleting user:', error);
     res.status(500).json({
       success: false,
-      error: 'Error al desactivar usuario'
+      error: 'Error al eliminar usuario'
     });
   }
 });

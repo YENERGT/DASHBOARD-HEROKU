@@ -89,8 +89,52 @@ function UsersManagement() {
     }
   };
 
+  const handleDeactivateUser = async (userId, email) => {
+    if (!confirm(`¿Estás seguro de inhabilitar a ${email}? El usuario no podrá acceder al sistema.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/users/${userId}/deactivate`, {
+        method: 'PATCH',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Error al inhabilitar usuario');
+      }
+
+      fetchUsers();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleReactivateUser = async (userId, email) => {
+    if (!confirm(`¿Reactivar a ${email}? El usuario podrá acceder nuevamente al sistema.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/users/${userId}/reactivate`, {
+        method: 'PATCH',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Error al reactivar usuario');
+      }
+
+      fetchUsers();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const handleDeleteUser = async (userId, email) => {
-    if (!confirm(`¿Estás seguro de eliminar a ${email}?`)) {
+    if (!confirm(`¿ELIMINAR PERMANENTEMENTE a ${email}? Esta acción no se puede deshacer.`)) {
       return;
     }
 
@@ -239,15 +283,45 @@ function UsersManagement() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     {u.email !== user?.email && (
-                      <button
-                        onClick={() => handleDeleteUser(u.id, u.email)}
-                        className="text-red-400 hover:text-red-300 transition-colors p-2"
-                        title="Eliminar usuario"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        {u.active ? (
+                          /* Usuario activo: mostrar botón de Inhabilitar */
+                          <button
+                            onClick={() => handleDeactivateUser(u.id, u.email)}
+                            className="text-yellow-400 hover:text-yellow-300 transition-colors p-2 flex items-center gap-1"
+                            title="Inhabilitar usuario"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
+                            <span className="text-sm">Inhabilitar</span>
+                          </button>
+                        ) : (
+                          /* Usuario inhabilitado: mostrar botones de Reactivar y Eliminar */
+                          <>
+                            <button
+                              onClick={() => handleReactivateUser(u.id, u.email)}
+                              className="text-green-400 hover:text-green-300 transition-colors p-2 flex items-center gap-1"
+                              title="Reactivar usuario"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span className="text-sm">Reactivar</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(u.id, u.email)}
+                              className="text-red-400 hover:text-red-300 transition-colors p-2 flex items-center gap-1"
+                              title="Eliminar permanentemente"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                              <span className="text-sm">Eliminar</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
                     )}
                   </td>
                 </tr>

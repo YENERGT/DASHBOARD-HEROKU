@@ -188,5 +188,46 @@ module.exports = {
     }
 
     return data;
+  },
+
+  /**
+   * Reactivar usuario
+   */
+  async reactivateUser(userId) {
+    const { data, error } = await supabase
+      .from('users')
+      .update({
+        active: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error reactivating user:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  /**
+   * Eliminar usuario permanentemente (hard delete)
+   */
+  async deleteUserPermanently(userId) {
+    const { data, error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error deleting user permanently:', error);
+      throw error;
+    }
+
+    return data;
   }
 };
