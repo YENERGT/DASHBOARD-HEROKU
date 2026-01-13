@@ -69,14 +69,20 @@ if (shopify) {
 /**
  * GET /auth/google
  * Inicia el flujo de autenticación con Google
+ * Soporta parámetro ?popup=true para modo popup (Shopify embedded)
  */
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+app.get('/auth/google', (req, res, next) => {
+  // Guardar si es modo popup en la sesión
+  if (req.query.popup === 'true') {
+    req.session.authPopup = true;
+  }
+  next();
+}, passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 /**
  * GET /auth/google/callback
  * Callback de Google OAuth
+ * Si viene de popup, cierra la ventana y notifica al padre
  */
 app.get('/auth/google/callback',
   passport.authenticate('google', {
@@ -84,9 +90,35 @@ app.get('/auth/google/callback',
     failureMessage: true
   }),
   (req, res) => {
-    // Autenticación exitosa
     console.log('✅ Login exitoso:', req.user.email);
-    res.redirect('/');
+
+    // Verificar si el login fue iniciado desde un popup
+    if (req.session.authPopup) {
+      delete req.session.authPopup;
+      // Enviar HTML que cierra el popup y notifica al padre
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Autenticación exitosa</title>
+        </head>
+        <body>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage({ type: 'AUTH_SUCCESS' }, window.location.origin);
+              window.close();
+            } else {
+              window.location.href = '/';
+            }
+          </script>
+          <p>Autenticación exitosa. Cerrando ventana...</p>
+        </body>
+        </html>
+      `);
+    } else {
+      // Redirección normal
+      res.redirect('/');
+    }
   }
 );
 
