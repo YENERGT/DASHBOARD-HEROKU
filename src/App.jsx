@@ -1,8 +1,6 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/shared/Layout';
-import Home from './pages/Home';
 import FELDashboard from './pages/FELDashboard';
 import ExpensesDashboard from './pages/ExpensesDashboard';
 import ProductsDashboard from './pages/ProductsDashboard';
@@ -40,9 +38,7 @@ function AppRoutes() {
       {/* Rutas protegidas */}
       <Route path="/" element={
         <ProtectedRoute>
-          <Layout>
-            <Home />
-          </Layout>
+          <Navigate to="/dashboard-fel" replace />
         </ProtectedRoute>
       } />
       <Route path="/dashboard-fel" element={

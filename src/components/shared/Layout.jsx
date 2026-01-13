@@ -1,47 +1,110 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import Sidebar from './Sidebar';
 
 const Layout = ({ children }) => {
-  const location = useLocation();
-  const { user, isAdmin, logout } = useAuth();
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('sidebarCollapsed') === 'true';
+    }
+    return false;
+  });
 
-  const navItems = [
-    { path: '/', label: 'Inicio', icon: '🏠' },
-    { path: '/dashboard-fel', label: 'Dashboard FEL', icon: '📊' },
-    { path: '/dashboard-gastos', label: 'Gastos', icon: '💰' },
-    { path: '/dashboard-productos', label: 'Productos', icon: '📦' },
-    // Solo mostrar Usuarios si es admin
-    ...(isAdmin ? [{ path: '/usuarios', label: 'Usuarios', icon: '👥' }] : [])
-  ];
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
 
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Escuchar cambios en localStorage para sincronizar estado de colapso
+  useEffect(() => {
+    const handleStorage = () => {
+      setSidebarCollapsed(localStorage.getItem('sidebarCollapsed') === 'true');
+    };
+
+    window.addEventListener('storage', handleStorage);
+
+    // También verificar periódicamente para cambios locales
+    const interval = setInterval(() => {
+      const currentValue = localStorage.getItem('sidebarCollapsed') === 'true';
+      if (currentValue !== sidebarCollapsed) {
+        setSidebarCollapsed(currentValue);
+      }
+    }, 100);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(interval);
+    };
+  }, [sidebarCollapsed]);
+
+  // Calcular margen izquierdo basado en estado del sidebar
+  const mainMargin = isMobile ? 'ml-0' : (sidebarCollapsed ? 'ml-16' : 'ml-64');
 
   return (
-    <div className="min-h-screen bg-dark-bg">
-      {/* Header */}
-      <header className="bg-dark-card border-b border-dark-border sticky top-0 z-50">
-        <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between gap-2">
-            {/* Logo */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary-600 rounded-lg flex items-center justify-center text-lg sm:text-xl">
-                📈
+    <div className="min-h-screen bg-slate-950">
+      {/* Sidebar */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+        isMobile={isMobile}
+      />
+
+      {/* Main Content Area */}
+      <div className={`transition-all duration-300 ${mainMargin}`}>
+        {/* Header móvil */}
+        {isMobile && (
+          <header className="sticky top-0 z-30 bg-slate-900 border-b border-slate-700">
+            <div className="flex items-center justify-between px-4 py-3">
+              {/* Botón hamburger */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              >
+                <MenuIcon className="w-6 h-6" />
+              </button>
+
+              {/* Logo centro */}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-lg">
+                  📈
+                </div>
+                <span className="font-bold text-white">Dashboard</span>
               </div>
-              <div>
-                <h1 className="text-base sm:text-xl font-bold text-white">Dashboard Heroku</h1>
-                <p className="text-xs text-gray-400 hidden sm:block">Sistema de Gestión FEL</p>
+
+              {/* Avatar usuario */}
+              <div className="w-8 h-8">
+                {user?.photoUrl ? (
+                  <img
+                    src={user.photoUrl}
+                    alt={user.displayName}
+                    className="w-8 h-8 rounded-full"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-medium">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
               </div>
             </div>
+          </header>
+        )}
 
-            {/* Usuario y menú */}
-            <div className="flex items-center gap-4">
+        {/* Header desktop - más compacto */}
+        {!isMobile && (
+          <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700">
+            <div className="flex items-center justify-between px-6 py-3">
               {/* Fecha actual */}
-              <div className="text-right hidden md:block">
-                <p className="text-sm text-gray-400">
+              <div>
+                <p className="text-sm text-slate-400">
                   {new Date().toLocaleDateString('es-GT', {
                     weekday: 'long',
                     year: 'numeric',
@@ -49,126 +112,43 @@ const Layout = ({ children }) => {
                     day: 'numeric'
                   })}
                 </p>
-                <p className="text-xs text-gray-500">
-                  {new Date().toLocaleTimeString('es-GT')}
-                </p>
               </div>
 
-              {/* User Menu */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 hover:bg-dark-hover rounded-lg p-2 transition-colors"
-                >
-                  {user?.photoUrl ? (
-                    <img
-                      src={user.photoUrl}
-                      alt={user.displayName}
-                      className="w-8 h-8 rounded-full"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white font-medium">
-                      {user?.email?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                  )}
-                  <svg className="w-4 h-4 text-gray-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {/* Dropdown Menu */}
-                {showUserMenu && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowUserMenu(false)}
-                    />
-                    <div className="absolute right-0 mt-2 w-64 bg-dark-card border border-dark-border rounded-xl shadow-xl z-50 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-dark-border">
-                        <p className="text-white font-medium truncate">{user?.displayName || user?.email}</p>
-                        <p className="text-gray-400 text-sm truncate">{user?.email}</p>
-                        <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium ${
-                          user?.role === 'admin' ? 'bg-purple-500/20 text-purple-400' :
-                          user?.role === 'ventas' ? 'bg-blue-500/20 text-blue-400' :
-                          'bg-green-500/20 text-green-400'
-                        }`}>
-                          {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
-                        </span>
-                      </div>
-                      <div className="p-2">
-                        <button
-                          onClick={() => {
-                            setShowUserMenu(false);
-                            logout();
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors text-left"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          Cerrar Sesión
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
+              {/* Info del sistema */}
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-xs text-slate-500">Sistema FEL Guatemala</p>
+                  <p className="text-xs text-slate-600">v1.0.0</p>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </header>
+          </header>
+        )}
 
-      {/* Navigation */}
-      <nav className="bg-dark-card border-b border-dark-border overflow-x-auto scrollbar-hide">
-        <div className="container mx-auto px-2 sm:px-4">
-          <div className="flex gap-0.5 sm:gap-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`
-                  flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2
-                  px-2 sm:px-6 py-2 sm:py-4
-                  text-xs sm:text-sm font-medium transition-all duration-200
-                  border-b-2 whitespace-nowrap min-w-[60px] sm:min-w-0
-                  ${isActive(item.path)
-                    ? 'border-primary-500 text-primary-400 bg-dark-hover'
-                    : 'border-transparent text-gray-400 hover:text-white hover:bg-dark-hover'
-                  }
-                `}
-              >
-                <span className="text-lg sm:text-lg">{item.icon}</span>
-                <span className="text-[9px] sm:text-sm leading-tight sm:leading-normal text-center sm:text-left">
-                  {item.label === 'Dashboard FEL' ?
-                    <><span className="sm:hidden">FEL</span><span className="hidden sm:inline">Dashboard FEL</span></> :
-                   item.label === 'Dashboard Gastos' ?
-                    <><span className="sm:hidden">Gastos</span><span className="hidden sm:inline">Gastos</span></> :
-                   item.label === 'Dashboard Productos' ?
-                    <><span className="sm:hidden">Productos</span><span className="hidden sm:inline">Productos</span></> :
-                   item.label}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </nav>
+        {/* Contenido principal */}
+        <main className="p-4 md:p-6 lg:p-8">
+          {children}
+        </main>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {children}
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-dark-card border-t border-dark-border mt-12">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm text-gray-500">
-            <p className="text-center sm:text-left">© 2025 Dashboard Heroku - Sistema FEL Guatemala</p>
-            <p>Versión 1.0.0</p>
+        {/* Footer */}
+        <footer className="border-t border-slate-800 mt-8">
+          <div className="px-4 md:px-6 lg:px-8 py-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600">
+              <p>© 2025 Dashboard Heroku - Sistema FEL Guatemala</p>
+              <p>Grupo Revisa</p>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 };
+
+// Icono de menú hamburger
+const MenuIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+);
 
 export default Layout;
