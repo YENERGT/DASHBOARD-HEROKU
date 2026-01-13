@@ -14,6 +14,11 @@ const { isAuthenticated, isAdmin, hasRole } = require('./auth/middleware.cjs');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Confiar en el proxy de Heroku (necesario para cookies seguras)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Middleware básico
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
@@ -29,9 +34,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'dashboard-fel-secret-change-this',
   resave: false,
   saveUninitialized: false,
+  proxy: process.env.NODE_ENV === 'production',
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
