@@ -72,12 +72,13 @@ if (shopify) {
  * Soporta parámetro ?popup=true para modo popup (Shopify embedded)
  */
 app.get('/auth/google', (req, res, next) => {
-  // Guardar si es modo popup en la sesión
-  if (req.query.popup === 'true') {
-    req.session.authPopup = true;
-  }
-  next();
-}, passport.authenticate('google', { scope: ['profile', 'email'] }));
+  // Pasar el modo popup como state parameter de OAuth
+  const isPopup = req.query.popup === 'true';
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    state: isPopup ? 'popup' : 'normal'
+  })(req, res, next);
+});
 
 /**
  * GET /auth/google/callback
@@ -92,28 +93,41 @@ app.get('/auth/google/callback',
   (req, res) => {
     console.log('✅ Login exitoso:', req.user.email);
 
-    // Verificar si el login fue iniciado desde un popup
-    if (req.session.authPopup) {
-      delete req.session.authPopup;
+    // Verificar si el login fue iniciado desde un popup (via state parameter)
+    const isPopup = req.query.state === 'popup';
+
+    if (isPopup) {
       // Enviar HTML que cierra el popup y notifica al padre
       res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Autenticación exitosa</title>
-        </head>
-        <body>
-          <script>
-            if (window.opener) {
-              window.opener.postMessage({ type: 'AUTH_SUCCESS' }, window.location.origin);
-              window.close();
-            } else {
-              window.location.href = '/';
-            }
-          </script>
-          <p>Autenticación exitosa. Cerrando ventana...</p>
-        </body>
-        </html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Autenticación exitosa</title>
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #1e293b; color: white; }
+    .container { text-align: center; }
+    .spinner { border: 3px solid #334155; border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <p>Autenticación exitosa</p>
+    <p style="font-size: 14px; color: #94a3b8;">Cerrando ventana...</p>
+  </div>
+  <script>
+    // Notificar a la ventana padre y cerrar
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage({ type: 'AUTH_SUCCESS' }, '*');
+      setTimeout(function() { window.close(); }, 500);
+    } else {
+      // Si no hay ventana padre, redirigir
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>
       `);
     } else {
       // Redirección normal
