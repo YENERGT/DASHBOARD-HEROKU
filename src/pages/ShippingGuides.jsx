@@ -1,7 +1,11 @@
 import { useState, useRef, useCallback } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Usar ruta relativa /api para que funcione tanto en desarrollo como en producción (Heroku/Shopify)
+const API_URL = '/api';
+
+// Número de prueba para modo test
+const TEST_PHONE_NUMBER = '50253431943';
 
 const ShippingGuides = () => {
   // Estados principales
@@ -13,6 +17,7 @@ const ShippingGuides = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sendResults, setSendResults] = useState(null);
+  const [testMode, setTestMode] = useState(true); // Modo test activado por defecto
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -122,12 +127,18 @@ const ShippingGuides = () => {
     setError(null);
     setStep(4);
 
+    // Si está en modo test, reemplazar todos los teléfonos con el número de prueba
+    const guidesToSend = testMode
+      ? guides.map(g => ({ ...g, telefono: TEST_PHONE_NUMBER }))
+      : guides;
+
     try {
       const response = await axios.post(
         `${API_URL}/guides/send-whatsapp`,
         {
-          guides,
+          guides: guidesToSend,
           transport,
+          testMode,
           imageUrl: imageBase64?.substring(0, 100) + '...' // Solo guardamos referencia
         },
         { withCredentials: true }
@@ -173,10 +184,44 @@ const ShippingGuides = () => {
     <div className="max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">Guías de Envío</h1>
-        <p className="text-slate-400">
-          Procesa imágenes de guías y envía notificaciones por WhatsApp
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white mb-2">Guías de Envío</h1>
+            <p className="text-slate-400">
+              Procesa imágenes de guías y envía notificaciones por WhatsApp
+            </p>
+          </div>
+          {/* Toggle Modo Test */}
+          <div className="flex items-center gap-3 p-3 bg-slate-800 border border-slate-700 rounded-lg">
+            <span className={`text-sm ${testMode ? 'text-yellow-400' : 'text-slate-400'}`}>
+              {testMode ? '🧪 Modo Test' : '🚀 Modo Real'}
+            </span>
+            <button
+              onClick={() => setTestMode(!testMode)}
+              className={`
+                relative w-14 h-7 rounded-full transition-colors duration-200
+                ${testMode ? 'bg-yellow-500' : 'bg-green-500'}
+              `}
+            >
+              <span
+                className={`
+                  absolute top-1 w-5 h-5 bg-white rounded-full transition-transform duration-200
+                  ${testMode ? 'left-1' : 'left-8'}
+                `}
+              />
+            </button>
+            {testMode && (
+              <span className="text-xs text-yellow-400/70">
+                → {TEST_PHONE_NUMBER}
+              </span>
+            )}
+          </div>
+        </div>
+        {testMode && (
+          <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-400 text-sm">
+            <strong>Modo Test Activo:</strong> Todos los mensajes se enviarán al número {TEST_PHONE_NUMBER} en lugar de los números reales de las guías.
+          </div>
+        )}
       </div>
 
       {/* Progress Steps */}
