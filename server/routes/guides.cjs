@@ -16,7 +16,7 @@ const { isAuthenticated, hasRole } = require('../auth/middleware.cjs');
  * Procesa una imagen de guías usando Vision AI + GPT
  * Requiere rol: admin o ventas
  */
-router.post('/process-image', isAuthenticated, hasRole(['admin', 'ventas']), async (req, res) => {
+router.post('/process-image', isAuthenticated, hasRole('admin', 'ventas'), async (req, res) => {
   try {
     const { image, transport } = req.body;
 
@@ -82,7 +82,7 @@ router.post('/process-image', isAuthenticated, hasRole(['admin', 'ventas']), asy
  * Envía mensajes de WhatsApp a las guías
  * Requiere rol: admin o ventas
  */
-router.post('/send-whatsapp', isAuthenticated, hasRole(['admin', 'ventas']), async (req, res) => {
+router.post('/send-whatsapp', isAuthenticated, hasRole('admin', 'ventas'), async (req, res) => {
   try {
     const { guides, transport, imageUrl } = req.body;
 
