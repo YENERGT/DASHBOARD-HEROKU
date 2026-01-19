@@ -1,0 +1,32 @@
+# Archivo de configuración para Shopify App (opcional, si usas Shopify CLI)
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "fel-dashboard"
+client_id = "" # Se llenará automáticamente
+application_url = "https://your-app.herokuapp.com"
+embedded = true
+
+[access_scopes]
+# Permisos necesarios para acceder a datos de Shopify
+scopes = "read_products,read_orders,read_customers"
+
+[auth]
+redirect_urls = [
+  "https://your-app.herokuapp.com/auth/callback",
+  "http://localhost:3000/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-01"
+
+# Ejemplo de webhooks que podrías configurar
+# [[webhooks.subscriptions]]
+# topics = [ "orders/create" ]
+# uri = "/webhooks/orders/create"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "your-dev-store.myshopify.com"

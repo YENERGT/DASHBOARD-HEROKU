@@ -1,0 +1,35 @@
+{
+  "name": "Shopify FEL Dashboard Wrapper",
+  "description": "Wrapper app to embed FEL Dashboard in Shopify Admin",
+  "repository": "https://github.com/your-repo/shopify-app-wrapper",
+  "keywords": ["shopify", "dashboard", "fel", "guatemala"],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "SHOPIFY_API_KEY": {
+      "description": "Your Shopify App API Key from Partners Dashboard",
+      "required": true
+    },
+    "SHOPIFY_API_SECRET": {
+      "description": "Your Shopify App API Secret from Partners Dashboard",
+      "required": true
+    },
+    "DASHBOARD_URL": {
+      "description": "URL of your existing dashboard (e.g., https://your-dashboard.herokuapp.com)",
+      "required": true
+    },
+    "SCOPES": {
+      "description": "Shopify API scopes (comma separated)",
+      "value": "read_products,read_orders,read_customers",
+      "required": false
+    },
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production",
+      "required": false
+    }
+  }
+}
