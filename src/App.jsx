@@ -7,6 +7,7 @@ import ExpensesDashboard from './pages/ExpensesDashboard';
 import ProductsDashboard from './pages/ProductsDashboard';
 import Login from './pages/Login';
 import UsersManagement from './pages/UsersManagement';
+import ShippingGuides from './pages/ShippingGuides';
 
 // Componente para proteger rutas
 function ProtectedRoute({ children }) {
@@ -69,6 +70,13 @@ function AppRoutes() {
         <ProtectedRoute>
           <Layout>
             <UsersManagement />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/guias-envio" element={
+        <ProtectedRoute>
+          <Layout>
+            <ShippingGuides />
           </Layout>
         </ProtectedRoute>
       } />

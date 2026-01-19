@@ -10,6 +10,7 @@ const googleSheetsService = require('./googleSheetsService.cjs');
 const { createShopifyConfig, setupShopifyRoutes } = require('./shopifyAuth.cjs');
 const { setupPassport } = require('./auth/passport.cjs');
 const { isAuthenticated, isAdmin, hasRole } = require('./auth/middleware.cjs');
+const guidesRoutes = require('./routes/guides.cjs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -405,6 +406,11 @@ app.delete('/api/users/:id', isAdmin, async (req, res) => {
     });
   }
 });
+
+// ========================================
+// RUTAS DE GUÍAS DE ENVÍO
+// ========================================
+app.use('/api/guides', guidesRoutes);
 
 // ========================================
 // PROTEGER RUTAS DE API EXISTENTES

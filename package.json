@@ -25,6 +25,7 @@
     "express-session": "^1.18.2",
     "googleapis": "^166.0.0",
     "jsonwebtoken": "^9.0.3",
+    "node-fetch": "^2.7.0",
     "papaparse": "^5.5.3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
