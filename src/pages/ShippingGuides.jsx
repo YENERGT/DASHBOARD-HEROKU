@@ -22,11 +22,26 @@ const ShippingGuides = () => {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
-  // Transportes disponibles
+  // Transportes disponibles con logos
   const transports = [
-    { id: 'guatex', name: 'Guatex', color: 'bg-blue-600', icon: '📦' },
-    { id: 'forza', name: 'Forza', color: 'bg-green-600', icon: '🚚' },
-    { id: 'cargo_express', name: 'Cargo Express', color: 'bg-orange-600', icon: '📬' }
+    {
+      id: 'guatex',
+      name: 'Guatex',
+      color: 'bg-blue-600',
+      logo: 'https://cdn.shopify.com/s/files/1/0289/7264/6460/files/images_8f226455-dd06-4cde-b130-26b25cb721fb.png?v=1768922358'
+    },
+    {
+      id: 'forza',
+      name: 'Forza',
+      color: 'bg-green-600',
+      logo: 'https://cdn.shopify.com/s/files/1/0289/7264/6460/files/logoForza.png?v=1768922358'
+    },
+    {
+      id: 'cargo_express',
+      name: 'Cargo Express',
+      color: 'bg-orange-600',
+      logo: 'https://cdn.shopify.com/s/files/1/0289/7264/6460/files/logo_footer.webp?v=1768922358'
+    }
   ];
 
   // Seleccionar transporte
@@ -267,21 +282,27 @@ const ShippingGuides = () => {
       {step === 1 && (
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <h2 className="text-xl font-semibold text-white mb-4">Selecciona el transporte</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {transports.map(t => (
               <button
                 key={t.id}
                 onClick={() => handleSelectTransport(t.id)}
                 className={`
                   p-6 rounded-xl border-2 transition-all duration-200
-                  hover:scale-105 hover:shadow-lg
+                  hover:scale-105 hover:shadow-lg flex flex-col items-center justify-center
                   ${transport === t.id
                     ? 'border-blue-500 bg-blue-500/20'
                     : 'border-slate-600 bg-slate-700/50 hover:border-slate-500'
                   }
                 `}
               >
-                <div className="text-4xl mb-3">{t.icon}</div>
+                <div className="h-20 w-full flex items-center justify-center mb-4">
+                  <img
+                    src={t.logo}
+                    alt={t.name}
+                    className="max-h-16 max-w-full object-contain"
+                  />
+                </div>
                 <div className="text-lg font-semibold text-white">{t.name}</div>
               </button>
             ))}
