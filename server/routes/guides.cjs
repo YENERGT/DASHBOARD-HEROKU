@@ -168,6 +168,32 @@ router.get('/templates', isAuthenticated, (req, res) => {
 });
 
 /**
+ * GET /api/guides/history
+ * Obtiene el historial de guías enviadas
+ * Requiere rol: admin o ventas
+ */
+router.get('/history', isAuthenticated, hasRole('admin', 'ventas'), async (req, res) => {
+  try {
+    const { period = 'day' } = req.query;
+    const date = req.query.date ? new Date(req.query.date) : new Date();
+
+    const stats = await guidesSheetService.getGuidesStats(period, date);
+
+    res.json({
+      success: true,
+      data: stats
+    });
+
+  } catch (error) {
+    console.error('❌ Error getting guides history:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Error al obtener historial de guías'
+    });
+  }
+});
+
+/**
  * GET /api/guides/health
  * Health check para el sistema de guías
  */

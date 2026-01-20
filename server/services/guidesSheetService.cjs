@@ -176,6 +176,194 @@ class GuidesSheetService {
       throw error;
     }
   }
+
+  /**
+   * Obtiene todas las guías del Google Sheet
+   * @returns {Promise<Array>} - Array de guías
+   */
+  async getGuides() {
+    try {
+      if (!this.initialized) {
+        await this.initialize();
+      }
+
+      const spreadsheetId = process.env.VITE_GOOGLE_SHEETS_ID || process.env.GOOGLE_SHEETS_ID;
+
+      const response = await this.sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: 'GUIAS!A:J'
+      });
+
+      const rows = response.data.values || [];
+
+      // Si no hay datos o solo hay headers
+      if (rows.length <= 1) {
+        return [];
+      }
+
+      // Convertir filas a objetos (omitiendo header)
+      const guides = rows.slice(1).map((row, index) => ({
+        id: index + 1,
+        imageUrl: row[0] || '',
+        transporte: row[1] || '',
+        numeroGuia: row[2] || '',
+        destinatario: row[3] || '',
+        telefono: row[4] || '',
+        direccion: row[5] || '',
+        numeroPedido: row[6] || 'Sin identificar',
+        estado: row[7] || '',
+        fechaEnvio: row[8] || '',
+        messageId: row[9] || ''
+      }));
+
+      // Ordenar por fecha más reciente
+      guides.sort((a, b) => new Date(b.fechaEnvio) - new Date(a.fechaEnvio));
+
+      console.log(`✅ Retrieved ${guides.length} guides from Google Sheets`);
+      return guides;
+
+    } catch (error) {
+      console.error('❌ Error getting guides from Google Sheets:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene estadísticas de guías por período
+   * @param {string} period - 'day', 'month', 'year'
+   * @param {Date} date - Fecha de referencia
+   * @returns {Promise<object>} - Estadísticas
+   */
+  async getGuidesStats(period, date = new Date()) {
+    try {
+      const guides = await this.getGuides();
+
+      // Filtrar guías por período
+      const filterByPeriod = (guideDate, targetDate, periodType) => {
+        const gDate = new Date(guideDate);
+        const tDate = new Date(targetDate);
+
+        switch (periodType) {
+          case 'day':
+            return gDate.toDateString() === tDate.toDateString();
+          case 'month':
+            return gDate.getMonth() === tDate.getMonth() &&
+                   gDate.getFullYear() === tDate.getFullYear();
+          case 'year':
+            return gDate.getFullYear() === tDate.getFullYear();
+          default:
+            return false;
+        }
+      };
+
+      // Calcular período anterior
+      const getPreviousDate = (d, periodType) => {
+        const prev = new Date(d);
+        switch (periodType) {
+          case 'day':
+            prev.setDate(prev.getDate() - 1);
+            break;
+          case 'month':
+            prev.setMonth(prev.getMonth() - 1);
+            break;
+          case 'year':
+            prev.setFullYear(prev.getFullYear() - 1);
+            break;
+        }
+        return prev;
+      };
+
+      const previousDate = getPreviousDate(date, period);
+
+      // Filtrar guías del período actual y anterior
+      const currentGuides = guides.filter(g =>
+        g.fechaEnvio && filterByPeriod(g.fechaEnvio, date, period)
+      );
+      const previousGuides = guides.filter(g =>
+        g.fechaEnvio && filterByPeriod(g.fechaEnvio, previousDate, period)
+      );
+
+      // Contar por transporte
+      const countByTransport = (guidesList) => {
+        return guidesList.reduce((acc, g) => {
+          const transport = g.transporte || 'Desconocido';
+          acc[transport] = (acc[transport] || 0) + 1;
+          return acc;
+        }, {});
+      };
+
+      // Agrupar por tiempo para gráfica lineal
+      const groupByTime = (guidesList, periodType) => {
+        const groups = {};
+
+        guidesList.forEach(g => {
+          if (!g.fechaEnvio) return;
+          const gDate = new Date(g.fechaEnvio);
+          let key;
+
+          switch (periodType) {
+            case 'day':
+              key = gDate.getHours().toString().padStart(2, '0') + ':00';
+              break;
+            case 'month':
+              key = gDate.getDate().toString();
+              break;
+            case 'year':
+              const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                             'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+              key = months[gDate.getMonth()];
+              break;
+          }
+
+          groups[key] = (groups[key] || 0) + 1;
+        });
+
+        return Object.entries(groups).map(([label, count]) => ({
+          label,
+          envios: count
+        })).sort((a, b) => {
+          if (periodType === 'day') return a.label.localeCompare(b.label);
+          if (periodType === 'month') return parseInt(a.label) - parseInt(b.label);
+          return 0; // Para año, mantener orden de meses
+        });
+      };
+
+      const currentTotal = currentGuides.length;
+      const previousTotal = previousGuides.length;
+      const percentChange = previousTotal > 0
+        ? ((currentTotal - previousTotal) / previousTotal * 100).toFixed(1)
+        : currentTotal > 0 ? 100 : 0;
+
+      return {
+        current: {
+          total: currentTotal,
+          byTransport: countByTransport(currentGuides),
+          timeline: groupByTime(currentGuides, period),
+          guides: currentGuides
+        },
+        previous: {
+          total: previousTotal,
+          byTransport: countByTransport(previousGuides)
+        },
+        comparison: {
+          total: parseFloat(percentChange),
+          byTransport: Object.keys(countByTransport(currentGuides)).reduce((acc, transport) => {
+            const current = countByTransport(currentGuides)[transport] || 0;
+            const previous = countByTransport(previousGuides)[transport] || 0;
+            acc[transport] = previous > 0
+              ? ((current - previous) / previous * 100).toFixed(1)
+              : current > 0 ? 100 : 0;
+            return acc;
+          }, {})
+        },
+        allGuides: guides // Para el timeline completo
+      };
+
+    } catch (error) {
+      console.error('❌ Error getting guides stats:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new GuidesSheetService();

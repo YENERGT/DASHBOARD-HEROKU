@@ -8,6 +8,7 @@ import ProductsDashboard from './pages/ProductsDashboard';
 import Login from './pages/Login';
 import UsersManagement from './pages/UsersManagement';
 import ShippingGuides from './pages/ShippingGuides';
+import GuidesHistory from './pages/GuidesHistory';
 
 // Componente para proteger rutas
 function ProtectedRoute({ children }) {
@@ -77,6 +78,13 @@ function AppRoutes() {
         <ProtectedRoute>
           <Layout>
             <ShippingGuides />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/historial-guias" element={
+        <ProtectedRoute>
+          <Layout>
+            <GuidesHistory />
           </Layout>
         </ProtectedRoute>
       } />

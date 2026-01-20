@@ -39,6 +39,7 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
       section: 'VENTAS',
       items: [
         { path: '/guias-envio', label: 'Guías de Envío', icon: TruckIcon },
+        { path: '/historial-guias', label: 'Historial de Guías', icon: HistoryIcon },
       ]
     }] : []),
     ...(isAdmin ? [{
@@ -257,6 +258,12 @@ const UsersIcon = ({ className }) => (
 const TruckIcon = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+  </svg>
+);
+
+const HistoryIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
