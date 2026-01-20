@@ -213,6 +213,86 @@ class WhatsAppService {
       }))
     };
   }
+
+  /**
+   * Envía un mensaje de texto simple (no plantilla)
+   * @param {string} phone - Número de teléfono (con código de país)
+   * @param {string} message - Mensaje de texto a enviar
+   * @returns {Promise<object>} - Resultado del envío
+   */
+  async sendTextMessage(phone, message) {
+    if (!this.phoneNumberId || !this.accessToken) {
+      throw new Error('WhatsApp credentials not configured');
+    }
+
+    const messageBody = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: phone,
+      type: 'text',
+      text: {
+        preview_url: true,
+        body: message
+      }
+    };
+
+    try {
+      console.log(`📤 Sending auto-reply to ${phone}...`);
+
+      const response = await fetch(this.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.accessToken}`
+        },
+        body: JSON.stringify(messageBody)
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        console.error('❌ WhatsApp API error:', responseData);
+        return {
+          success: false,
+          phone,
+          error: responseData.error?.message || 'Unknown error'
+        };
+      }
+
+      console.log(`✅ Auto-reply sent to ${phone}`);
+      return {
+        success: true,
+        phone,
+        messageId: responseData.messages?.[0]?.id
+      };
+
+    } catch (error) {
+      console.error(`❌ Error sending auto-reply to ${phone}:`, error);
+      return {
+        success: false,
+        phone,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Procesa un mensaje entrante y envía respuesta automática
+   * @param {object} message - Mensaje entrante de WhatsApp
+   * @returns {Promise<object>} - Resultado del procesamiento
+   */
+  async handleIncomingMessage(message) {
+    const from = message.from; // Número del remitente
+    const messageType = message.type;
+
+    // Mensaje de respuesta automática
+    const autoReplyMessage = `Soy un chat de notificaciones, aquí puedes hablar con un asesor:\n\nhttps://wa.me/50257867159`;
+
+    console.log(`📨 Incoming message from ${from} (type: ${messageType})`);
+
+    // Enviar respuesta automática
+    return await this.sendTextMessage(from, autoReplyMessage);
+  }
 }
 
 module.exports = new WhatsAppService();

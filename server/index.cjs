@@ -11,6 +11,7 @@ const { createShopifyConfig, setupShopifyRoutes } = require('./shopifyAuth.cjs')
 const { setupPassport } = require('./auth/passport.cjs');
 const { isAuthenticated, isAdmin, hasRole } = require('./auth/middleware.cjs');
 const guidesRoutes = require('./routes/guides.cjs');
+const webhookRoutes = require('./routes/webhook.cjs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -412,6 +413,11 @@ app.delete('/api/users/:id', isAdmin, async (req, res) => {
 // RUTAS DE GUÍAS DE ENVÍO
 // ========================================
 app.use('/api/guides', guidesRoutes);
+
+// ========================================
+// WEBHOOK DE WHATSAPP (respuestas automáticas)
+// ========================================
+app.use('/api/webhook', webhookRoutes);
 
 // ========================================
 // PROTEGER RUTAS DE API EXISTENTES
