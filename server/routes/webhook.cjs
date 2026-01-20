@@ -47,8 +47,12 @@ router.post('/whatsapp', async (req, res) => {
   try {
     const body = req.body;
 
+    // Log completo del body recibido para debug
+    console.log('📥 Webhook received:', JSON.stringify(body, null, 2));
+
     // Verificar que sea una notificación de WhatsApp
     if (body.object !== 'whatsapp_business_account') {
+      console.log('⚠️ Not a WhatsApp notification, object:', body.object);
       return res.sendStatus(404);
     }
 
@@ -57,17 +61,35 @@ router.post('/whatsapp', async (req, res) => {
 
     // Procesar las entradas
     const entries = body.entry || [];
+    console.log(`📋 Processing ${entries.length} entries`);
 
     for (const entry of entries) {
       const changes = entry.changes || [];
+      console.log(`📋 Entry has ${changes.length} changes`);
 
       for (const change of changes) {
-        if (change.field !== 'messages') continue;
+        console.log(`📋 Change field: ${change.field}`);
+
+        if (change.field !== 'messages') {
+          console.log('⏭️ Skipping non-messages field');
+          continue;
+        }
 
         const value = change.value;
         const messages = value.messages || [];
+        const statuses = value.statuses || [];
+
+        console.log(`📋 Found ${messages.length} messages, ${statuses.length} statuses`);
+
+        // Ignorar notificaciones de estado (delivered, read, etc.)
+        if (statuses.length > 0 && messages.length === 0) {
+          console.log('📋 Status update only, no action needed');
+          continue;
+        }
 
         for (const message of messages) {
+          console.log(`📨 Message: id=${message.id}, from=${message.from}, type=${message.type}`);
+
           // Evitar procesar mensajes duplicados
           if (processedMessages.has(message.id)) {
             console.log(`⏭️ Skipping duplicate message: ${message.id}`);
@@ -77,8 +99,14 @@ router.post('/whatsapp', async (req, res) => {
           // Marcar como procesado
           processedMessages.add(message.id);
 
-          // Ignorar mensajes de estado (read, delivered, etc.)
-          if (message.type === 'system' || !message.from) {
+          // Ignorar mensajes de sistema
+          if (message.type === 'system') {
+            console.log('⏭️ Skipping system message');
+            continue;
+          }
+
+          if (!message.from) {
+            console.log('⏭️ Skipping message without from field');
             continue;
           }
 
@@ -86,7 +114,8 @@ router.post('/whatsapp', async (req, res) => {
           console.log(`📨 Processing incoming message from ${message.from}`);
 
           try {
-            await whatsappService.handleIncomingMessage(message);
+            const result = await whatsappService.handleIncomingMessage(message);
+            console.log('📤 Auto-reply result:', JSON.stringify(result));
           } catch (error) {
             console.error('❌ Error handling incoming message:', error);
           }
