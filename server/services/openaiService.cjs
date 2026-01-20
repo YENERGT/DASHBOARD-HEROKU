@@ -30,10 +30,13 @@ class OpenAIService {
 No respondas nada más que no sea el JSON.
 No incluyas \`\`\` ni ningún otro texto antes o después del JSON.`;
 
-    // Instrucciones específicas para Cargo Express
-    const guiaInstructions = transport === 'cargo_express'
-      ? 'IMPORTANTE: Para Cargo Express, el número de guía es el que aparece como "GUIA MADRE" o "Guía Madre". Ignora cualquier otro número de guía secundario.'
-      : '';
+    // Instrucciones específicas por transporte
+    let guiaInstructions = '';
+    if (transport === 'cargo_express') {
+      guiaInstructions = 'IMPORTANTE: Para Cargo Express, el número de guía es el que aparece como "GUIA MADRE" o "Guía Madre". Ignora cualquier otro número de guía secundario.';
+    } else if (transport === 'forza') {
+      guiaInstructions = 'IMPORTANTE: Para Forza, el número de guía es el que comienza con "FD" seguido de números (ejemplo: FD123456). Usa ese código completo incluyendo las letras FD.';
+    }
 
     const userPrompt = `A continuación tienes un texto con varias guías de envío de ${transportName}.
 
