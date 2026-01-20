@@ -30,17 +30,29 @@ class OpenAIService {
 No respondas nada más que no sea el JSON.
 No incluyas \`\`\` ni ningún otro texto antes o después del JSON.`;
 
+    // Instrucciones específicas para Cargo Express
+    const guiaInstructions = transport === 'cargo_express'
+      ? 'IMPORTANTE: Para Cargo Express, el número de guía es el que aparece como "GUIA MADRE" o "Guía Madre". Ignora cualquier otro número de guía secundario.'
+      : '';
+
     const userPrompt = `A continuación tienes un texto con varias guías de envío de ${transportName}.
-Cada guía puede contener: No. Guía, Destinatario/Nombre, Teléfono, Dirección y posiblemente número de pedido/orden.
 
-En observacion coloca únicamente: GUIA DE ${transportName.toUpperCase()}.
+EXTRAE ÚNICAMENTE la información del DESTINATARIO de cada guía:
+- Número de Guía
+- Nombre del Destinatario
+- Teléfono del Destinatario
+- Dirección del Destinatario
+- Número de Pedido/Orden (si existe)
 
-Además a los números de teléfono agrégales el 502 al principio si no lo tienen, y quita cualquier carácter que no sea número para que WhatsApp detecte el número correctamente.
+${guiaInstructions}
 
-Si no encuentras número de pedido, usa "Sin identificar".
+REGLAS:
+1. Solo extrae datos del DESTINATARIO, ignora información del remitente.
+2. A los números de teléfono agrégales el 502 al principio si no lo tienen.
+3. Quita cualquier carácter que no sea número del teléfono.
+4. Si no encuentras número de pedido, usa "Sin identificar".
 
-Quiero que analices el texto y me devuelvas un array JSON,
-donde cada elemento sea un objeto con la estructura:
+Devuelve un array JSON con esta estructura:
 
 [
   {
@@ -48,12 +60,11 @@ donde cada elemento sea un objeto con la estructura:
     "destinatario": "...",
     "telefono": "...",
     "direccion": "...",
-    "numeroPedido": "...",
-    "observacion": "GUIA DE ${transportName.toUpperCase()}"
+    "numeroPedido": "..."
   }
 ]
 
-Este es el texto extraído por OCR:
+Texto extraído por OCR:
 ${ocrText}`;
 
     try {
@@ -107,7 +118,6 @@ ${ocrText}`;
         telefono: this.cleanPhoneNumber(guide.telefono || ''),
         direccion: guide.direccion || '',
         numeroPedido: guide.numeroPedido || 'Sin identificar',
-        observacion: guide.observacion || `GUIA DE ${transportName.toUpperCase()}`,
         selected: true,
         status: 'pending'
       }));

@@ -12,28 +12,32 @@ class WhatsAppService {
     this.accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
     this.apiUrl = `https://graph.facebook.com/v18.0/${this.phoneNumberId}/messages`;
 
-    // Plantillas por transporte (nombres registrados en Meta)
-    this.templates = {
-      guatex: {
-        name: 'guia_guatex',
-        language: 'es'
-      },
-      forza: {
-        name: 'guia_forza',
-        language: 'es'
-      },
-      cargo_express: {
-        name: 'guia_cargo_express',
-        language: 'es'
-      }
+    // Una sola plantilla para todos los transportes
+    // Template ID: 540231642510842 (Meta Business)
+    this.templateName = 'guias_revisa_app';
+    this.templateLanguage = 'es';
+
+    // URLs de rastreo por transporte
+    this.trackingUrls = {
+      guatex: 'https://servicios.guatex.gt/Guatex/Tracking/',
+      forza: 'https://rastreo.forzadelivery.com/',
+      cargo_express: 'https://cargoexpreso.com/tracking/'
+    };
+
+    // Nombres de transporte para mostrar
+    this.transportNames = {
+      guatex: 'GUATEX',
+      forza: 'FORZA',
+      cargo_express: 'CARGO EXPRESS'
     };
   }
 
   /**
    * Envía un mensaje de plantilla a un número de WhatsApp
-   * Estructura de plantilla:
+   * Plantilla: guias_revisa_app
    * - Header: {{1}} = nombre del cliente
-   * - Body: {{1}} = número de guía, {{2}} = dirección, {{3}} = número de pedido
+   * - Body: {{1}} = número de guía, {{2}} = dirección, {{3}} = número de pedido,
+   *         {{4}} = nombre transporte, {{5}} = URL de rastreo
    *
    * @param {string} phone - Número de teléfono (con código de país)
    * @param {string} transport - Tipo de transporte
@@ -45,10 +49,8 @@ class WhatsAppService {
       throw new Error('WhatsApp credentials not configured');
     }
 
-    const template = this.templates[transport];
-    if (!template) {
-      throw new Error(`Template not found for transport: ${transport}`);
-    }
+    const transportName = this.transportNames[transport] || transport.toUpperCase();
+    const trackingUrl = this.trackingUrls[transport] || '';
 
     // Construir el cuerpo del mensaje con la plantilla
     const messageBody = {
@@ -57,9 +59,9 @@ class WhatsAppService {
       to: phone,
       type: 'template',
       template: {
-        name: template.name,
+        name: this.templateName,
         language: {
-          code: template.language
+          code: this.templateLanguage
         },
         components: [
           // Header con nombre del cliente
@@ -72,7 +74,7 @@ class WhatsAppService {
               }
             ]
           },
-          // Body con datos de la guía
+          // Body con 5 parámetros
           {
             type: 'body',
             parameters: [
@@ -87,6 +89,14 @@ class WhatsAppService {
               {
                 type: 'text',
                 text: data.numeroPedido || 'Sin identificar'
+              },
+              {
+                type: 'text',
+                text: transportName
+              },
+              {
+                type: 'text',
+                text: trackingUrl
               }
             ]
           }
@@ -190,11 +200,18 @@ class WhatsAppService {
   }
 
   /**
-   * Obtiene las plantillas disponibles
-   * @returns {object} - Plantillas configuradas
+   * Obtiene la información de la plantilla y transportes
+   * @returns {object} - Información de plantilla y transportes
    */
   getTemplates() {
-    return this.templates;
+    return {
+      templateName: this.templateName,
+      transports: Object.entries(this.transportNames).map(([key, name]) => ({
+        id: key,
+        name: name,
+        trackingUrl: this.trackingUrls[key]
+      }))
+    };
   }
 }
 

@@ -155,20 +155,15 @@ router.post('/send-whatsapp', isAuthenticated, hasRole('admin', 'ventas'), async
 
 /**
  * GET /api/guides/templates
- * Obtiene las plantillas de WhatsApp disponibles
+ * Obtiene la información de la plantilla y transportes disponibles
  */
 router.get('/templates', isAuthenticated, (req, res) => {
-  const templates = whatsappService.getTemplates();
+  const templateInfo = whatsappService.getTemplates();
 
   res.json({
     success: true,
-    templates: Object.entries(templates).map(([key, value]) => ({
-      id: key,
-      name: value.name,
-      displayName: key === 'guatex' ? 'Guatex' :
-                   key === 'forza' ? 'Forza' :
-                   key === 'cargo_express' ? 'Cargo Express' : key
-    }))
+    templateName: templateInfo.templateName,
+    transports: templateInfo.transports
   });
 });
 
