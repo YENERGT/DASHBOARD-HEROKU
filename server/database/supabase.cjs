@@ -229,5 +229,61 @@ module.exports = {
     }
 
     return data;
+  },
+
+  /**
+   * Subir imagen a Supabase Storage
+   * @param {string} base64Image - Imagen en formato base64 (con o sin prefijo data:image/...)
+   * @param {string} fileName - Nombre del archivo (sin extensión)
+   * @returns {Promise<string>} - URL pública de la imagen
+   */
+  async uploadGuideImage(base64Image, fileName) {
+    try {
+      // Extraer el tipo de imagen y los datos
+      let imageData = base64Image;
+      let mimeType = 'image/jpeg';
+      let extension = 'jpg';
+
+      if (base64Image.startsWith('data:')) {
+        const matches = base64Image.match(/^data:([^;]+);base64,(.+)$/);
+        if (matches) {
+          mimeType = matches[1];
+          imageData = matches[2];
+          extension = mimeType.split('/')[1] || 'jpg';
+          if (extension === 'jpeg') extension = 'jpg';
+        }
+      }
+
+      // Convertir base64 a Buffer
+      const buffer = Buffer.from(imageData, 'base64');
+
+      // Generar nombre único
+      const uniqueFileName = `${fileName}_${Date.now()}.${extension}`;
+
+      // Subir a Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('guias-imagenes')
+        .upload(uniqueFileName, buffer, {
+          contentType: mimeType,
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Error uploading image to Supabase:', error);
+        throw error;
+      }
+
+      // Obtener URL pública
+      const { data: urlData } = supabase.storage
+        .from('guias-imagenes')
+        .getPublicUrl(uniqueFileName);
+
+      console.log(`✅ Image uploaded to Supabase: ${urlData.publicUrl}`);
+      return urlData.publicUrl;
+
+    } catch (error) {
+      console.error('Error in uploadGuideImage:', error);
+      throw error;
+    }
   }
 };

@@ -432,7 +432,7 @@ const GuidesHistory = () => {
 
                 {/* Ver Imagen */}
                 <div className="lg:w-24">
-                  {guide.imageUrl && guide.imageUrl.startsWith('data:') ? (
+                  {guide.imageUrl && (guide.imageUrl.startsWith('http') || guide.imageUrl.startsWith('data:image/')) ? (
                     <button
                       onClick={() => setSelectedImage(guide.imageUrl)}
                       className="w-full lg:w-auto px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"

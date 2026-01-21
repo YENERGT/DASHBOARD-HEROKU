@@ -144,7 +144,7 @@ const ShippingGuides = () => {
         {
           guides,
           transport,
-          imageUrl: imageBase64?.substring(0, 100) + '...' // Solo guardamos referencia
+          imageBase64 // Enviar imagen completa para subir a Supabase
         },
         { withCredentials: true }
       );

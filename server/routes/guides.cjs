@@ -10,6 +10,7 @@ const openaiService = require('../services/openaiService.cjs');
 const whatsappService = require('../services/whatsappService.cjs');
 const guidesSheetService = require('../services/guidesSheetService.cjs');
 const { isAuthenticated, hasRole } = require('../auth/middleware.cjs');
+const { uploadGuideImage } = require('../database/supabase.cjs');
 
 /**
  * POST /api/guides/process-image
@@ -84,7 +85,7 @@ router.post('/process-image', isAuthenticated, hasRole('admin', 'ventas'), async
  */
 router.post('/send-whatsapp', isAuthenticated, hasRole('admin', 'ventas'), async (req, res) => {
   try {
-    const { guides, transport, imageUrl } = req.body;
+    const { guides, transport, imageBase64 } = req.body;
 
     if (!guides || !Array.isArray(guides) || guides.length === 0) {
       return res.status(400).json({
@@ -124,10 +125,22 @@ router.post('/send-whatsapp', isAuthenticated, hasRole('admin', 'ventas'), async
     const failed = results.filter(r => !r.success && !r.skipped).length;
     const skipped = results.filter(r => r.skipped).length;
 
-    // Guardar en Google Sheets
+    // Subir imagen a Supabase Storage y obtener URL
+    let imageUrl = '';
+    if (imageBase64 && imageBase64.startsWith('data:image/')) {
+      try {
+        const fileName = `guia_${transport}_${Date.now()}`;
+        imageUrl = await uploadGuideImage(imageBase64, fileName);
+        console.log('✅ Image uploaded to Supabase:', imageUrl);
+      } catch (uploadError) {
+        console.error('⚠️ Error uploading image to Supabase (non-critical):', uploadError);
+      }
+    }
+
+    // Guardar en Google Sheets con la URL de la imagen
     try {
       await guidesSheetService.ensureSheetExists();
-      await guidesSheetService.saveGuides(imageUrl || '', transport, updatedGuides.filter(g => g.selected));
+      await guidesSheetService.saveGuides(imageUrl, transport, updatedGuides.filter(g => g.selected));
       console.log('✅ Guides saved to Google Sheets');
     } catch (sheetError) {
       console.error('⚠️ Error saving to Google Sheets (non-critical):', sheetError);
