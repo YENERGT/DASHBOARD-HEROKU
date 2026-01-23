@@ -39,14 +39,15 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
       section: 'VENTAS',
       items: [
         { path: '/guias-envio', label: 'Guías de Envío', icon: TruckIcon },
-        { path: '/historial-guias', label: 'Historial de Guías', icon: HistoryIcon },
         { path: '/pagos', label: 'Pagos', icon: PaymentIcon },
-        { path: '/historial-pagos', label: 'Historial de Pagos', icon: PaymentHistoryIcon },
       ]
     }] : []),
+    // Sección de Administración (solo admin)
     ...(isAdmin ? [{
       section: 'ADMINISTRACIÓN',
       items: [
+        { path: '/historial-guias', label: 'Historial de Guías', icon: HistoryIcon },
+        { path: '/historial-pagos', label: 'Historial de Pagos', icon: PaymentHistoryIcon },
         { path: '/usuarios', label: 'Usuarios', icon: UsersIcon },
       ]
     }] : [])
