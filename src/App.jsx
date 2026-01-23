@@ -9,6 +9,8 @@ import Login from './pages/Login';
 import UsersManagement from './pages/UsersManagement';
 import ShippingGuides from './pages/ShippingGuides';
 import GuidesHistory from './pages/GuidesHistory';
+import Payments from './pages/Payments';
+import PaymentsHistory from './pages/PaymentsHistory';
 
 // Componente para proteger rutas
 function ProtectedRoute({ children }) {
@@ -85,6 +87,20 @@ function AppRoutes() {
         <ProtectedRoute>
           <Layout>
             <GuidesHistory />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/pagos" element={
+        <ProtectedRoute>
+          <Layout>
+            <Payments />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/historial-pagos" element={
+        <ProtectedRoute>
+          <Layout>
+            <PaymentsHistory />
           </Layout>
         </ProtectedRoute>
       } />
