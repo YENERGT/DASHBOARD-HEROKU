@@ -32,17 +32,21 @@ No incluyas \`\`\` ni ningún otro texto antes o después del JSON.`;
 
   const userPrompt = `A continuación tienes el texto extraído de un comprobante de pago.
 
+IMPORTANTE: Solo necesito extraer el TOTAL del comprobante, NO los items individuales.
+
 EXTRAE la siguiente información:
-- Nombre de la empresa que emite el pago o recibe el pago
-- Fecha del pago (en formato YYYY-MM-DD si es posible identificarla)
-- Monto del pago (solo el número, sin símbolo de moneda)
-- Producto o servicio por el cual se realizó el pago (descripción breve)
+- Nombre de la empresa que emite o recibe el pago (busca en el encabezado del documento)
+- Fecha del pago (en formato YYYY-MM-DD)
+- MONTO TOTAL del comprobante (busca palabras como "TOTAL", "Total a Pagar", "Gran Total", "Monto Total", etc.)
+- Descripción general del pago (puede ser "Compra de productos", "Pago de servicios", o una descripción breve)
 
 REGLAS:
-1. Si no puedes identificar algún campo, usa "Sin identificar" para texto o 0 para números.
-2. El monto debe ser un número decimal (sin comas de miles, usar punto para decimales).
-3. Si hay múltiples pagos en el comprobante, extrae cada uno como un objeto separado.
-4. La fecha debe estar en formato YYYY-MM-DD si es posible identificar día, mes y año.
+1. SOLO extrae el TOTAL GENERAL, NO los subtotales ni los items individuales.
+2. Si hay varios totales, usa el monto más grande que represente el total final.
+3. Si no puedes identificar algún campo, usa "Sin identificar" para texto o 0 para números.
+4. El monto debe ser un número decimal (sin comas de miles, usar punto para decimales).
+5. La fecha debe estar en formato YYYY-MM-DD si es posible identificar día, mes y año.
+6. Solo devuelve UN objeto en el array (el pago total del comprobante).
 
 Devuelve un array JSON con esta estructura:
 

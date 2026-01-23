@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
 const API_URL = '/api';
 
@@ -12,9 +11,6 @@ const PaymentsHistory = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
   const [selectedImage, setSelectedImage] = useState(null);
-
-  // Colores para gráficas
-  const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
   // Cargar datos
   const fetchData = async () => {
@@ -73,15 +69,6 @@ const PaymentsHistory = () => {
     }
     setSelectedDate(newDate);
   };
-
-  // Datos para la gráfica de pie
-  const pieData = useMemo(() => {
-    if (!data?.current?.montoByEmpresa) return [];
-    return Object.entries(data.current.montoByEmpresa).map(([name, value]) => ({
-      name,
-      value
-    }));
-  }, [data]);
 
   // Modal de imagen
   const ImageModal = ({ imageUrl, onClose }) => (
@@ -257,119 +244,6 @@ const PaymentsHistory = () => {
               : '0.00'}
           </div>
           <div className="text-sm text-slate-400">por transacción</div>
-        </div>
-      </div>
-
-      {/* Gráficas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Gráfica de línea - Timeline */}
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
-          <h3 className="text-lg font-semibold text-white mb-4">Pagos en el tiempo</h3>
-          {data?.current?.timeline?.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={data.current.timeline}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="label" stroke="#9ca3af" fontSize={12} />
-                <YAxis stroke="#9ca3af" fontSize={12} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                  labelStyle={{ color: '#f1f5f9' }}
-                />
-                <Line type="monotone" dataKey="pagos" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e' }} name="Pagos" />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[250px] flex items-center justify-center text-slate-500">
-              No hay datos para mostrar
-            </div>
-          )}
-        </div>
-
-        {/* Gráfica de barras - Monto por tiempo */}
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
-          <h3 className="text-lg font-semibold text-white mb-4">Monto en el tiempo</h3>
-          {data?.current?.timeline?.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={data.current.timeline}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="label" stroke="#9ca3af" fontSize={12} />
-                <YAxis stroke="#9ca3af" fontSize={12} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                  labelStyle={{ color: '#f1f5f9' }}
-                  formatter={(value) => [`Q${value.toLocaleString('es-GT', { minimumFractionDigits: 2 })}`, 'Monto']}
-                />
-                <Bar dataKey="monto" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Monto" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[250px] flex items-center justify-center text-slate-500">
-              No hay datos para mostrar
-            </div>
-          )}
-        </div>
-
-        {/* Gráfica de pie - Por empresa */}
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
-          <h3 className="text-lg font-semibold text-white mb-4">Distribución por empresa</h3>
-          {pieData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  labelLine={{ stroke: '#6b7280' }}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                  formatter={(value) => [`Q${value.toLocaleString('es-GT', { minimumFractionDigits: 2 })}`, 'Monto']}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[250px] flex items-center justify-center text-slate-500">
-              No hay datos para mostrar
-            </div>
-          )}
-        </div>
-
-        {/* Lista de empresas */}
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
-          <h3 className="text-lg font-semibold text-white mb-4">Pagos por empresa</h3>
-          <div className="space-y-3 max-h-[250px] overflow-y-auto">
-            {Object.entries(data?.current?.montoByEmpresa || {}).map(([empresa, monto], index) => (
-              <div key={empresa} className="flex items-center justify-between p-2 bg-slate-700/50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                  />
-                  <span className="text-white">{empresa}</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-green-400 font-semibold">
-                    Q{monto.toLocaleString('es-GT', { minimumFractionDigits: 2 })}
-                  </div>
-                  <div className="text-xs text-slate-500">
-                    {data?.current?.byEmpresa?.[empresa] || 0} pagos
-                  </div>
-                </div>
-              </div>
-            ))}
-            {Object.keys(data?.current?.montoByEmpresa || {}).length === 0 && (
-              <div className="text-center text-slate-500 py-4">
-                No hay pagos registrados
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
