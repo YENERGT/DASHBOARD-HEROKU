@@ -185,15 +185,24 @@ class PaymentsSheetService {
         return [];
       }
 
+      // Función para parsear números de forma segura (maneja comas, símbolos de moneda, etc.)
+      const parseNumber = (value) => {
+        if (value === null || value === undefined || value === '') return 0;
+        // Convertir a string y remover todo excepto números, punto decimal y signo negativo
+        const cleaned = String(value).replace(/[^0-9.-]/g, '');
+        const parsed = parseFloat(cleaned);
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
       // Convertir filas a objetos (omitiendo header)
       const payments = rows.slice(1).map((row, index) => ({
         id: index + 1,
         empresa: row[0] || '',
         fecha: row[1] || '',
-        monto: parseFloat(row[2]) || 0,
+        monto: parseNumber(row[2]),
         producto: row[3] || '',
         monedaOriginal: row[4] || 'GTQ',
-        montoOriginal: parseFloat(row[5]) || 0,
+        montoOriginal: parseNumber(row[5]),
         imageUrl: row[6] || '',
         fechaRegistro: row[7] || '',
         usuario: row[8] || ''
