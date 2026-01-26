@@ -40,7 +40,7 @@ class GoogleSheetsService {
    * Obtiene datos del Google Sheet
    * Hoja: REGISTRO (donde están los datos de FEL)
    */
-  async getSheetData(range = 'REGISTRO!A2:P') {
+  async getSheetData(range = 'REGISTRO!A2:R') {
     try {
       if (!this.initialized) {
         await this.initialize();
@@ -199,7 +199,8 @@ class GoogleSheetsService {
           direccion: direccion,
           telefono: row[13] || '',
           canalVenta: row[14] || 'Sin especificar',
-          descuento: parseFloat(row[15]) || 0
+          descuento: parseFloat(row[15]) || 0,
+          vendedor: row[17] || ''
         };
       } catch (error) {
         console.error(`Error parsing row ${index}:`, error);

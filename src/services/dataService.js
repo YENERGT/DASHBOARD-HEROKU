@@ -482,5 +482,156 @@ class DataService {
   }
 }
 
+/**
+   * Obtiene ventas filtradas por vendedor
+   */
+  async getSalesByVendor(vendorName, periodType = 'month', date = new Date()) {
+    await this.loadData();
+
+    const currentPeriod = getCurrentPeriod(date, periodType);
+    const previousPeriod = getPreviousPeriod(date, periodType);
+
+    // Filtrar por vendedor (comparación case-insensitive)
+    const vendorInvoices = this.invoices.filter(inv =>
+      inv.vendedor && inv.vendedor.toLowerCase() === vendorName.toLowerCase()
+    );
+
+    const allCurrentData = filterByDateRange(
+      vendorInvoices,
+      currentPeriod.start,
+      currentPeriod.end
+    ).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+    const allPreviousData = filterByDateRange(
+      vendorInvoices,
+      previousPeriod.start,
+      previousPeriod.end
+    ).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+    // Solo facturas pagadas para métricas
+    const currentPaidData = allCurrentData.filter(inv => inv.estado === 'paid');
+    const previousPaidData = allPreviousData.filter(inv => inv.estado === 'paid');
+
+    const currentMetrics = calculateMetrics(currentPaidData);
+    const previousMetrics = calculateMetrics(previousPaidData);
+
+    return {
+      current: {
+        ...currentMetrics,
+        data: allCurrentData,
+        period: currentPeriod
+      },
+      previous: {
+        ...previousMetrics,
+        data: allPreviousData,
+        period: previousPeriod
+      },
+      comparison: {
+        total: calculateComparison(currentMetrics.total, previousMetrics.total),
+        count: calculateComparison(currentMetrics.count, previousMetrics.count),
+        average: calculateComparison(currentMetrics.average, previousMetrics.average),
+        totalIVA: calculateComparison(currentMetrics.totalIVA, previousMetrics.totalIVA)
+      }
+    };
+  }
+
+  /**
+   * Obtiene resumen de todos los vendedores
+   */
+  async getAllVendorsSummary(periodType = 'month', date = new Date()) {
+    await this.loadData();
+
+    const currentPeriod = getCurrentPeriod(date, periodType);
+
+    const currentData = filterByDateRange(
+      this.invoices,
+      currentPeriod.start,
+      currentPeriod.end
+    );
+
+    // Agrupar por vendedor
+    const vendorMap = new Map();
+
+    currentData.forEach(inv => {
+      const vendedor = inv.vendedor || 'Sin asignar';
+      if (!vendorMap.has(vendedor)) {
+        vendorMap.set(vendedor, {
+          vendedor,
+          total: 0,
+          count: 0,
+          paid: 0,
+          cancelled: 0
+        });
+      }
+
+      const stats = vendorMap.get(vendedor);
+      if (inv.estado === 'paid') {
+        stats.total += inv.totalGeneral;
+        stats.paid += 1;
+      } else {
+        stats.cancelled += 1;
+      }
+      stats.count += 1;
+    });
+
+    // Convertir a array y calcular promedios
+    const vendorStats = Array.from(vendorMap.values()).map(v => ({
+      ...v,
+      average: v.paid > 0 ? v.total / v.paid : 0
+    }));
+
+    // Ordenar por total de ventas (descendente)
+    vendorStats.sort((a, b) => b.total - a.total);
+
+    return {
+      vendors: vendorStats,
+      period: currentPeriod,
+      totals: {
+        totalSales: vendorStats.reduce((sum, v) => sum + v.total, 0),
+        totalInvoices: vendorStats.reduce((sum, v) => sum + v.count, 0),
+        totalPaid: vendorStats.reduce((sum, v) => sum + v.paid, 0),
+        totalCancelled: vendorStats.reduce((sum, v) => sum + v.cancelled, 0),
+        activeVendors: vendorStats.filter(v => v.total > 0).length
+      }
+    };
+  }
+
+  /**
+   * Obtiene lista única de vendedores
+   */
+  async getVendorsList() {
+    await this.loadData();
+
+    const vendors = new Set();
+    this.invoices.forEach(inv => {
+      if (inv.vendedor && inv.vendedor.trim() !== '') {
+        vendors.add(inv.vendedor);
+      }
+    });
+
+    return Array.from(vendors).sort();
+  }
+
+  /**
+   * Obtiene top productos de un vendedor específico
+   */
+  async getVendorTopProducts(vendorName, periodType = 'month', date = new Date(), limit = 5) {
+    await this.loadData();
+
+    const currentPeriod = getCurrentPeriod(date, periodType);
+
+    const vendorInvoices = filterByDateRange(
+      this.invoices.filter(inv =>
+        inv.vendedor &&
+        inv.vendedor.toLowerCase() === vendorName.toLowerCase() &&
+        inv.estado === 'paid'
+      ),
+      currentPeriod.start,
+      currentPeriod.end
+    );
+
+    return getTopProducts(vendorInvoices, limit);
+  }
+
 // Exportar instancia única del servicio
 export default new DataService();

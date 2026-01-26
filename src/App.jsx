@@ -11,10 +11,12 @@ import ShippingGuides from './pages/ShippingGuides';
 import GuidesHistory from './pages/GuidesHistory';
 import Payments from './pages/Payments';
 import PaymentsHistory from './pages/PaymentsHistory';
+import MisVentas from './pages/MisVentas';
+import VentasVendedores from './pages/VentasVendedores';
 
 // Componente para proteger rutas
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+function ProtectedRoute({ children, adminOnly = false }) {
+  const { isAuthenticated, loading, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -31,7 +33,39 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
+  // Redirigir si la ruta es solo para admin y el usuario no es admin
+  if (adminOnly && !isAdmin) {
+    return <Navigate to="/mis-ventas" replace />;
+  }
+
   return children;
+}
+
+// Componente para redirigir según el rol
+function RoleBasedRedirect() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-400">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si es vendedor, ir a mis-ventas; si es admin, mostrar Home
+  if (user?.role === 'ventas') {
+    return <Navigate to="/mis-ventas" replace />;
+  }
+
+  return (
+    <Layout>
+      <Home />
+    </Layout>
+  );
 }
 
 function AppRoutes() {
@@ -40,37 +74,35 @@ function AppRoutes() {
       {/* Ruta pública */}
       <Route path="/login" element={<Login />} />
 
-      {/* Rutas protegidas */}
+      {/* Ruta principal - redirige según rol */}
       <Route path="/" element={
         <ProtectedRoute>
-          <Layout>
-            <Home />
-          </Layout>
+          <RoleBasedRedirect />
         </ProtectedRoute>
       } />
       <Route path="/dashboard-fel" element={
-        <ProtectedRoute>
+        <ProtectedRoute adminOnly>
           <Layout>
             <FELDashboard />
           </Layout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard-gastos" element={
-        <ProtectedRoute>
+        <ProtectedRoute adminOnly>
           <Layout>
             <ExpensesDashboard />
           </Layout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard-productos" element={
-        <ProtectedRoute>
+        <ProtectedRoute adminOnly>
           <Layout>
             <ProductsDashboard />
           </Layout>
         </ProtectedRoute>
       } />
       <Route path="/usuarios" element={
-        <ProtectedRoute>
+        <ProtectedRoute adminOnly>
           <Layout>
             <UsersManagement />
           </Layout>
@@ -84,7 +116,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       <Route path="/historial-guias" element={
-        <ProtectedRoute>
+        <ProtectedRoute adminOnly>
           <Layout>
             <GuidesHistory />
           </Layout>
@@ -98,9 +130,23 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       <Route path="/historial-pagos" element={
-        <ProtectedRoute>
+        <ProtectedRoute adminOnly>
           <Layout>
             <PaymentsHistory />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/mis-ventas" element={
+        <ProtectedRoute>
+          <Layout>
+            <MisVentas />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/ventas-vendedores" element={
+        <ProtectedRoute adminOnly>
+          <Layout>
+            <VentasVendedores />
           </Layout>
         </ProtectedRoute>
       } />
