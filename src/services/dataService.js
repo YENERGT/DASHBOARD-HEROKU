@@ -480,9 +480,8 @@ class DataService {
       }
     };
   }
-}
 
-/**
+  /**
    * Obtiene ventas filtradas por vendedor
    */
   async getSalesByVendor(vendorName, periodType = 'month', date = new Date()) {
@@ -632,6 +631,7 @@ class DataService {
 
     return getTopProducts(vendorInvoices, limit);
   }
+}
 
 // Exportar instancia única del servicio
 export default new DataService();
