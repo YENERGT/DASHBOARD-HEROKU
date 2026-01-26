@@ -179,7 +179,7 @@ const VentasVendedores = () => {
             Resumen y análisis del rendimiento de cada vendedor
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto">
           <PeriodSelector selectedPeriod={periodType} onPeriodChange={setPeriodType} />
           <DateSelector
             selectedDate={selectedDate}
