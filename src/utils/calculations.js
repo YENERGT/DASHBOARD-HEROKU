@@ -104,10 +104,12 @@ export const filterByDateRange = (data, startDate, endDate) => {
  * Formatea moneda a Quetzales
  */
 export const formatCurrency = (value) => {
+  // Manejar valores inválidos (NaN, undefined, null)
+  const safeValue = (value === null || value === undefined || isNaN(value)) ? 0 : value;
   return new Intl.NumberFormat('es-GT', {
     style: 'currency',
     currency: 'GTQ'
-  }).format(value);
+  }).format(safeValue);
 };
 
 /**

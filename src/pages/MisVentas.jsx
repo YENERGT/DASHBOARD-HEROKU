@@ -16,6 +16,8 @@ const MisVentas = () => {
   const [periodType, setPeriodType] = useState('month');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(25);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -66,6 +68,9 @@ const MisVentas = () => {
     };
 
     loadData();
+    // Resetear paginación y búsqueda al cambiar período/fecha
+    setVisibleCount(25);
+    setSearchTerm('');
   }, [user, periodType, selectedDate]);
 
   if (loading || !metrics) {
@@ -127,6 +132,24 @@ const MisVentas = () => {
 
   const paidCount = metrics.current.data.filter(inv => inv.estado === 'paid').length;
   const periodLabel = periodType === 'day' ? 'ayer' : periodType === 'month' ? 'mes anterior' : 'año anterior';
+
+  // Filtrar datos por búsqueda
+  const filteredData = metrics.current.data.filter(inv => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase().trim();
+    const pedido = (inv.pedido || '').toLowerCase();
+    const nit = (inv.nit || '').toLowerCase();
+    const nombreNit = (inv.nombreNit || '').toLowerCase();
+    return pedido.includes(term) || nit.includes(term) || nombreNit.includes(term);
+  });
+
+  // Datos visibles con paginación
+  const visibleData = filteredData.slice(0, visibleCount);
+  const hasMore = filteredData.length > visibleCount;
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 25);
+  };
 
   return (
     <div className="space-y-8">
@@ -248,18 +271,70 @@ const MisVentas = () => {
 
       {/* Tabla de Ventas */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Historial de Ventas</h2>
-          <span className="text-sm text-gray-400">
-            {metrics.current.data.length} registros
-          </span>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-xl font-bold text-white">Historial de Ventas</h2>
+            <span className="text-sm text-gray-400">
+              {searchTerm ? `${filteredData.length} de ${metrics.current.data.length}` : metrics.current.data.length} registros
+            </span>
+          </div>
+          {/* Buscador */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Buscar por pedido, NIT o cliente..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setVisibleCount(25); // Resetear paginación al buscar
+              }}
+              className="w-full md:w-80 px-4 py-2 pl-10 bg-dark-card border border-dark-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
-        {metrics.current.data.length > 0 ? (
-          <Table columns={tableColumns} data={metrics.current.data} />
+
+        {filteredData.length > 0 ? (
+          <>
+            <Table columns={tableColumns} data={visibleData} />
+            {/* Botón Ver Más */}
+            {hasMore && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={handleLoadMore}
+                  className="px-6 py-3 bg-primary-500/20 text-primary-400 rounded-lg hover:bg-primary-500/30 transition-colors font-medium"
+                >
+                  Ver más ({filteredData.length - visibleCount} restantes)
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="bg-dark-card border border-dark-border rounded-lg p-12 text-center">
-            <div className="text-6xl mb-4">📋</div>
-            <p className="text-gray-400">No tienes ventas registradas en este período</p>
+            <div className="text-6xl mb-4">{searchTerm ? '🔍' : '📋'}</div>
+            <p className="text-gray-400">
+              {searchTerm
+                ? `No se encontraron ventas con "${searchTerm}"`
+                : 'No tienes ventas registradas en este período'
+              }
+            </p>
           </div>
         )}
       </div>
