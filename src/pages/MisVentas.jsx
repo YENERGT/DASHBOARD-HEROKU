@@ -141,8 +141,8 @@ const MisVentas = () => {
         <div className="flex items-center gap-4">
           <PeriodSelector value={periodType} onChange={setPeriodType} />
           <DateSelector
-            value={selectedDate}
-            onChange={setSelectedDate}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
             periodType={periodType}
           />
         </div>
