@@ -180,7 +180,7 @@ const VentasVendedores = () => {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <PeriodSelector value={periodType} onChange={setPeriodType} />
+          <PeriodSelector selectedPeriod={periodType} onPeriodChange={setPeriodType} />
           <DateSelector
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
