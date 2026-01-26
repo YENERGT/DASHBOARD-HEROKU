@@ -161,7 +161,7 @@ const MisVentas = () => {
             Bienvenido, <span className="text-blue-400 font-medium">{user?.displayName}</span>
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto">
           <PeriodSelector selectedPeriod={periodType} onPeriodChange={setPeriodType} />
           <DateSelector
             selectedDate={selectedDate}
@@ -257,7 +257,6 @@ const MisVentas = () => {
                       <p className="text-xs text-gray-500">{product.cantidad} vendidos</p>
                     </div>
                   </div>
-                  <span className="text-green-400 font-semibold">{formatCurrency(product.total)}</span>
                 </div>
               ))}
             </div>
