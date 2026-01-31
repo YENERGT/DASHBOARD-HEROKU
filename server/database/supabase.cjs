@@ -285,5 +285,84 @@ module.exports = {
       console.error('Error in uploadGuideImage:', error);
       throw error;
     }
+  },
+
+  /**
+   * Subir PDF de comprobante de devolución a Supabase Storage
+   * @param {string} base64Pdf - PDF en formato base64 (con o sin prefijo data:application/pdf...)
+   * @param {string} pedido - Número de pedido para nombrar el archivo
+   * @returns {Promise<string>} - URL pública del PDF
+   */
+  async uploadRefundReceipt(base64Pdf, pedido) {
+    try {
+      // Extraer los datos del base64
+      let pdfData = base64Pdf;
+      let mimeType = 'application/pdf';
+
+      if (base64Pdf.startsWith('data:')) {
+        const matches = base64Pdf.match(/^data:([^;]+);base64,(.+)$/);
+        if (matches) {
+          mimeType = matches[1];
+          pdfData = matches[2];
+        }
+      }
+
+      // Convertir base64 a Buffer
+      const buffer = Buffer.from(pdfData, 'base64');
+
+      // Limpiar número de pedido para nombre de archivo
+      const cleanPedido = pedido.replace(/[^a-zA-Z0-9]/g, '');
+      const uniqueFileName = `devolucion_${cleanPedido}_${Date.now()}.pdf`;
+
+      // Subir a Supabase Storage (bucket: devoluciones-comprobantes)
+      const { data, error } = await supabase.storage
+        .from('devoluciones-comprobantes')
+        .upload(uniqueFileName, buffer, {
+          contentType: mimeType,
+          upsert: false
+        });
+
+      if (error) {
+        // Si el bucket no existe, intentar crearlo o usar uno existente
+        if (error.message.includes('Bucket not found')) {
+          console.warn('⚠️ Bucket "devoluciones-comprobantes" no existe, usando "guias-imagenes"');
+
+          // Intentar con el bucket existente
+          const { data: altData, error: altError } = await supabase.storage
+            .from('guias-imagenes')
+            .upload(`devoluciones/${uniqueFileName}`, buffer, {
+              contentType: mimeType,
+              upsert: false
+            });
+
+          if (altError) {
+            console.error('Error uploading PDF to Supabase:', altError);
+            throw altError;
+          }
+
+          const { data: altUrlData } = supabase.storage
+            .from('guias-imagenes')
+            .getPublicUrl(`devoluciones/${uniqueFileName}`);
+
+          console.log(`✅ Refund receipt uploaded to Supabase: ${altUrlData.publicUrl}`);
+          return altUrlData.publicUrl;
+        }
+
+        console.error('Error uploading PDF to Supabase:', error);
+        throw error;
+      }
+
+      // Obtener URL pública
+      const { data: urlData } = supabase.storage
+        .from('devoluciones-comprobantes')
+        .getPublicUrl(uniqueFileName);
+
+      console.log(`✅ Refund receipt uploaded to Supabase: ${urlData.publicUrl}`);
+      return urlData.publicUrl;
+
+    } catch (error) {
+      console.error('Error in uploadRefundReceipt:', error);
+      throw error;
+    }
   }
 };

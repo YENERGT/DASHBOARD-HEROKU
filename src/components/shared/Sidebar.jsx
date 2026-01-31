@@ -51,6 +51,7 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
       section: 'ADMINISTRACIÓN',
       items: [
         { path: '/ventas-vendedores', label: 'Ventas por Vendedor', icon: SalesIcon },
+        { path: '/devoluciones', label: 'Devoluciones', icon: RefundIcon },
         { path: '/historial-guias', label: 'Historial de Guías', icon: HistoryIcon },
         { path: '/historial-pagos', label: 'Historial de Pagos', icon: PaymentHistoryIcon },
         { path: '/usuarios', label: 'Usuarios', icon: UsersIcon },
@@ -314,6 +315,12 @@ const PaymentHistoryIcon = ({ className }) => (
 const SalesIcon = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+  </svg>
+);
+
+const RefundIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
   </svg>
 );
 

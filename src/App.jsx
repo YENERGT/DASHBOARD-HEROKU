@@ -13,6 +13,7 @@ import Payments from './pages/Payments';
 import PaymentsHistory from './pages/PaymentsHistory';
 import MisVentas from './pages/MisVentas';
 import VentasVendedores from './pages/VentasVendedores';
+import RefundsDashboard from './pages/RefundsDashboard';
 
 // Componente para proteger rutas
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -147,6 +148,13 @@ function AppRoutes() {
         <ProtectedRoute adminOnly>
           <Layout>
             <VentasVendedores />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/devoluciones" element={
+        <ProtectedRoute adminOnly>
+          <Layout>
+            <RefundsDashboard />
           </Layout>
         </ProtectedRoute>
       } />

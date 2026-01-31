@@ -293,6 +293,166 @@ class WhatsAppService {
     // Enviar respuesta automática
     return await this.sendTextMessage(from, autoReplyMessage);
   }
+
+  /**
+   * Envía notificación de devolución completada con PDF adjunto
+   * Plantilla: devolucion_completada (ID: 3253339951510174)
+   * - Header: DOCUMENT (PDF del comprobante)
+   * - Body: {{1}} = nombre cliente, {{2}} = número pedido, {{3}} = monto, {{4}} = método
+   *
+   * @param {string} phone - Número de teléfono (con código de país)
+   * @param {object} data - Datos de la devolución
+   * @param {string} data.nombreCliente - Nombre del cliente
+   * @param {string} data.pedido - Número de pedido
+   * @param {number} data.monto - Monto devuelto
+   * @param {string} data.metodo - Método de devolución (efectivo, deposito, web)
+   * @param {string} data.pdfUrl - URL del PDF del comprobante
+   * @returns {Promise<object>} - Resultado del envío
+   */
+  async sendRefundNotification(phone, data) {
+    if (!this.phoneNumberId || !this.accessToken) {
+      throw new Error('WhatsApp credentials not configured');
+    }
+
+    // Mapear método a texto legible
+    const metodosTexto = {
+      'efectivo': 'Efectivo',
+      'deposito': 'Depósito bancario',
+      'web': 'Reembolso web',
+      'tarjeta': 'Reembolso a tarjeta'
+    };
+    const metodoTexto = metodosTexto[data.metodo?.toLowerCase()] || data.metodo || 'Devolución';
+
+    // Formatear monto
+    const montoFormateado = parseFloat(data.monto || 0).toFixed(2);
+
+    // Construir componentes del mensaje
+    const components = [
+      // Header con documento PDF
+      {
+        type: 'header',
+        parameters: [
+          {
+            type: 'document',
+            document: {
+              link: data.pdfUrl,
+              filename: `Comprobante_Devolucion_${data.pedido?.replace('#', '') || 'pedido'}.pdf`
+            }
+          }
+        ]
+      },
+      // Body con 4 parámetros
+      {
+        type: 'body',
+        parameters: [
+          {
+            type: 'text',
+            text: data.nombreCliente || 'Cliente'
+          },
+          {
+            type: 'text',
+            text: data.pedido?.replace('#', '') || 'Sin identificar'
+          },
+          {
+            type: 'text',
+            text: montoFormateado
+          },
+          {
+            type: 'text',
+            text: metodoTexto
+          }
+        ]
+      }
+    ];
+
+    const messageBody = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: phone,
+      type: 'template',
+      template: {
+        name: 'devolucion_completada',
+        language: {
+          code: 'es'
+        },
+        components: components
+      }
+    };
+
+    try {
+      console.log(`📤 Sending refund notification to ${phone}...`);
+      console.log('📎 PDF URL:', data.pdfUrl);
+
+      const response = await fetch(this.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.accessToken}`
+        },
+        body: JSON.stringify(messageBody)
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        console.error('❌ WhatsApp API error:', responseData);
+        return {
+          success: false,
+          phone,
+          error: responseData.error?.message || 'Unknown error',
+          errorCode: responseData.error?.code,
+          errorDetails: responseData.error
+        };
+      }
+
+      console.log(`✅ Refund notification sent successfully to ${phone}`);
+      return {
+        success: true,
+        phone,
+        messageId: responseData.messages?.[0]?.id,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      console.error(`❌ Error sending refund notification to ${phone}:`, error);
+      return {
+        success: false,
+        phone,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Envía notificación de devolución sin PDF (para métodos automáticos)
+   * Solo envía mensaje de texto simple notificando la devolución
+   *
+   * @param {string} phone - Número de teléfono
+   * @param {object} data - Datos de la devolución
+   * @returns {Promise<object>} - Resultado del envío
+   */
+  async sendRefundNotificationSimple(phone, data) {
+    const metodosTexto = {
+      'efectivo': 'efectivo',
+      'deposito': 'depósito bancario',
+      'web': 'reembolso web',
+      'tarjeta': 'reembolso a tarjeta'
+    };
+    const metodoTexto = metodosTexto[data.metodo?.toLowerCase()] || data.metodo || 'devolución';
+    const montoFormateado = parseFloat(data.monto || 0).toFixed(2);
+
+    const message = `Hola ${data.nombreCliente || 'Cliente'},
+
+Tu devolución ha sido procesada exitosamente.
+
+📦 Pedido: #${data.pedido?.replace('#', '') || 'Sin identificar'}
+💰 Monto devuelto: Q${montoFormateado}
+💳 Método: ${metodoTexto}
+
+Gracias por tu preferencia.`;
+
+    return await this.sendTextMessage(phone, message);
+  }
 }
 
 module.exports = new WhatsAppService();
