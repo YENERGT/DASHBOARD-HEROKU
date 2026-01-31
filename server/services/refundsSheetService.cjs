@@ -211,7 +211,7 @@ class RefundsSheetService {
         completadoPor: updateData.completadoPor || 'admin'
       };
 
-      // Actualizar columna W (ESTADO_DEVOLUCION) y AA (DATOS_DEVOLUCION)
+      // Actualizar columna W (ESTADO_DEVOLUCION), AA (DATOS_DEVOLUCION) y AB (PDF_COMPROBANTE_URL)
       const requests = [
         {
           range: `REGISTRO!W${rowIndex}`,
@@ -220,6 +220,10 @@ class RefundsSheetService {
         {
           range: `REGISTRO!AA${rowIndex}`,
           values: [[JSON.stringify(updatedData)]]
+        },
+        {
+          range: `REGISTRO!AB${rowIndex}`,
+          values: [[updateData.pdfUrl || '']]
         }
       ];
 
