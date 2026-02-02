@@ -128,6 +128,10 @@ router.post('/:rowIndex/complete', isAdmin, async (req, res) => {
 
     // Para devoluciones de depósito bancario: Llamar al POS para completar flujo en Shopify
     let posResult = null;
+    console.log('🔍 DEBUG - metodoDevolucion:', refund.metodoDevolucion);
+    console.log('🔍 DEBUG - datosDevolucion:', JSON.stringify(refund.datosDevolucion, null, 2));
+    console.log('🔍 DEBUG - returnId:', refund.datosDevolucion?.returnId);
+
     if (refund.metodoDevolucion === 'deposito' && refund.datosDevolucion?.returnId) {
       const posAppUrl = process.env.POS_APP_URL;
       const internalApiKey = process.env.INTERNAL_API_KEY;
