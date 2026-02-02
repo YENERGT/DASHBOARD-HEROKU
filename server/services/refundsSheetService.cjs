@@ -146,9 +146,11 @@ class RefundsSheetService {
           pedido: row[0] || '',
           productos: row[1] || '',
           totalGeneral: parseFloat(row[2]) || 0,
+          nit: row[4] || 'CF',        // Columna E - NIT del cliente
           nombreNit: row[5] || 'Consumidor Final',
           fecha: row[9] || '',
           estadoPago: row[10] || '',
+          pdfURL: row[11] || '',       // Columna L - URL de factura FEL
           telefono: row[13] || '',
           canalVenta: row[14] || '',
           direccion: direccion,

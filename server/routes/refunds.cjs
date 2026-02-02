@@ -83,6 +83,7 @@ router.get('/:rowIndex', isAdmin, async (req, res) => {
 /**
  * POST /api/refunds/:rowIndex/complete
  * Marca una devolución como completada
+ * - Para depósito bancario: Llama al POS para completar flujo en Shopify + anular FEL
  * - Sube el PDF del comprobante a Supabase
  * - Actualiza el estado en Google Sheets
  * - Envía WhatsApp al cliente
@@ -122,6 +123,54 @@ router.post('/:rowIndex/complete', isAdmin, async (req, res) => {
       } catch (uploadError) {
         console.error('⚠️ Error uploading PDF (continuing):', uploadError);
         // Continuar sin PDF si falla la subida
+      }
+    }
+
+    // Para devoluciones de depósito bancario: Llamar al POS para completar flujo en Shopify
+    let posResult = null;
+    if (refund.metodoDevolucion === 'deposito' && refund.datosDevolucion?.returnId) {
+      const posAppUrl = process.env.POS_APP_URL;
+      const internalApiKey = process.env.INTERNAL_API_KEY;
+      const shopDomain = process.env.SHOPIFY_SHOP_DOMAIN;
+
+      if (posAppUrl && internalApiKey && shopDomain) {
+        console.log('🏦 Llamando al POS para completar flujo en Shopify...');
+        try {
+          const posResponse = await fetch(`${posAppUrl}/api/complete-deposit-return`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              apiKey: internalApiKey,
+              shop: shopDomain,
+              rowIndex: parseInt(rowIndex),
+              orderGid: refund.orderGid,
+              orderNumber: refund.pedido,
+              returnId: refund.datosDevolucion.returnId,
+              totalRefundAmount: refund.montoDevolucion,
+              selectedItems: refund.itemsDevolucion || [],
+              // Datos para anulación de factura FEL
+              pdfURL: refund.pdfURL || null,
+              nit: refund.nit || null,
+              fecha: refund.fecha || null
+            })
+          });
+
+          posResult = await posResponse.json();
+
+          if (posResult.success) {
+            console.log('✅ Flujo Shopify completado:', posResult.data);
+          } else {
+            console.error('⚠️ Error en flujo Shopify:', posResult.error);
+            // No fallar el proceso completo, solo registrar el error
+          }
+        } catch (posError) {
+          console.error('⚠️ Error llamando al POS:', posError.message);
+          posResult = { success: false, error: posError.message };
+        }
+      } else {
+        console.warn('⚠️ Variables de entorno para POS no configuradas (POS_APP_URL, INTERNAL_API_KEY, SHOPIFY_SHOP_DOMAIN)');
       }
     }
 
@@ -175,7 +224,8 @@ router.post('/:rowIndex/complete', isAdmin, async (req, res) => {
         pedido: refund.pedido,
         estadoDevolucion: 'COMPLETADO',
         pdfUrl,
-        whatsapp: whatsappResult
+        whatsapp: whatsappResult,
+        shopify: posResult
       }
     });
 
