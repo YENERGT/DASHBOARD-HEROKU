@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 
 const API_URL = '/api';
 
 const RefundsDashboard = () => {
+  const { isAdmin } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refunds, setRefunds] = useState({ enProceso: [], completadas: [] });
@@ -460,63 +462,72 @@ const RefundsDashboard = () => {
                   {/* Acciones */}
                   <div className="mt-6 pt-4 border-t border-slate-700">
                     {refund.estadoDevolucion === 'EN_PROCESO' ? (
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Upload de PDF */}
-                        <div className="flex-1">
-                          <input
-                            type="file"
-                            accept="application/pdf"
-                            onChange={handlePdfUpload}
-                            ref={fileInputRef}
-                            className="hidden"
-                          />
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white flex items-center justify-center gap-2 transition-colors"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                            {pdfPreview ? pdfPreview : 'Subir comprobante PDF'}
-                          </button>
-                          {uploadedPdf && (
-                            <div className="mt-2 flex items-center gap-2 text-green-400 text-sm">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                              PDF cargado correctamente
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Botón completar */}
-                        <button
-                          onClick={() => openConfirmModal(refund)}
-                          disabled={processingId === refund.rowIndex}
-                          className={`px-6 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${
-                            processingId === refund.rowIndex
-                              ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                              : 'bg-green-600 hover:bg-green-700 text-white'
-                          }`}
-                        >
-                          {processingId === refund.rowIndex ? (
-                            <>
-                              <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Procesando...
-                            </>
-                          ) : (
-                            <>
+                      isAdmin ? (
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          {/* Upload de PDF */}
+                          <div className="flex-1">
+                            <input
+                              type="file"
+                              accept="application/pdf"
+                              onChange={handlePdfUpload}
+                              ref={fileInputRef}
+                              className="hidden"
+                            />
+                            <button
+                              onClick={() => fileInputRef.current?.click()}
+                              className="w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white flex items-center justify-center gap-2 transition-colors"
+                            >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                               </svg>
-                              Marcar como Completado
-                            </>
-                          )}
-                        </button>
-                      </div>
+                              {pdfPreview ? pdfPreview : 'Subir comprobante PDF'}
+                            </button>
+                            {uploadedPdf && (
+                              <div className="mt-2 flex items-center gap-2 text-green-400 text-sm">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                PDF cargado correctamente
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Botón completar */}
+                          <button
+                            onClick={() => openConfirmModal(refund)}
+                            disabled={processingId === refund.rowIndex}
+                            className={`px-6 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${
+                              processingId === refund.rowIndex
+                                ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                            }`}
+                          >
+                            {processingId === refund.rowIndex ? (
+                              <>
+                                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Procesando...
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Marcar como Completado
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-slate-400 text-sm">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Solo los administradores pueden completar devoluciones
+                        </div>
+                      )
                     ) : (
                       <div className="flex justify-end">
                         <button

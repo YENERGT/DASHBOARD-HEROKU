@@ -7,15 +7,15 @@ const router = express.Router();
 
 const refundsSheetService = require('../services/refundsSheetService.cjs');
 const whatsappService = require('../services/whatsappService.cjs');
-const { isAuthenticated, isAdmin } = require('../auth/middleware.cjs');
+const { isAuthenticated, isAdmin, hasRole } = require('../auth/middleware.cjs');
 const { uploadRefundReceipt } = require('../database/supabase.cjs');
 
 /**
  * GET /api/refunds
  * Obtiene todas las devoluciones
- * Requiere rol: admin
+ * Requiere rol: admin o ventas
  */
-router.get('/', isAdmin, async (req, res) => {
+router.get('/', hasRole('admin', 'ventas'), async (req, res) => {
   try {
     console.log('📦 Fetching refunds...');
     const refunds = await refundsSheetService.getRefunds();
@@ -52,9 +52,9 @@ router.get('/', isAdmin, async (req, res) => {
 /**
  * GET /api/refunds/:rowIndex
  * Obtiene una devolución específica por índice de fila
- * Requiere rol: admin
+ * Requiere rol: admin o ventas
  */
-router.get('/:rowIndex', isAdmin, async (req, res) => {
+router.get('/:rowIndex', hasRole('admin', 'ventas'), async (req, res) => {
   try {
     const { rowIndex } = req.params;
     const refund = await refundsSheetService.getRefundByRowIndex(parseInt(rowIndex));
@@ -245,9 +245,9 @@ router.post('/:rowIndex/complete', isAdmin, async (req, res) => {
 /**
  * POST /api/refunds/:rowIndex/send-whatsapp
  * Reenvía el WhatsApp de notificación de una devolución completada
- * Requiere rol: admin
+ * Requiere rol: admin o ventas
  */
-router.post('/:rowIndex/send-whatsapp', isAdmin, async (req, res) => {
+router.post('/:rowIndex/send-whatsapp', hasRole('admin', 'ventas'), async (req, res) => {
   try {
     const { rowIndex } = req.params;
 

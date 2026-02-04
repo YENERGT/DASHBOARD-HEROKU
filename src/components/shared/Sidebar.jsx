@@ -44,6 +44,8 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
         ...(isVentas ? [{ path: '/mis-ventas', label: 'Mis Ventas', icon: SalesIcon }] : []),
         { path: '/guias-envio', label: 'Guías de Envío', icon: TruckIcon },
         { path: '/pagos', label: 'Pagos', icon: PaymentIcon },
+        // Devoluciones: visible para ventas (solo lectura) y admin
+        ...(isVentas ? [{ path: '/devoluciones', label: 'Devoluciones', icon: RefundIcon }] : []),
       ]
     }] : []),
     // Sección de Administración (solo admin)

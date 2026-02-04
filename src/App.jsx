@@ -153,7 +153,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       <Route path="/devoluciones" element={
-        <ProtectedRoute adminOnly>
+        <ProtectedRoute>
           <Layout>
             <RefundsDashboard />
           </Layout>
