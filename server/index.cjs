@@ -14,6 +14,7 @@ const guidesRoutes = require('./routes/guides.cjs');
 const webhookRoutes = require('./routes/webhook.cjs');
 const paymentsRoutes = require('./routes/payments.cjs');
 const refundsRoutes = require('./routes/refunds.cjs');
+const inventoryRoutes = require('./routes/inventory.cjs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -425,6 +426,11 @@ app.use('/api/payments', paymentsRoutes);
 // RUTAS DE DEVOLUCIONES
 // ========================================
 app.use('/api/refunds', refundsRoutes);
+
+// ========================================
+// RUTAS DE INVENTARIO (Productos agotados)
+// ========================================
+app.use('/api/inventory', inventoryRoutes);
 
 // ========================================
 // WEBHOOK DE WHATSAPP (respuestas automáticas)

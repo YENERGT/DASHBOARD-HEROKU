@@ -14,6 +14,7 @@ import PaymentsHistory from './pages/PaymentsHistory';
 import MisVentas from './pages/MisVentas';
 import VentasVendedores from './pages/VentasVendedores';
 import RefundsDashboard from './pages/RefundsDashboard';
+import OutOfStockDashboard from './pages/OutOfStockDashboard';
 
 // Componente para proteger rutas
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -155,6 +156,13 @@ function AppRoutes() {
         <ProtectedRoute adminOnly>
           <Layout>
             <RefundsDashboard />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/productos-agotados" element={
+        <ProtectedRoute adminOnly>
+          <Layout>
+            <OutOfStockDashboard />
           </Layout>
         </ProtectedRoute>
       } />

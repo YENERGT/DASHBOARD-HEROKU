@@ -12,6 +12,22 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 /**
  * SQL para crear las tablas necesarias (ejecutar en Supabase SQL Editor)
  *
+ * -- Tabla de productos solicitados a proveedor
+ * CREATE TABLE IF NOT EXISTS requested_products (
+ *   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+ *   variant_id BIGINT NOT NULL UNIQUE,
+ *   product_id BIGINT NOT NULL,
+ *   product_title TEXT NOT NULL,
+ *   variant_title TEXT,
+ *   sku TEXT,
+ *   image_url TEXT,
+ *   requested_by TEXT NOT NULL,
+ *   requested_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+ *   notes TEXT
+ * );
+ *
+ * CREATE INDEX IF NOT EXISTS idx_requested_products_variant ON requested_products(variant_id);
+ *
  * -- Tabla de usuarios
  * CREATE TABLE IF NOT EXISTS users (
  *   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -364,5 +380,94 @@ module.exports = {
       console.error('Error in uploadRefundReceipt:', error);
       throw error;
     }
+  },
+
+  // ========================================
+  // PRODUCTOS SOLICITADOS A PROVEEDOR
+  // ========================================
+
+  /**
+   * Obtener todos los productos marcados como solicitados
+   */
+  async getRequestedProducts() {
+    const { data, error } = await supabase
+      .from('requested_products')
+      .select('*')
+      .order('requested_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching requested products:', error);
+      throw error;
+    }
+
+    return data || [];
+  },
+
+  /**
+   * Marcar un producto/variante como solicitado a proveedor
+   */
+  async markProductAsRequested(productData) {
+    const { data, error } = await supabase
+      .from('requested_products')
+      .upsert({
+        variant_id: productData.variantId,
+        product_id: productData.productId,
+        product_title: productData.productTitle,
+        variant_title: productData.variantTitle,
+        sku: productData.sku,
+        image_url: productData.image,
+        requested_by: productData.requestedBy,
+        requested_at: new Date().toISOString(),
+        notes: productData.notes || null
+      }, {
+        onConflict: 'variant_id'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error marking product as requested:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  /**
+   * Eliminar productos que ya tienen stock (limpiar de la lista)
+   */
+  async removeRequestedProducts(variantIds) {
+    if (!variantIds || variantIds.length === 0) return [];
+
+    const { data, error } = await supabase
+      .from('requested_products')
+      .delete()
+      .in('variant_id', variantIds)
+      .select();
+
+    if (error) {
+      console.error('Error removing requested products:', error);
+      throw error;
+    }
+
+    return data || [];
+  },
+
+  /**
+   * Verificar si una variante está marcada como solicitada
+   */
+  async isProductRequested(variantId) {
+    const { data, error } = await supabase
+      .from('requested_products')
+      .select('id')
+      .eq('variant_id', variantId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking if product is requested:', error);
+      return false;
+    }
+
+    return !!data;
   }
 };

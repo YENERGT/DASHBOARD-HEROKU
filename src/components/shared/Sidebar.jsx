@@ -52,6 +52,7 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
       items: [
         { path: '/ventas-vendedores', label: 'Ventas por Vendedor', icon: SalesIcon },
         { path: '/devoluciones', label: 'Devoluciones', icon: RefundIcon },
+        { path: '/productos-agotados', label: 'Productos Agotados', icon: OutOfStockIcon },
         { path: '/historial-guias', label: 'Historial de Guías', icon: HistoryIcon },
         { path: '/historial-pagos', label: 'Historial de Pagos', icon: PaymentHistoryIcon },
         { path: '/usuarios', label: 'Usuarios', icon: UsersIcon },
@@ -321,6 +322,13 @@ const SalesIcon = ({ className }) => (
 const RefundIcon = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+  </svg>
+);
+
+const OutOfStockIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01" />
   </svg>
 );
 
