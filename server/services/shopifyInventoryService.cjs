@@ -1,6 +1,7 @@
 /**
  * Servicio para consultar inventario de Shopify
  * Obtiene productos y variantes con stock = 0
+ * Soporta paginación para tiendas con +2000 productos
  */
 
 const SHOPIFY_SHOP_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
@@ -9,6 +10,7 @@ const API_VERSION = '2024-01';
 
 /**
  * Hace una llamada a la API de Shopify
+ * Retorna tanto el body como los headers (para paginación)
  */
 async function shopifyFetch(endpoint, options = {}) {
   if (!SHOPIFY_SHOP_DOMAIN || !SHOPIFY_ACCESS_TOKEN) {
@@ -31,29 +33,57 @@ async function shopifyFetch(endpoint, options = {}) {
     throw new Error(`Shopify API error: ${response.status} - ${error}`);
   }
 
-  return response.json();
+  // Obtener Link header para paginación
+  const linkHeader = response.headers.get('Link');
+  const body = await response.json();
+
+  return { body, linkHeader };
+}
+
+/**
+ * Parsea el Link header de Shopify para obtener el cursor de la siguiente página
+ */
+function parseNextPageUrl(linkHeader) {
+  if (!linkHeader) return null;
+
+  const links = linkHeader.split(',');
+  for (const link of links) {
+    const match = link.match(/<([^>]+)>;\s*rel="next"/);
+    if (match) {
+      const url = new URL(match[1]);
+      return url.searchParams.get('page_info');
+    }
+  }
+  return null;
 }
 
 /**
  * Obtiene todos los productos con sus variantes e inventario
- * Filtra por stock = 0
+ * Filtra por stock <= 0
+ * Usa paginación cursor-based para obtener TODOS los productos
  */
 async function getOutOfStockProducts() {
   const outOfStock = [];
   let pageInfo = null;
   let hasNextPage = true;
+  let pageCount = 0;
 
-  console.log('📦 Fetching out of stock products from Shopify...');
+  console.log('📦 Fetching ALL out of stock products from Shopify (with pagination)...');
 
   while (hasNextPage) {
-    // Construir URL con paginación
-    let endpoint = '/products.json?limit=250&fields=id,title,images,variants,status';
+    pageCount++;
 
+    // Construir URL con paginación
+    let endpoint;
     if (pageInfo) {
       endpoint = `/products.json?limit=250&page_info=${pageInfo}`;
+    } else {
+      endpoint = '/products.json?limit=250&fields=id,title,images,variants,status';
     }
 
-    const data = await shopifyFetch(endpoint);
+    console.log(`   📄 Fetching page ${pageCount}...`);
+
+    const { body: data, linkHeader } = await shopifyFetch(endpoint);
 
     // Procesar productos
     for (const product of data.products) {
@@ -71,6 +101,7 @@ async function getOutOfStockProducts() {
             sku: variant.sku || null,
             inventoryQuantity: variant.inventory_quantity,
             image: product.images?.[0]?.src || null,
+            price: variant.price || null,
             // Nombre combinado para mostrar
             displayName: variant.title !== 'Default Title'
               ? `${product.title} - ${variant.title}`
@@ -80,12 +111,22 @@ async function getOutOfStockProducts() {
       }
     }
 
-    // Verificar si hay más páginas (Link header)
-    // Shopify usa cursor-based pagination
-    hasNextPage = false; // Por ahora solo primera página, extender si hay muchos productos
+    // Verificar si hay más páginas
+    const nextPage = parseNextPageUrl(linkHeader);
+    if (nextPage) {
+      pageInfo = nextPage;
+      hasNextPage = true;
+    } else {
+      hasNextPage = false;
+    }
+
+    // Pequeña pausa para no saturar la API (rate limiting)
+    if (hasNextPage) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
   }
 
-  console.log(`✅ Found ${outOfStock.length} out of stock items`);
+  console.log(`✅ Fetched ${pageCount} pages, found ${outOfStock.length} out of stock items`);
   return outOfStock;
 }
 
@@ -95,7 +136,7 @@ async function getOutOfStockProducts() {
  */
 async function checkIfRestocked(variantId) {
   try {
-    const data = await shopifyFetch(`/variants/${variantId}.json`);
+    const { body: data } = await shopifyFetch(`/variants/${variantId}.json`);
     return data.variant.inventory_quantity > 0;
   } catch (error) {
     console.error(`Error checking variant ${variantId}:`, error);
@@ -109,10 +150,27 @@ async function checkIfRestocked(variantId) {
 async function checkRestockedVariants(variantIds) {
   const restocked = [];
 
-  for (const variantId of variantIds) {
-    const hasStock = await checkIfRestocked(variantId);
-    if (hasStock) {
-      restocked.push(variantId);
+  // Procesar en lotes para no saturar la API
+  const batchSize = 10;
+  for (let i = 0; i < variantIds.length; i += batchSize) {
+    const batch = variantIds.slice(i, i + batchSize);
+
+    const results = await Promise.all(
+      batch.map(async (variantId) => {
+        const hasStock = await checkIfRestocked(variantId);
+        return { variantId, hasStock };
+      })
+    );
+
+    for (const result of results) {
+      if (result.hasStock) {
+        restocked.push(result.variantId);
+      }
+    }
+
+    // Pequeña pausa entre lotes
+    if (i + batchSize < variantIds.length) {
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
   }
 

@@ -107,6 +107,49 @@ const OutOfStockDashboard = () => {
     }
   };
 
+  // Cancelar solicitud (regresar a pendientes)
+  const cancelRequest = async (product) => {
+    setProcessingIds(prev => new Set([...prev, product.variantId]));
+
+    try {
+      const response = await axios.delete(
+        `${API_URL}/inventory/cancel-requested/${product.variantId}`,
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        // Mover el producto de requested a pending
+        setProducts(prev => ({
+          requested: prev.requested.filter(p => p.variantId !== product.variantId),
+          pending: [
+            {
+              ...product,
+              isRequested: false,
+              requestedInfo: null
+            },
+            ...prev.pending
+          ]
+        }));
+        setCounts(prev => ({
+          ...prev,
+          pending: prev.pending + 1,
+          requested: prev.requested - 1
+        }));
+      } else {
+        alert('Error: ' + (response.data.error || 'No se pudo cancelar la solicitud'));
+      }
+    } catch (err) {
+      console.error('Error canceling request:', err);
+      alert('Error: ' + (err.response?.data?.error || 'Error al cancelar solicitud'));
+    } finally {
+      setProcessingIds(prev => {
+        const next = new Set(prev);
+        next.delete(product.variantId);
+        return next;
+      });
+    }
+  };
+
   // Formatear fecha
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -132,6 +175,7 @@ const OutOfStockDashboard = () => {
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
           <p className="text-slate-400">Cargando productos agotados...</p>
+          <p className="text-slate-500 text-sm mt-2">Esto puede tomar unos segundos si hay muchos productos</p>
         </div>
       </div>
     );
@@ -158,7 +202,7 @@ const OutOfStockDashboard = () => {
         <div>
           <h1 className="text-2xl font-bold text-white mb-2">Productos Agotados</h1>
           <p className="text-slate-400">
-            Productos y variantes sin stock en Shopify
+            {counts.total} productos/variantes sin stock en Shopify
           </p>
         </div>
         <button
@@ -214,10 +258,10 @@ const OutOfStockDashboard = () => {
           </button>
         </div>
 
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full sm:w-72">
           <input
             type="text"
-            placeholder="Buscar producto..."
+            placeholder="Buscar producto, SKU..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 pl-10 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
@@ -228,7 +272,7 @@ const OutOfStockDashboard = () => {
         </div>
       </div>
 
-      {/* Grid de productos */}
+      {/* Lista de productos */}
       {filteredProducts.length === 0 ? (
         <div className="bg-slate-800 rounded-xl p-8 text-center border border-slate-700">
           <svg className="w-16 h-16 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,88 +287,166 @@ const OutOfStockDashboard = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.variantId}
-              className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden hover:border-slate-600 transition-colors"
-            >
-              {/* Imagen */}
-              <div className="aspect-square bg-slate-900 relative">
-                {product.image ? (
-                  <img
-                    src={product.image}
-                    alt={product.displayName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <svg className="w-16 h-16 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+          {/* Header de la tabla */}
+          <div className="hidden md:grid md:grid-cols-12 gap-4 px-4 py-3 bg-slate-900 border-b border-slate-700 text-xs font-semibold text-slate-400 uppercase">
+            <div className="col-span-1">Imagen</div>
+            <div className="col-span-4">Producto</div>
+            <div className="col-span-2">SKU</div>
+            <div className="col-span-1">Stock</div>
+            <div className="col-span-2">{activeTab === 'requested' ? 'Solicitado' : 'Estado'}</div>
+            <div className="col-span-2 text-right">Acción</div>
+          </div>
+
+          {/* Lista de productos */}
+          <div className="divide-y divide-slate-700">
+            {filteredProducts.map((product) => (
+              <div
+                key={product.variantId}
+                className="grid grid-cols-1 md:grid-cols-12 gap-4 px-4 py-3 items-center hover:bg-slate-700/30 transition-colors"
+              >
+                {/* Imagen */}
+                <div className="col-span-1 flex md:block items-center gap-3">
+                  <div className="w-12 h-12 bg-slate-900 rounded-lg overflow-hidden flex-shrink-0">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.displayName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
-                )}
-                {/* Badge de stock */}
-                <div className="absolute top-2 right-2 px-2 py-1 bg-red-600 text-white text-xs font-semibold rounded-full">
-                  Stock: {product.inventoryQuantity}
+                  {/* Mobile: mostrar nombre junto a imagen */}
+                  <div className="md:hidden flex-1">
+                    <p className="text-white font-medium text-sm line-clamp-2">{product.displayName}</p>
+                    {product.sku && <p className="text-slate-500 text-xs">SKU: {product.sku}</p>}
+                  </div>
+                </div>
+
+                {/* Nombre del producto (desktop) */}
+                <div className="hidden md:block col-span-4">
+                  <p className="text-white font-medium text-sm line-clamp-2" title={product.displayName}>
+                    {product.displayName}
+                  </p>
+                  {product.variantTitle && (
+                    <p className="text-slate-500 text-xs mt-0.5">
+                      Variante: {product.variantTitle}
+                    </p>
+                  )}
+                </div>
+
+                {/* SKU (desktop) */}
+                <div className="hidden md:block col-span-2">
+                  <span className="text-slate-400 text-sm font-mono">
+                    {product.sku || '-'}
+                  </span>
+                </div>
+
+                {/* Stock */}
+                <div className="hidden md:block col-span-1">
+                  <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-semibold rounded-full">
+                    {product.inventoryQuantity}
+                  </span>
+                </div>
+
+                {/* Estado / Fecha solicitado */}
+                <div className="hidden md:block col-span-2">
+                  {product.isRequested ? (
+                    <div>
+                      <div className="flex items-center gap-1 text-blue-400 text-sm">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Solicitado
+                      </div>
+                      <p className="text-slate-500 text-xs mt-0.5">
+                        {formatDate(product.requestedInfo?.requested_at)}
+                      </p>
+                    </div>
+                  ) : (
+                    <span className="text-red-400 text-sm">Pendiente</span>
+                  )}
+                </div>
+
+                {/* Botón de acción */}
+                <div className="col-span-1 md:col-span-2 flex justify-end">
+                  {product.isRequested ? (
+                    <button
+                      onClick={() => cancelRequest(product)}
+                      disabled={processingIds.has(product.variantId)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${
+                        processingIds.has(product.variantId)
+                          ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                          : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                      }`}
+                    >
+                      {processingIds.has(product.variantId) ? (
+                        <>
+                          <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          <span className="hidden sm:inline">Cancelar</span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => markAsRequested(product)}
+                      disabled={processingIds.has(product.variantId)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-colors ${
+                        processingIds.has(product.variantId)
+                          ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
+                    >
+                      {processingIds.has(product.variantId) ? (
+                        <>
+                          <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                          </svg>
+                          <span className="hidden sm:inline">Solicitar</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Mobile: info adicional */}
+                <div className="md:hidden col-span-1 flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs font-semibold rounded-full">
+                      Stock: {product.inventoryQuantity}
+                    </span>
+                    {product.isRequested && (
+                      <span className="text-blue-400 text-xs">
+                        Solicitado {formatDate(product.requestedInfo?.requested_at)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              {/* Info */}
-              <div className="p-4">
-                <h3 className="text-white font-medium mb-1 line-clamp-2" title={product.displayName}>
-                  {product.displayName}
-                </h3>
-                {product.sku && (
-                  <p className="text-slate-500 text-sm mb-3">
-                    SKU: {product.sku}
-                  </p>
-                )}
-
-                {/* Estado y acción */}
-                {product.isRequested ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-blue-400 text-sm">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Solicitado
-                    </div>
-                    <span className="text-slate-500 text-xs">
-                      {formatDate(product.requestedInfo?.requested_at)}
-                    </span>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => markAsRequested(product)}
-                    disabled={processingIds.has(product.variantId)}
-                    className={`w-full px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${
-                      processingIds.has(product.variantId)
-                        ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                    }`}
-                  >
-                    {processingIds.has(product.variantId) ? (
-                      <>
-                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                        </svg>
-                        Marcar Solicitado
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 

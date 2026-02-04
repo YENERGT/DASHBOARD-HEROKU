@@ -192,4 +192,48 @@ router.get('/requested', isAdmin, async (req, res) => {
   }
 });
 
+/**
+ * DELETE /api/inventory/cancel-requested/:variantId
+ * Cancela la solicitud de un producto (lo regresa a pendientes)
+ * Requiere rol: admin
+ */
+router.delete('/cancel-requested/:variantId', isAdmin, async (req, res) => {
+  try {
+    const { variantId } = req.params;
+
+    if (!variantId) {
+      return res.status(400).json({
+        success: false,
+        error: 'variantId es requerido'
+      });
+    }
+
+    console.log(`🔄 Canceling request for variant ${variantId} by ${req.user?.email}...`);
+
+    const result = await removeRequestedProducts([parseInt(variantId)]);
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Producto no encontrado en la lista de solicitados'
+      });
+    }
+
+    console.log(`✅ Request canceled for variant ${variantId}`);
+
+    res.json({
+      success: true,
+      message: 'Solicitud cancelada, producto regresado a pendientes',
+      data: result[0]
+    });
+
+  } catch (error) {
+    console.error('❌ Error canceling request:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Error al cancelar solicitud'
+    });
+  }
+});
+
 module.exports = router;
