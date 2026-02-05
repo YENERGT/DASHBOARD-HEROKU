@@ -7,20 +7,23 @@ const Card = ({
   subtitle,
   className = ''
 }) => {
+  const numTrend = trend !== undefined && trend !== null ? Number(trend) : null;
+  const isValidTrend = numTrend !== null && !isNaN(numTrend);
+
   const getTrendColor = () => {
-    if (trend === undefined || trend === null) return 'text-[#6B7280]';
-    return trend >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]';
+    if (!isValidTrend) return 'text-[#6B7280]';
+    return numTrend >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]';
   };
 
   const getTrendIcon = () => {
-    if (trend === undefined || trend === null) return '';
-    return trend >= 0 ? '++' : '--';
+    if (!isValidTrend) return '';
+    return numTrend >= 0 ? '++' : '--';
   };
 
   const formatTrend = () => {
-    if (trend === undefined || trend === null) return '';
-    const sign = trend >= 0 ? '+' : '';
-    return `[${sign}${trend.toFixed(1)}%]`;
+    if (!isValidTrend) return '';
+    const sign = numTrend >= 0 ? '+' : '';
+    return `[${sign}${numTrend.toFixed(1)}%]`;
   };
 
   return (
@@ -45,7 +48,7 @@ const Card = ({
 
       {/* Comparación y tendencia */}
       <div className="space-y-1">
-        {trend !== undefined && trend !== null && (
+        {isValidTrend && (
           <div className={`flex items-center gap-2 text-xs font-semibold ${getTrendColor()}`}>
             <span>{formatTrend()}</span>
           </div>
