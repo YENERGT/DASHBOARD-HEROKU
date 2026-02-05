@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../components/shared/Card';
 import Table from '../components/shared/Table';
 import dataService from '../services/dataService';
@@ -44,48 +44,48 @@ const Home = () => {
   if (!metrics) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Cargando...</p>
+        <p className="text-[#6B7280] font-mono">$ cargando datos<span className="animate-pulse">_</span></p>
       </div>
     );
   }
 
-  const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+  const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'];
 
   const tableColumns = [
     {
-      header: 'Pedido',
+      header: 'pedido',
       accessor: 'pedido',
-      render: (value) => <span className="font-semibold text-primary-400">{value}</span>
+      render: (value) => <span className="font-semibold text-[#10B981]">#{value}</span>
     },
     {
-      header: 'Cliente',
+      header: 'cliente',
       accessor: 'nombreNit',
-      render: (value) => <span className="truncate max-w-xs block">{value}</span>
+      render: (value) => <span className="truncate max-w-xs block text-[#FAFAFA]">{value}</span>
     },
     {
-      header: 'Total',
+      header: 'total',
       accessor: 'totalGeneral',
-      render: (value) => <span className="font-semibold">{formatCurrency(value)}</span>
+      render: (value) => <span className="font-semibold text-white">{formatCurrency(value)}</span>
     },
     {
-      header: 'Estado',
+      header: 'estado',
       accessor: 'estado',
       render: (value) => (
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+        <span className={`px-2 py-1 text-xs font-mono ${
           value === 'paid'
-            ? 'bg-green-500/20 text-green-400'
-            : 'bg-red-500/20 text-red-400'
+            ? 'bg-[#10B981]/20 text-[#10B981]'
+            : 'bg-[#EF4444]/20 text-[#EF4444]'
         }`}>
-          {value === 'paid' ? '✅ Pagado' : '❌ Anulado'}
+          {value === 'paid' ? '[pagado]' : '[anulado]'}
         </span>
       )
     },
     {
-      header: 'Hora',
+      header: 'hora',
       accessor: 'fecha',
       render: (value) => {
         const date = new Date(value);
-        return date.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' });
+        return <span className="text-[#6B7280] font-mono">{date.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}</span>;
       }
     }
   ];
@@ -97,49 +97,53 @@ const Home = () => {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Resumen del Día</h1>
-        <p className="text-gray-400">
-          Vista general de las operaciones de hoy - {new Date().toLocaleDateString('es-GT')}
+        <h1 className="text-2xl font-bold text-white mb-1">
+          <span className="text-[#10B981]">&gt;</span> resumen_del_dia
+        </h1>
+        <p className="text-[#6B7280] text-sm">
+          // operaciones de hoy - {new Date().toLocaleDateString('es-GT')}
         </p>
       </div>
 
       {/* Métricas Principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
-          title="Ventas del Día"
+          title="ventas_del_dia"
           value={formatCurrency(metrics.current.total)}
-          icon="💰"
-          comparison={`vs ayer: ${formatCurrency(metrics.previous.total)}`}
+          icon="$"
+          comparison={`// vs ayer: ${formatCurrency(metrics.previous.total)}`}
           trend={metrics.comparison.total}
         />
         <Card
-          title="Facturas Emitidas"
+          title="facturas_emitidas"
           value={metrics.current.count}
-          icon="📋"
-          comparison={`vs ayer: ${metrics.previous.count} facturas`}
+          icon="#"
+          comparison={`// vs ayer: ${metrics.previous.count} facturas`}
           trend={metrics.comparison.count}
         />
         <Card
-          title="IVA Recaudado"
+          title="iva_recaudado"
           value={formatCurrency(metrics.current.totalIVA)}
-          icon="💳"
-          comparison={`vs ayer: ${formatCurrency(metrics.previous.totalIVA)}`}
+          icon="%"
+          comparison={`// vs ayer: ${formatCurrency(metrics.previous.totalIVA)}`}
           trend={metrics.comparison.totalIVA}
         />
         <Card
-          title="Ticket Promedio"
+          title="ticket_promedio"
           value={formatCurrency(metrics.current.average)}
-          icon="🎯"
-          comparison={`vs ayer: ${formatCurrency(metrics.previous.average)}`}
+          icon="~"
+          comparison={`// vs ayer: ${formatCurrency(metrics.previous.average)}`}
           trend={metrics.comparison.average}
         />
       </div>
 
       {/* Ventas por Canal y Estado de Facturas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Ventas por Canal */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white mb-4">Ventas por Canal</h2>
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> ventas_por_canal
+          </h2>
           {channelData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -159,64 +163,66 @@ const Home = () => {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
-                    color: '#e2e8f0'
+                    backgroundColor: '#111111',
+                    border: '1px solid #1F1F1F',
+                    borderRadius: '0',
+                    color: '#FAFAFA'
                   }}
                   formatter={(value) => formatCurrency(value)}
                 />
                 <Legend
-                  wrapperStyle={{ color: '#e2e8f0' }}
+                  wrapperStyle={{ color: '#FAFAFA' }}
                 />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-500 text-center py-8">No hay datos de canales</p>
+            <p className="text-[#4B5563] text-center py-8">// no hay datos de canales</p>
           )}
         </div>
 
         {/* Estado de Facturas */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white mb-4">Estado de Facturas</h2>
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> estado_facturas
+          </h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-[#10B981]/10 border border-[#10B981]/30">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center text-2xl">
-                  ✅
+                <div className="w-12 h-12 bg-[#10B981]/20 flex items-center justify-center text-[#10B981] font-bold text-xl">
+                  ++
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Facturas Pagadas</p>
+                  <p className="text-sm text-[#6B7280]">// facturas_pagadas</p>
                   <p className="text-2xl font-bold text-white">{paidCount}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-green-400 text-2xl font-bold">
-                  {metrics.current.count > 0 ? ((paidCount / metrics.current.count) * 100).toFixed(0) : 0}%
+                <p className="text-[#10B981] text-2xl font-bold font-mono">
+                  [{metrics.current.count > 0 ? ((paidCount / metrics.current.count) * 100).toFixed(0) : 0}%]
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-[#EF4444]/10 border border-[#EF4444]/30">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center text-2xl">
-                  ❌
+                <div className="w-12 h-12 bg-[#EF4444]/20 flex items-center justify-center text-[#EF4444] font-bold text-xl">
+                  --
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Facturas Anuladas</p>
+                  <p className="text-sm text-[#6B7280]">// facturas_anuladas</p>
                   <p className="text-2xl font-bold text-white">{cancelledCount}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-red-400 text-2xl font-bold">
-                  {metrics.current.count > 0 ? ((cancelledCount / metrics.current.count) * 100).toFixed(0) : 0}%
+                <p className="text-[#EF4444] text-2xl font-bold font-mono">
+                  [{metrics.current.count > 0 ? ((cancelledCount / metrics.current.count) * 100).toFixed(0) : 0}%]
                 </p>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-dark-border">
+            <div className="pt-4 border-t border-[#1F1F1F]">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Total Facturas</span>
+                <span className="text-[#6B7280]">// total_facturas</span>
                 <span className="text-xl font-bold text-white">{metrics.current.count}</span>
               </div>
             </div>
@@ -226,7 +232,9 @@ const Home = () => {
 
       {/* Últimas Transacciones */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-4">Últimas Transacciones</h2>
+        <h2 className="text-lg font-bold text-white mb-4">
+          <span className="text-[#10B981]">&gt;</span> ultimas_transacciones
+        </h2>
         <Table columns={tableColumns} data={recentTransactions} />
       </div>
     </div>

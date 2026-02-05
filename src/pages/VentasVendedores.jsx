@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../components/shared/Card';
 import Table from '../components/shared/Table';
 import PeriodSelector from '../components/shared/PeriodSelector';
@@ -57,10 +57,7 @@ const VentasVendedores = () => {
   if (loading || !summary) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Cargando resumen de vendedores...</p>
-        </div>
+        <p className="text-[#6B7280] font-mono">$ cargando vendedores<span className="animate-pulse">_</span></p>
       </div>
     );
   }
@@ -69,91 +66,91 @@ const VentasVendedores = () => {
     {
       header: '#',
       accessor: 'rank',
-      render: (_, row, index) => (
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-          index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
-          index === 1 ? 'bg-gray-400/20 text-gray-300' :
-          index === 2 ? 'bg-amber-600/20 text-amber-500' :
-          'bg-slate-600/20 text-slate-400'
+      render: (_, _row, index) => (
+        <span className={`w-8 h-8 flex items-center justify-center text-sm font-bold font-mono ${
+          index === 0 ? 'bg-[#F59E0B]/20 text-[#F59E0B]' :
+          index === 1 ? 'bg-[#6B7280]/20 text-[#6B7280]' :
+          index === 2 ? 'bg-[#F59E0B]/10 text-[#F59E0B]/70' :
+          'bg-[#1F1F1F] text-[#4B5563]'
         }`}>
-          {index + 1}
+          #{index + 1}
         </span>
       )
     },
     {
-      header: 'Vendedor',
+      header: 'vendedor',
       accessor: 'vendedor',
       render: (value) => (
         <button
           onClick={() => setSelectedVendor(value)}
-          className="text-blue-400 hover:text-blue-300 font-medium hover:underline text-left"
+          className="text-[#3B82F6] hover:text-[#3B82F6]/80 font-medium text-left"
         >
           {value}
         </button>
       )
     },
     {
-      header: 'Total Ventas',
+      header: 'total_ventas',
       accessor: 'total',
-      render: (value) => <span className="font-semibold text-green-400">{formatCurrency(value)}</span>
+      render: (value) => <span className="font-mono font-bold text-[#10B981]">{formatCurrency(value)}</span>
     },
     {
-      header: 'Facturas',
+      header: 'facturas',
       accessor: 'paid',
-      render: (value) => <span className="text-white">{value}</span>
+      render: (value) => <span className="text-white font-mono">{value}</span>
     },
     {
-      header: 'Anuladas',
+      header: 'anuladas',
       accessor: 'cancelled',
       render: (value) => (
-        <span className={value > 0 ? 'text-red-400' : 'text-gray-500'}>{value}</span>
+        <span className={`font-mono ${value > 0 ? 'text-[#EF4444]' : 'text-[#4B5563]'}`}>{value}</span>
       )
     },
     {
-      header: 'Promedio',
+      header: 'promedio',
       accessor: 'average',
-      render: (value) => <span className="text-gray-300">{formatCurrency(value)}</span>
+      render: (value) => <span className="text-[#6B7280] font-mono">{formatCurrency(value)}</span>
     }
   ];
 
   const detailColumns = [
     {
-      header: 'Fecha',
+      header: 'fecha',
       accessor: 'fecha',
       render: (value) => {
         const date = new Date(value);
         return (
-          <span className="text-gray-300">
+          <span className="text-[#FAFAFA] font-mono">
             {date.toLocaleDateString('es-GT', { day: '2-digit', month: 'short' })}
           </span>
         );
       }
     },
     {
-      header: 'Pedido',
+      header: 'pedido',
       accessor: 'pedido',
-      render: (value) => <span className="font-semibold text-primary-400">{value}</span>
+      render: (value) => <span className="font-mono font-semibold text-[#10B981]">#{value}</span>
     },
     {
-      header: 'Cliente',
+      header: 'cliente',
       accessor: 'nombreNit',
-      render: (value) => <span className="truncate max-w-[150px] block">{value}</span>
+      render: (value) => <span className="truncate max-w-[150px] block text-[#FAFAFA]">{value}</span>
     },
     {
-      header: 'Total',
+      header: 'total',
       accessor: 'totalGeneral',
-      render: (value) => <span className="font-semibold text-green-400">{formatCurrency(value)}</span>
+      render: (value) => <span className="font-mono font-bold text-[#10B981]">{formatCurrency(value)}</span>
     },
     {
-      header: 'Estado',
+      header: 'estado',
       accessor: 'estado',
       render: (value) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+        <span className={`px-2 py-1 text-xs font-mono ${
           value === 'paid'
-            ? 'bg-green-500/20 text-green-400'
-            : 'bg-red-500/20 text-red-400'
+            ? 'bg-[#10B981]/20 text-[#10B981]'
+            : 'bg-[#EF4444]/20 text-[#EF4444]'
         }`}>
-          {value === 'paid' ? 'Pagado' : 'Anulado'}
+          {value === 'paid' ? '[pagado]' : '[anulado]'}
         </span>
       )
     }
@@ -174,9 +171,11 @@ const VentasVendedores = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Ventas por Vendedor</h1>
-          <p className="text-gray-400">
-            Resumen y análisis del rendimiento de cada vendedor
+          <h1 className="text-2xl font-bold text-white mb-1">
+            <span className="text-[#10B981]">&gt;</span> ventas_vendedores
+          </h1>
+          <p className="text-[#6B7280] text-sm">
+            // resumen y analisis de rendimiento
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto">
@@ -190,54 +189,56 @@ const VentasVendedores = () => {
       </div>
 
       {/* Métricas Generales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
-          title="Total Ventas"
+          title="total_ventas"
           value={formatCurrency(summary.totals.totalSales)}
-          icon="💰"
-          comparison={`${summary.totals.totalPaid} facturas pagadas`}
+          icon="$"
+          subtitle={`// ${summary.totals.totalPaid} facturas pagadas`}
         />
         <Card
-          title="Vendedores Activos"
+          title="vendedores_activos"
           value={summary.totals.activeVendors}
-          icon="👥"
-          comparison={`de ${summary.vendors.length} registrados`}
+          icon="@"
+          subtitle={`// de ${summary.vendors.length} registrados`}
         />
         <Card
-          title="Promedio por Vendedor"
+          title="promedio_vendedor"
           value={formatCurrency(summary.totals.activeVendors > 0 ? summary.totals.totalSales / summary.totals.activeVendors : 0)}
-          icon="📊"
-          comparison="promedio de ventas"
+          icon="~"
+          subtitle="// promedio de ventas"
         />
         <Card
-          title="Facturas Anuladas"
+          title="facturas_anuladas"
           value={summary.totals.totalCancelled}
-          icon="❌"
-          comparison={`${summary.totals.totalInvoices > 0 ? ((summary.totals.totalCancelled / summary.totals.totalInvoices) * 100).toFixed(1) : 0}% del total`}
+          icon="-"
+          subtitle={`// ${summary.totals.totalInvoices > 0 ? ((summary.totals.totalCancelled / summary.totals.totalInvoices) * 100).toFixed(1) : 0}% del total`}
         />
       </div>
 
       {/* Gráfico y Ranking */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Gráfico de Barras */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white mb-4">Comparación de Ventas</h2>
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> comparacion_ventas
+          </h2>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={chartData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis type="number" stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `Q${(v/1000).toFixed(0)}k`} />
-                <YAxis type="category" dataKey="name" stroke="#94a3b8" fontSize={12} width={80} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#1F1F1F" />
+                <XAxis type="number" stroke="#6B7280" fontSize={12} tickFormatter={(v) => `Q${(v/1000).toFixed(0)}k`} />
+                <YAxis type="category" dataKey="name" stroke="#6B7280" fontSize={12} width={80} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
-                    color: '#e2e8f0'
+                    backgroundColor: '#111111',
+                    border: '1px solid #1F1F1F',
+                    borderRadius: '0',
+                    color: '#FAFAFA'
                   }}
-                  formatter={(value, name, props) => [formatCurrency(value), props.payload.fullName]}
+                  formatter={(value, _name, props) => [formatCurrency(value), props.payload.fullName]}
                 />
-                <Bar dataKey="total" radius={[0, 4, 4, 0]}>
+                <Bar dataKey="total">
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
@@ -245,15 +246,17 @@ const VentasVendedores = () => {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[350px] text-gray-500">
-              No hay datos para mostrar
+            <div className="flex items-center justify-center h-[350px] text-[#4B5563] font-mono">
+              // no hay datos
             </div>
           )}
         </div>
 
         {/* Tabla Ranking */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white mb-4">Ranking de Vendedores</h2>
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> ranking_vendedores
+          </h2>
           <div className="overflow-y-auto max-h-[350px]">
             <Table columns={rankingColumns} data={summary.vendors.filter(v => v.vendedor !== 'Sin asignar')} />
           </div>
@@ -262,72 +265,78 @@ const VentasVendedores = () => {
 
       {/* Detalle del Vendedor Seleccionado */}
       {selectedVendor && vendorDetail && (
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-bold text-white">Detalle: {selectedVendor}</h2>
-              <p className="text-sm text-gray-400">
-                {vendorDetail.sales.current.data.length} ventas en el período
+              <h2 className="text-lg font-bold text-white">
+                <span className="text-[#10B981]">&gt;</span> detalle --vendedor "{selectedVendor}"
+              </h2>
+              <p className="text-sm text-[#6B7280] font-mono">
+                // {vendorDetail.sales.current.data.length} ventas en el periodo
               </p>
             </div>
             <button
               onClick={() => setSelectedVendor(null)}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-[#1A1A1A] border border-[#1F1F1F] hover:border-[#EF4444] text-white font-mono"
             >
-              Cerrar
+              $ cerrar
             </button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
             {/* Métricas del vendedor */}
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-sm text-gray-400 mb-1">Total Ventas</p>
-              <p className="text-2xl font-bold text-green-400">
+            <div className="bg-[#1A1A1A] border border-[#1F1F1F] p-4">
+              <p className="text-xs text-[#6B7280] font-mono mb-1">// total_ventas</p>
+              <p className="text-2xl font-bold text-[#10B981] font-mono">
                 {formatCurrency(vendorDetail.sales.current.total)}
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[#4B5563] mt-1 font-mono">
                 {vendorDetail.sales.current.count} facturas
               </p>
             </div>
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-sm text-gray-400 mb-1">Ticket Promedio</p>
-              <p className="text-2xl font-bold text-blue-400">
+            <div className="bg-[#1A1A1A] border border-[#1F1F1F] p-4">
+              <p className="text-xs text-[#6B7280] font-mono mb-1">// ticket_promedio</p>
+              <p className="text-2xl font-bold text-[#3B82F6] font-mono">
                 {formatCurrency(vendorDetail.sales.current.average)}
               </p>
             </div>
-            <div className="bg-slate-800/50 rounded-lg p-4">
-              <p className="text-sm text-gray-400 mb-1">Comparación</p>
-              <p className={`text-2xl font-bold ${vendorDetail.sales.comparison.total >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {vendorDetail.sales.comparison.total >= 0 ? '+' : ''}{vendorDetail.sales.comparison.total.toFixed(1)}%
+            <div className="bg-[#1A1A1A] border border-[#1F1F1F] p-4">
+              <p className="text-xs text-[#6B7280] font-mono mb-1">// comparacion</p>
+              <p className={`text-2xl font-bold font-mono ${vendorDetail.sales.comparison.total >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                [{vendorDetail.sales.comparison.total >= 0 ? '+' : ''}{vendorDetail.sales.comparison.total.toFixed(1)}%]
               </p>
-              <p className="text-xs text-gray-500 mt-1">vs período anterior</p>
+              <p className="text-xs text-[#4B5563] mt-1 font-mono">vs periodo anterior</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Top Productos */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">Top Productos</h3>
+              <h3 className="text-lg font-bold text-white mb-3">
+                <span className="text-[#10B981]">&gt;</span> top_productos
+              </h3>
               {vendorDetail.products.length > 0 ? (
                 <div className="space-y-2">
                   {vendorDetail.products.map((product, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
+                    <div key={index} className="flex items-center justify-between p-2 bg-[#1A1A1A] border border-[#1F1F1F]">
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-500 text-sm">{index + 1}.</span>
+                        <span className="text-[#4B5563] text-sm font-mono">#{index + 1}</span>
                         <span className="text-white truncate max-w-[180px]">{product.nombre}</span>
                       </div>
-                      <span className="text-green-400 text-sm">{product.cantidad} uds</span>
+                      <span className="text-[#10B981] text-sm font-mono">{product.cantidad} uds</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-4">Sin productos</p>
+                <p className="text-[#4B5563] text-center py-4 font-mono">// sin productos</p>
               )}
             </div>
 
             {/* Últimas Ventas */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">Últimas Ventas</h3>
+              <h3 className="text-lg font-bold text-white mb-3">
+                <span className="text-[#10B981]">&gt;</span> ultimas_ventas
+              </h3>
               <div className="overflow-y-auto max-h-[200px]">
                 <Table columns={detailColumns} data={vendorDetail.sales.current.data.slice(0, 5)} />
               </div>
@@ -338,13 +347,13 @@ const VentasVendedores = () => {
 
       {/* Ventas sin vendedor asignado */}
       {summary.vendors.find(v => v.vendedor === 'Sin asignar' && v.count > 0) && (
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+        <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 p-4">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">⚠️</span>
+            <span className="text-[#F59E0B] font-mono font-bold">[!]</span>
             <div>
-              <p className="text-yellow-400 font-medium">Ventas sin vendedor asignado</p>
-              <p className="text-sm text-gray-400">
-                Hay {summary.vendors.find(v => v.vendedor === 'Sin asignar')?.count || 0} ventas sin vendedor en la columna R
+              <p className="text-[#F59E0B] font-medium font-mono">ventas_sin_vendedor</p>
+              <p className="text-sm text-[#6B7280] font-mono">
+                // hay {summary.vendors.find(v => v.vendedor === 'Sin asignar')?.count || 0} ventas sin asignar
               </p>
             </div>
           </div>

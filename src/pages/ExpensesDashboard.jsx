@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { formatCurrency } from '../utils/calculations';
 import {
   groupByHour,
@@ -160,21 +160,26 @@ const ExpensesDashboard = () => {
     : [];
 
   // Colores para gráficos
-  const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+  const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'];
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-xl text-gray-400">Cargando datos...</div>
+        <p className="text-[#6B7280] font-mono">$ cargando gastos<span className="animate-pulse">_</span></p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-white">Dashboard de Gastos y Profit</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">
+            <span className="text-[#10B981]">&gt;</span> gastos_profit
+          </h1>
+          <p className="text-sm text-[#6B7280]">// analisis financiero</p>
+        </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-stretch sm:items-center">
           <PeriodSelector
             selectedPeriod={selectedPeriod}
@@ -189,78 +194,78 @@ const ExpensesDashboard = () => {
       </div>
 
       {/* PROFIT Card - Grande y destacado */}
-      <div className="bg-gradient-to-br from-green-600 to-green-800 border border-green-500 rounded-xl p-4 md:p-8 shadow-xl">
+      <div className="bg-[#10B981]/10 border border-[#10B981]/30 p-4 md:p-8">
         <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-4">
           <div className="flex-1">
-            <h2 className="text-white text-opacity-90 text-xs md:text-sm font-medium uppercase tracking-wide mb-2">
-              PROFIT DEL PERÍODO
+            <h2 className="text-[#10B981] text-xs md:text-sm font-mono uppercase tracking-wide mb-2">
+              // profit_del_periodo
             </h2>
-            <div className="text-3xl md:text-5xl font-bold text-white mb-2">
+            <div className="text-3xl md:text-5xl font-bold text-white mb-2 font-mono">
               {formatCurrency(profitData?.current.profit || 0)}
             </div>
-            <div className="text-xl md:text-2xl text-green-100">
-              Margen: {profitData?.current.margin || 0}%
+            <div className="text-xl md:text-2xl text-[#10B981] font-mono">
+              margen: [{profitData?.current.margin || 0}%]
             </div>
           </div>
           <div className="text-left sm:text-right w-full sm:w-auto">
-            <div className="text-white text-opacity-75 text-xs md:text-sm mb-1">vs período anterior</div>
-            <div className={`text-xl md:text-2xl font-bold ${profitData?.comparison.profit.isPositive ? 'text-green-200' : 'text-red-200'}`}>
-              {profitData?.comparison.profit.isPositive ? '+' : ''}{profitData?.comparison.profit.percentage}%
+            <div className="text-[#6B7280] text-xs md:text-sm mb-1 font-mono">// vs periodo_anterior</div>
+            <div className={`text-xl md:text-2xl font-bold font-mono ${profitData?.comparison.profit.isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+              [{profitData?.comparison.profit.isPositive ? '+' : ''}{profitData?.comparison.profit.percentage}%]
             </div>
-            <div className="text-lg md:text-xl">
-              {profitData?.comparison.profit.isPositive ? '📈' : '📉'}
+            <div className="text-lg md:text-xl font-mono">
+              {profitData?.comparison.profit.isPositive ? '++' : '--'}
             </div>
           </div>
         </div>
       </div>
 
       {/* Métricas principales - 3 cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <Card
-          title="Ingresos"
+          title="ingresos"
           value={formatCurrency(invoicesData?.current.total || 0)}
-          subtitle={`${invoicesData?.current.count || 0} facturas`}
+          subtitle={`// ${invoicesData?.current.count || 0} facturas`}
           trend={invoicesData?.comparison.total}
-          icon="💰"
+          icon="$"
         />
         <Card
-          title="Gastos"
+          title="gastos"
           value={formatCurrency(expensesData?.current.total || 0)}
-          subtitle={`${expensesData?.current.count || 0} transacciones`}
+          subtitle={`// ${expensesData?.current.count || 0} transacciones`}
           trend={expensesData?.comparison.total}
-          icon="💸"
+          icon="-"
         />
         <Card
-          title="Relación Ingresos/Gastos"
+          title="relacion_ingresos_gastos"
           value={invoicesData?.current.total > 0
             ? `${((expensesData?.current.total / invoicesData?.current.total) * 100).toFixed(1)}%`
             : '0%'}
-          subtitle={`${((invoicesData?.current.total - expensesData?.current.total) / invoicesData?.current.total * 100).toFixed(1)}% profit`}
-          icon="📊"
+          subtitle={`// ${((invoicesData?.current.total - expensesData?.current.total) / invoicesData?.current.total * 100).toFixed(1)}% profit`}
+          icon="%"
         />
       </div>
 
       {/* Gráfico combinado - GRANDE */}
-      <div className="bg-dark-card border border-dark-border rounded-lg p-4 md:p-6">
-        <h2 className="text-lg md:text-xl font-semibold text-white mb-4">
-          Evolución de Ingresos, Gastos y Profit
+      <div className="bg-[#111111] border border-[#1F1F1F] p-4 md:p-6">
+        <h2 className="text-lg font-bold text-white mb-4">
+          <span className="text-[#10B981]">&gt;</span> evolucion_financiera
         </h2>
         <div className="overflow-x-auto -mx-4 md:mx-0">
           <div className="min-w-[500px] md:min-w-0 px-4 md:px-0">
             <ResponsiveContainer width="100%" height={300} className="md:!h-[400px]">
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="name" stroke="#9ca3af" />
-            <YAxis stroke="#9ca3af" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#1F1F1F" />
+            <XAxis dataKey="name" stroke="#6B7280" />
+            <YAxis stroke="#6B7280" />
             <Tooltip
-              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-              labelStyle={{ color: '#fff' }}
+              contentStyle={{ backgroundColor: '#111111', border: '1px solid #1F1F1F', borderRadius: '0' }}
+              labelStyle={{ color: '#FAFAFA' }}
               formatter={(value) => formatCurrency(value)}
             />
-            <Legend />
-            <Line type="monotone" dataKey="Ingresos" stroke="#10b981" strokeWidth={3} name="Ingresos" />
-            <Line type="monotone" dataKey="Gastos" stroke="#ef4444" strokeWidth={3} name="Gastos" />
-            <Line type="monotone" dataKey="Profit" stroke="#3b82f6" strokeWidth={3} name="Profit" />
+            <Legend wrapperStyle={{ color: '#FAFAFA' }} />
+            <Line type="monotone" dataKey="Ingresos" stroke="#10B981" strokeWidth={2} name="Ingresos" />
+            <Line type="monotone" dataKey="Gastos" stroke="#EF4444" strokeWidth={2} name="Gastos" />
+            <Line type="monotone" dataKey="Profit" stroke="#3B82F6" strokeWidth={2} name="Profit" />
           </LineChart>
         </ResponsiveContainer>
           </div>
@@ -268,23 +273,25 @@ const ExpensesDashboard = () => {
       </div>
 
       {/* Top Gastos por Empresa y Distribución */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top Empresas */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-4 md:p-6">
-          <h2 className="text-lg md:text-xl font-semibold text-white mb-4">Top Gastos por Empresa</h2>
+        <div className="bg-[#111111] border border-[#1F1F1F] p-4 md:p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> top_gastos_empresa
+          </h2>
           <div className="overflow-x-auto -mx-4 md:mx-0">
             <div className="min-w-[400px] md:min-w-0 px-4 md:px-0">
               <ResponsiveContainer width="100%" height={250} className="md:!h-[300px]">
             <BarChart data={topCompaniesByExpense}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="empresa" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1F1F1F" />
+              <XAxis dataKey="empresa" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                labelStyle={{ color: '#fff' }}
+                contentStyle={{ backgroundColor: '#111111', border: '1px solid #1F1F1F', borderRadius: '0' }}
+                labelStyle={{ color: '#FAFAFA' }}
                 formatter={(value) => formatCurrency(value)}
               />
-              <Bar dataKey="total" fill="#ef4444" name="Gasto Total" />
+              <Bar dataKey="total" fill="#EF4444" name="Gasto Total" />
             </BarChart>
           </ResponsiveContainer>
             </div>
@@ -292,8 +299,10 @@ const ExpensesDashboard = () => {
         </div>
 
         {/* Distribución de Gastos (Pie Chart) */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-4 md:p-6">
-          <h2 className="text-lg md:text-xl font-semibold text-white mb-4">Distribución de Gastos por Producto</h2>
+        <div className="bg-[#111111] border border-[#1F1F1F] p-4 md:p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> distribucion_gastos
+          </h2>
           <ResponsiveContainer width="100%" height={250} className="md:!h-[300px]">
             <PieChart>
               <Pie
@@ -305,54 +314,56 @@ const ExpensesDashboard = () => {
                 outerRadius={80}
                 label={false}
               >
-                {topProductsByExpense.map((entry, index) => (
+                {topProductsByExpense.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip
                 formatter={(value) => formatCurrency(value)}
-                contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
-                labelStyle={{ color: '#fff' }}
+                contentStyle={{ backgroundColor: '#111111', border: '1px solid #1F1F1F', borderRadius: '0' }}
+                labelStyle={{ color: '#FAFAFA' }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ color: '#FAFAFA' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Tabla de gastos con búsqueda */}
-      <div className="bg-dark-card border border-dark-border rounded-lg p-4 md:p-6">
+      <div className="bg-[#111111] border border-[#1F1F1F] p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-          <h2 className="text-lg md:text-xl font-semibold text-white">Gastos Detallados</h2>
+          <h2 className="text-lg font-bold text-white">
+            <span className="text-[#10B981]">&gt;</span> gastos_detallados
+          </h2>
           <input
             type="text"
-            placeholder="Buscar empresa o producto..."
+            placeholder="$ grep empresa|producto..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-dark-bg border border-dark-border rounded-lg px-3 md:px-4 py-2 text-sm md:text-base text-gray-300 focus:outline-none focus:border-blue-500 w-full sm:w-auto"
+            className="bg-[#0A0A0A] border border-[#1F1F1F] px-3 md:px-4 py-2 text-sm text-[#FAFAFA] placeholder-[#4B5563] focus:outline-none focus:border-[#10B981] w-full sm:w-auto font-mono"
           />
         </div>
         <div className="overflow-x-auto -mx-4 md:mx-0">
           <div className="inline-block min-w-full align-middle px-4 md:px-0">
             <Table
           columns={[
-            { header: 'Fecha', accessor: 'fecha', render: (value) => new Date(value).toLocaleString('es-GT') },
-            { header: 'Empresa', accessor: 'empresa' },
-            { header: 'Producto', accessor: 'producto' },
-            { header: 'Monto', accessor: 'monto', render: (value) => formatCurrency(value) }
+            { header: 'fecha', accessor: 'fecha', render: (value) => <span className="font-mono text-[#FAFAFA]">{new Date(value).toLocaleString('es-GT')}</span> },
+            { header: 'empresa', accessor: 'empresa', render: (value) => <span className="text-[#FAFAFA]">{value}</span> },
+            { header: 'producto', accessor: 'producto', render: (value) => <span className="text-[#6B7280]">{value}</span> },
+            { header: 'monto', accessor: 'monto', render: (value) => <span className="font-mono text-[#EF4444]">-{formatCurrency(value)}</span> }
           ]}
           data={displayExpenses}
         />
           </div>
         </div>
         {searchQuery && (
-          <div className="mt-2 text-sm text-gray-400 px-4 md:px-0">
-            Mostrando {filteredExpenses.length} resultado{filteredExpenses.length !== 1 ? 's' : ''}
+          <div className="mt-2 text-sm text-[#4B5563] px-4 md:px-0 font-mono">
+            // resultados: {filteredExpenses.length}
           </div>
         )}
         {!searchQuery && expensesData?.current.data.length > 20 && (
-          <div className="mt-2 text-sm text-gray-400 px-4 md:px-0">
-            Mostrando últimas 20 transacciones de {expensesData.current.data.length} totales
+          <div className="mt-2 text-sm text-[#4B5563] px-4 md:px-0 font-mono">
+            // mostrando 20 de {expensesData.current.data.length} totales
           </div>
         )}
       </div>

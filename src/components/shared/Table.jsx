@@ -1,33 +1,31 @@
-import React from 'react';
-
 const Table = ({ columns, data, className = '' }) => {
   return (
-    <div className={`bg-dark-card border border-dark-border rounded-lg overflow-hidden ${className}`}>
+    <div className={`bg-[#111111] border border-[#1F1F1F] overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-dark-bg border-b border-dark-border">
+            <tr className="bg-[#1A1A1A] border-b border-[#1F1F1F]">
               {columns.map((column, index) => (
                 <th
                   key={index}
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                  className="px-4 py-3 text-left text-xs font-semibold text-[#6B7280] lowercase"
                 >
                   {column.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-dark-border">
+          <tbody className="divide-y divide-[#1F1F1F]">
             {data.length > 0 ? (
               data.map((row, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className="hover:bg-dark-hover transition-colors duration-150"
+                  className="hover:bg-[#1A1A1A] transition-colors duration-150"
                 >
                   {columns.map((column, colIndex) => (
                     <td
                       key={colIndex}
-                      className="px-6 py-4 text-sm text-gray-300"
+                      className="px-4 py-3 text-sm text-[#FAFAFA]"
                     >
                       {column.render
                         ? column.render(row[column.accessor], row, rowIndex)
@@ -40,9 +38,9 @@ const Table = ({ columns, data, className = '' }) => {
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-8 text-center text-gray-500"
+                  className="px-4 py-8 text-center text-[#4B5563]"
                 >
-                  No hay datos disponibles
+                  // no hay datos disponibles
                 </td>
               </tr>
             )}

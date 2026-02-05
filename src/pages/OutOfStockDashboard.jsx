@@ -169,27 +169,20 @@ const OutOfStockDashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <svg className="animate-spin w-10 h-10 mx-auto text-blue-500 mb-4" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <p className="text-slate-400">Cargando productos agotados...</p>
-          <p className="text-slate-500 text-sm mt-2">Esto puede tomar unos segundos si hay muchos productos</p>
-        </div>
+        <p className="text-[#6B7280] font-mono">$ cargando inventario<span className="animate-pulse">_</span></p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-500/20 border border-red-500 rounded-lg p-6 text-center">
-        <p className="text-red-400">{error}</p>
+      <div className="bg-[#EF4444]/20 border border-[#EF4444]/30 p-6 text-center">
+        <p className="text-[#EF4444] font-mono">[ERROR] {error}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+          className="mt-4 px-4 py-2 bg-[#EF4444] hover:bg-[#EF4444]/80 text-white font-mono"
         >
-          Reintentar
+          $ reintentar
         </button>
       </div>
     );
@@ -200,20 +193,19 @@ const OutOfStockDashboard = () => {
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Productos Agotados</h1>
-          <p className="text-slate-400">
-            {counts.total} productos/variantes sin stock en Shopify
+          <h1 className="text-2xl font-bold text-white mb-1">
+            <span className="text-[#10B981]">&gt;</span> productos_agotados
+          </h1>
+          <p className="text-[#6B7280] text-sm font-mono">
+            // {counts.total} items sin stock
           </p>
         </div>
         <button
           onClick={fetchData}
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg flex items-center gap-2 transition-colors"
+          className="px-4 py-2 bg-[#3B82F6] hover:bg-[#3B82F6]/80 disabled:bg-[#1F1F1F] disabled:cursor-not-allowed text-white font-mono flex items-center gap-2 transition-colors"
         >
-          <svg className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Actualizar
+          $ refresh
         </button>
       </div>
 
@@ -222,38 +214,32 @@ const OutOfStockDashboard = () => {
         <div className="flex gap-2">
           <button
             onClick={() => setActiveTab('pending')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+            className={`px-4 py-2 font-mono transition-colors flex items-center gap-2 ${
               activeTab === 'pending'
-                ? 'bg-red-600 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                ? 'bg-[#EF4444] text-white'
+                : 'bg-[#1A1A1A] text-[#6B7280] hover:bg-[#2A2A2A] border border-[#1F1F1F]'
             }`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            Pendientes
-            <span className={`px-2 py-0.5 rounded-full text-xs ${
-              activeTab === 'pending' ? 'bg-red-500' : 'bg-slate-600'
+            $ pendientes
+            <span className={`px-2 py-0.5 text-xs font-mono ${
+              activeTab === 'pending' ? 'bg-[#0A0A0A]/20' : 'bg-[#1F1F1F]'
             }`}>
-              {counts.pending}
+              [{counts.pending}]
             </span>
           </button>
           <button
             onClick={() => setActiveTab('requested')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+            className={`px-4 py-2 font-mono transition-colors flex items-center gap-2 ${
               activeTab === 'requested'
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                ? 'bg-[#3B82F6] text-white'
+                : 'bg-[#1A1A1A] text-[#6B7280] hover:bg-[#2A2A2A] border border-[#1F1F1F]'
             }`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-            Solicitados
-            <span className={`px-2 py-0.5 rounded-full text-xs ${
-              activeTab === 'requested' ? 'bg-blue-500' : 'bg-slate-600'
+            $ solicitados
+            <span className={`px-2 py-0.5 text-xs font-mono ${
+              activeTab === 'requested' ? 'bg-[#0A0A0A]/20' : 'bg-[#1F1F1F]'
             }`}>
-              {counts.requested}
+              [{counts.requested}]
             </span>
           </button>
         </div>
@@ -261,12 +247,12 @@ const OutOfStockDashboard = () => {
         <div className="relative w-full sm:w-72">
           <input
             type="text"
-            placeholder="Buscar producto, SKU..."
+            placeholder="$ grep producto|sku..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 pl-10 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full px-4 py-2 pl-10 bg-[#111111] border border-[#1F1F1F] text-white placeholder-[#4B5563] focus:outline-none focus:border-[#10B981] font-mono"
           />
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4B5563]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
@@ -274,36 +260,34 @@ const OutOfStockDashboard = () => {
 
       {/* Lista de productos */}
       {filteredProducts.length === 0 ? (
-        <div className="bg-slate-800 rounded-xl p-8 text-center border border-slate-700">
-          <svg className="w-16 h-16 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
-          <p className="text-slate-400">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-8 text-center">
+          <p className="text-[#4B5563] font-mono text-lg mb-2">$ ls --empty</p>
+          <p className="text-[#4B5563] text-sm">
             {searchTerm
-              ? 'No se encontraron productos que coincidan con la búsqueda'
+              ? `// no hay resultados para "${searchTerm}"`
               : activeTab === 'pending'
-                ? 'No hay productos agotados pendientes'
-                : 'No hay productos marcados como solicitados'}
+                ? '// no hay productos pendientes'
+                : '// no hay productos solicitados'}
           </p>
         </div>
       ) : (
-        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+        <div className="bg-[#111111] border border-[#1F1F1F] overflow-hidden">
           {/* Header de la tabla */}
-          <div className="hidden md:grid md:grid-cols-12 gap-4 px-4 py-3 bg-slate-900 border-b border-slate-700 text-xs font-semibold text-slate-400 uppercase">
-            <div className="col-span-1">Imagen</div>
-            <div className="col-span-4">Producto</div>
-            <div className="col-span-2">SKU</div>
-            <div className="col-span-1">Stock</div>
-            <div className="col-span-2">{activeTab === 'requested' ? 'Solicitado' : 'Estado'}</div>
-            <div className="col-span-2 text-right">Acción</div>
+          <div className="hidden md:grid md:grid-cols-12 gap-4 px-4 py-3 bg-[#1A1A1A] border-b border-[#1F1F1F] text-xs font-mono text-[#6B7280] lowercase">
+            <div className="col-span-1">img</div>
+            <div className="col-span-4">producto</div>
+            <div className="col-span-2">sku</div>
+            <div className="col-span-1">stock</div>
+            <div className="col-span-2">{activeTab === 'requested' ? 'fecha' : 'estado'}</div>
+            <div className="col-span-2 text-right">accion</div>
           </div>
 
           {/* Lista de productos */}
-          <div className="divide-y divide-slate-700">
+          <div className="divide-y divide-[#1F1F1F]">
             {filteredProducts.map((product) => (
               <div
                 key={product.variantId}
-                className="grid grid-cols-1 md:grid-cols-12 gap-4 px-4 py-3 items-center hover:bg-slate-700/30 transition-colors"
+                className="grid grid-cols-1 md:grid-cols-12 gap-4 px-4 py-3 items-center hover:bg-[#1A1A1A] transition-colors"
               >
                 {/* Imagen */}
                 <div className="col-span-1 flex md:block items-center gap-3">
@@ -451,22 +435,22 @@ const OutOfStockDashboard = () => {
       )}
 
       {/* Footer con totales */}
-      <div className="mt-6 bg-slate-800 rounded-lg p-4 border border-slate-700">
-        <div className="flex flex-wrap gap-6 justify-center text-sm">
+      <div className="mt-6 bg-[#111111] border border-[#1F1F1F] p-4">
+        <div className="flex flex-wrap gap-6 justify-center text-sm font-mono">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span className="text-slate-400">Pendientes:</span>
-            <span className="text-white font-semibold">{counts.pending}</span>
+            <div className="w-3 h-3 bg-[#EF4444]"></div>
+            <span className="text-[#6B7280]">pendientes:</span>
+            <span className="text-white font-semibold">[{counts.pending}]</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span className="text-slate-400">Solicitados:</span>
-            <span className="text-white font-semibold">{counts.requested}</span>
+            <div className="w-3 h-3 bg-[#3B82F6]"></div>
+            <span className="text-[#6B7280]">solicitados:</span>
+            <span className="text-white font-semibold">[{counts.requested}]</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-slate-500"></div>
-            <span className="text-slate-400">Total agotados:</span>
-            <span className="text-white font-semibold">{counts.total}</span>
+            <div className="w-3 h-3 bg-[#6B7280]"></div>
+            <span className="text-[#6B7280]">total:</span>
+            <span className="text-white font-semibold">[{counts.total}]</span>
           </div>
         </div>
       </div>

@@ -175,10 +175,10 @@ const RefundsDashboard = () => {
   // Obtener color del método
   const getMethodColor = (metodo) => {
     switch (metodo?.toLowerCase()) {
-      case 'efectivo': return 'bg-green-500/20 text-green-400';
-      case 'deposito': return 'bg-blue-500/20 text-blue-400';
-      case 'web': return 'bg-purple-500/20 text-purple-400';
-      default: return 'bg-slate-500/20 text-slate-400';
+      case 'efectivo': return 'bg-[#10B981]/20 text-[#10B981]';
+      case 'deposito': return 'bg-[#3B82F6]/20 text-[#3B82F6]';
+      case 'web': return 'bg-[#8B5CF6]/20 text-[#8B5CF6]';
+      default: return 'bg-[#6B7280]/20 text-[#6B7280]';
     }
   };
 
@@ -195,26 +195,20 @@ const RefundsDashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <svg className="animate-spin w-10 h-10 mx-auto text-blue-500 mb-4" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <p className="text-slate-400">Cargando devoluciones...</p>
-        </div>
+        <p className="text-[#6B7280] font-mono">$ cargando devoluciones<span className="animate-pulse">_</span></p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-500/20 border border-red-500 rounded-lg p-6 text-center">
-        <p className="text-red-400">{error}</p>
+      <div className="bg-[#EF4444]/20 border border-[#EF4444]/30 p-6 text-center">
+        <p className="text-[#EF4444] font-mono">[ERROR] {error}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+          className="mt-4 px-4 py-2 bg-[#EF4444] hover:bg-[#EF4444]/80 text-white font-mono"
         >
-          Reintentar
+          $ reintentar
         </button>
       </div>
     );
@@ -224,9 +218,11 @@ const RefundsDashboard = () => {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">Devoluciones</h1>
-        <p className="text-slate-400">
-          Gestiona las devoluciones pendientes y completadas
+        <h1 className="text-2xl font-bold text-white mb-1">
+          <span className="text-[#10B981]">&gt;</span> devoluciones
+        </h1>
+        <p className="text-[#6B7280] text-sm">
+          // gestion de reembolsos
         </p>
       </div>
 
@@ -235,38 +231,32 @@ const RefundsDashboard = () => {
         <div className="flex gap-2">
           <button
             onClick={() => setActiveTab('enProceso')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+            className={`px-4 py-2 font-mono transition-colors flex items-center gap-2 ${
               activeTab === 'enProceso'
-                ? 'bg-orange-600 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                ? 'bg-[#F59E0B] text-[#0A0A0A]'
+                : 'bg-[#1A1A1A] text-[#6B7280] hover:bg-[#2A2A2A] border border-[#1F1F1F]'
             }`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            En Proceso
-            <span className={`px-2 py-0.5 rounded-full text-xs ${
-              activeTab === 'enProceso' ? 'bg-orange-500' : 'bg-slate-600'
+            $ en_proceso
+            <span className={`px-2 py-0.5 text-xs font-mono ${
+              activeTab === 'enProceso' ? 'bg-[#0A0A0A]/20' : 'bg-[#1F1F1F]'
             }`}>
-              {counts.enProceso}
+              [{counts.enProceso}]
             </span>
           </button>
           <button
             onClick={() => setActiveTab('completadas')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+            className={`px-4 py-2 font-mono transition-colors flex items-center gap-2 ${
               activeTab === 'completadas'
-                ? 'bg-green-600 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                ? 'bg-[#10B981] text-[#0A0A0A]'
+                : 'bg-[#1A1A1A] text-[#6B7280] hover:bg-[#2A2A2A] border border-[#1F1F1F]'
             }`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Completadas
-            <span className={`px-2 py-0.5 rounded-full text-xs ${
-              activeTab === 'completadas' ? 'bg-green-500' : 'bg-slate-600'
+            $ completadas
+            <span className={`px-2 py-0.5 text-xs font-mono ${
+              activeTab === 'completadas' ? 'bg-[#0A0A0A]/20' : 'bg-[#1F1F1F]'
             }`}>
-              {counts.completadas}
+              [{counts.completadas}]
             </span>
           </button>
         </div>
@@ -274,12 +264,12 @@ const RefundsDashboard = () => {
         <div className="relative w-full sm:w-64">
           <input
             type="text"
-            placeholder="Buscar pedido..."
+            placeholder="$ grep pedido..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 pl-10 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full px-4 py-2 pl-10 bg-[#111111] border border-[#1F1F1F] text-white placeholder-[#4B5563] focus:outline-none focus:border-[#10B981] font-mono"
           />
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4B5563]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
@@ -288,22 +278,20 @@ const RefundsDashboard = () => {
       {/* Lista de devoluciones */}
       <div className="space-y-4">
         {filteredRefunds.length === 0 ? (
-          <div className="bg-slate-800 rounded-xl p-8 text-center border border-slate-700">
-            <svg className="w-16 h-16 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <p className="text-slate-400">
+          <div className="bg-[#111111] border border-[#1F1F1F] p-8 text-center">
+            <p className="text-[#4B5563] font-mono text-lg mb-2">$ ls --empty</p>
+            <p className="text-[#4B5563] text-sm">
               {searchTerm
-                ? 'No se encontraron devoluciones que coincidan con la búsqueda'
-                : `No hay devoluciones ${activeTab === 'enProceso' ? 'en proceso' : 'completadas'}`}
+                ? `// no hay resultados para "${searchTerm}"`
+                : `// no hay devoluciones ${activeTab === 'enProceso' ? 'en proceso' : 'completadas'}`}
             </p>
           </div>
         ) : (
           filteredRefunds.map((refund) => (
             <div
               key={refund.rowIndex}
-              className={`bg-slate-800 rounded-xl border transition-all ${
-                expandedCard === refund.rowIndex ? 'border-blue-500' : 'border-slate-700'
+              className={`bg-[#111111] border transition-all ${
+                expandedCard === refund.rowIndex ? 'border-[#10B981]' : 'border-[#1F1F1F]'
               }`}
             >
               {/* Header de la card */}
@@ -313,88 +301,71 @@ const RefundsDashboard = () => {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      refund.estadoDevolucion === 'EN_PROCESO' ? 'bg-orange-500/20' : 'bg-green-500/20'
+                    <div className={`w-10 h-10 flex items-center justify-center font-mono font-bold ${
+                      refund.estadoDevolucion === 'EN_PROCESO' ? 'bg-[#F59E0B]/20 text-[#F59E0B]' : 'bg-[#10B981]/20 text-[#10B981]'
                     }`}>
-                      {refund.estadoDevolucion === 'EN_PROCESO' ? (
-                        <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )}
+                      {refund.estadoDevolucion === 'EN_PROCESO' ? '...' : '++'}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-white font-semibold">Pedido {refund.pedido}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-xs ${getMethodColor(refund.metodoDevolucion)}`}>
-                          {getMethodText(refund.metodoDevolucion)}
+                        <span className="text-white font-semibold font-mono">#{refund.pedido}</span>
+                        <span className={`px-2 py-0.5 text-xs font-mono ${getMethodColor(refund.metodoDevolucion)}`}>
+                          [{getMethodText(refund.metodoDevolucion)}]
                         </span>
                       </div>
-                      <div className="text-sm text-slate-400">
-                        {refund.nombreCliente} • {formatDate(refund.fechaInicioDevolucion)}
+                      <div className="text-sm text-[#6B7280] font-mono">
+                        {refund.nombreCliente} | {formatDate(refund.fechaInicioDevolucion)}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <div className="text-xl font-bold text-white">
+                      <div className="text-xl font-bold text-white font-mono">
                         Q{refund.montoDevolucion?.toLocaleString('es-GT', { minimumFractionDigits: 2 })}
                       </div>
-                      <div className="text-xs text-slate-400">Monto a devolver</div>
+                      <div className="text-xs text-[#4B5563]">// monto</div>
                     </div>
-                    <svg
-                      className={`w-5 h-5 text-slate-400 transition-transform ${
-                        expandedCard === refund.rowIndex ? 'rotate-180' : ''
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <span className={`text-[#6B7280] font-mono transition-transform ${
+                        expandedCard === refund.rowIndex ? '' : ''
+                      }`}>
+                      {expandedCard === refund.rowIndex ? '[-]' : '[+]'}
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Contenido expandido */}
               {expandedCard === refund.rowIndex && (
-                <div className="px-4 pb-4 border-t border-slate-700 pt-4">
+                <div className="px-4 pb-4 border-t border-[#1F1F1F] pt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Información del cliente */}
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-400 uppercase mb-3">Datos del Cliente</h4>
-                      <div className="space-y-2">
+                      <h4 className="text-sm font-mono text-[#6B7280] mb-3">// datos_cliente</h4>
+                      <div className="space-y-2 font-mono">
                         <div className="flex items-center gap-2">
-                          <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                          <span className="text-white">{refund.nombreCliente || 'Sin nombre'}</span>
+                          <span className="text-[#6B7280]">nombre:</span>
+                          <span className="text-white">{refund.nombreCliente || 'N/A'}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
-                          <span className="text-white">{refund.telefono || 'Sin teléfono'}</span>
+                          <span className="text-[#6B7280]">tel:</span>
+                          <span className="text-white">{refund.telefono || 'N/A'}</span>
                         </div>
                       </div>
 
                       {/* Items a devolver */}
-                      <h4 className="text-sm font-semibold text-slate-400 uppercase mt-4 mb-3">Items a Devolver</h4>
+                      <h4 className="text-sm font-mono text-[#6B7280] mt-4 mb-3">// items_devolver</h4>
                       <div className="space-y-2 max-h-40 overflow-y-auto">
                         {refund.itemsDevolucion?.map((item, idx) => (
-                          <div key={idx} className="bg-slate-700/50 rounded-lg p-2 text-sm">
+                          <div key={idx} className="bg-[#1A1A1A] border border-[#1F1F1F] p-2 text-sm font-mono">
                             <div className="text-white">{item.name}</div>
-                            <div className="flex justify-between text-slate-400">
-                              <span>Cantidad: {item.quantity}</span>
-                              <span>Q{parseFloat(item.refundAmount || item.discountedPrice || 0).toFixed(2)}</span>
+                            <div className="flex justify-between text-[#6B7280]">
+                              <span>qty: {item.quantity}</span>
+                              <span className="text-[#10B981]">Q{parseFloat(item.refundAmount || item.discountedPrice || 0).toFixed(2)}</span>
                             </div>
                           </div>
                         ))}
                         {(!refund.itemsDevolucion || refund.itemsDevolucion.length === 0) && (
-                          <div className="text-slate-500 text-sm">Sin items especificados</div>
+                          <div className="text-[#4B5563] text-sm font-mono">// sin items</div>
                         )}
                       </div>
                     </div>

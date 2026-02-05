@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Terminal Minimal Theme */
 @layer base {
   :root {
     font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -9,55 +10,206 @@
     font-weight: 400;
 
     color-scheme: dark;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #0f172a;
+    color: #FAFAFA;
+    background-color: #0A0A0A;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    /* Terminal CSS Variables */
+    --terminal-green: #10B981;
+    --terminal-blue: #3B82F6;
+    --terminal-purple: #8B5CF6;
+    --terminal-amber: #F59E0B;
+    --terminal-red: #EF4444;
+    --terminal-cyan: #06B6D4;
+    --terminal-gray: #6B7280;
+    --terminal-muted: #4B5563;
+    --bg-page: #0A0A0A;
+    --bg-card: #111111;
+    --bg-hover: #1A1A1A;
+    --border-color: #1F1F1F;
   }
 
   body {
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
-    background-color: #0f172a;
-    color: #e2e8f0;
+    background-color: #0A0A0A;
+    color: #FAFAFA;
   }
 
   * {
     box-sizing: border-box;
+    border-radius: 0 !important;
+  }
+
+  /* Override rounded corners for terminal aesthetic */
+  .rounded, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-full,
+  .rounded-md, .rounded-sm {
+    border-radius: 0 !important;
   }
 }
 
 @layer components {
-  /* Scrollbar personalizado para tema dark */
+  /* Terminal Scrollbar */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #1e293b;
+    background: #0A0A0A;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 5px;
+    background: #1F1F1F;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
+    background: #2A2A2A;
   }
 
-  /* Clase para ocultar scrollbar pero mantener funcionalidad */
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari and Opera */
+    display: none;
+  }
+
+  /* Terminal Text Styles */
+  .terminal-comment {
+    color: #6B7280;
+    font-size: 12px;
+  }
+
+  .terminal-command {
+    color: #10B981;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+  }
+
+  .terminal-path {
+    color: #6B7280;
+    font-size: 12px;
+  }
+
+  /* Terminal Card */
+  .terminal-card {
+    background: #111111;
+    border: 1px solid #1F1F1F;
+  }
+
+  /* Terminal Badge */
+  .terminal-badge {
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .terminal-badge-success {
+    background: #10B981;
+    color: #0A0A0A;
+  }
+
+  .terminal-badge-error {
+    background: #EF4444;
+    color: #0A0A0A;
+  }
+
+  .terminal-badge-warning {
+    background: #F59E0B;
+    color: #0A0A0A;
+  }
+
+  .terminal-badge-info {
+    background: #3B82F6;
+    color: #FAFAFA;
+  }
+
+  /* Terminal Button */
+  .terminal-btn {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+  }
+
+  .terminal-btn-primary {
+    background: #10B981;
+    color: #0A0A0A;
+  }
+
+  .terminal-btn-primary:hover {
+    background: #059669;
+  }
+
+  .terminal-btn-secondary {
+    background: transparent;
+    border: 1px solid #1F1F1F;
+    color: #6B7280;
+  }
+
+  .terminal-btn-secondary:hover {
+    background: #1A1A1A;
+    color: #FAFAFA;
+  }
+
+  /* Terminal Input */
+  .terminal-input {
+    background: #0A0A0A;
+    border: 1px solid #1F1F1F;
+    color: #FAFAFA;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .terminal-input:focus {
+    outline: none;
+    border-color: #10B981;
+  }
+
+  .terminal-input::placeholder {
+    color: #4B5563;
+  }
+
+  /* Terminal Select */
+  .terminal-select {
+    background: #0A0A0A;
+    border: 1px solid #1F1F1F;
+    color: #FAFAFA;
+    padding: 8px 12px;
+  }
+
+  /* Terminal Table */
+  .terminal-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .terminal-table th {
+    background: #1A1A1A;
+    color: #6B7280;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: lowercase;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #1F1F1F;
+  }
+
+  .terminal-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #1F1F1F;
+    color: #FAFAFA;
+    font-size: 13px;
+  }
+
+  .terminal-table tr:hover {
+    background: #1A1A1A;
   }
 }

@@ -73,19 +73,22 @@ const PaymentsHistory = () => {
   // Modal de imagen
   const ImageModal = ({ imageUrl, onClose }) => (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="relative max-w-4xl max-h-[90vh]" onClick={e => e.stopPropagation()}>
-        <button
-          onClick={onClose}
-          className="absolute -top-10 right-0 text-white hover:text-slate-300"
-        >
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+      <div className="relative max-w-4xl max-h-[90vh] bg-[#111111] border border-[#1F1F1F] p-4" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-white">
+            <span className="text-[#10B981]">&gt;</span> comprobante
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-[#6B7280] hover:text-[#EF4444] font-mono"
+          >
+            [x]
+          </button>
+        </div>
         <img
           src={imageUrl}
           alt="Comprobante de pago"
-          className="max-w-full max-h-[85vh] object-contain rounded-lg"
+          className="max-w-full max-h-[75vh] object-contain"
         />
       </div>
     </div>
@@ -94,26 +97,20 @@ const PaymentsHistory = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <svg className="animate-spin w-10 h-10 mx-auto text-green-500 mb-4" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <p className="text-slate-400">Cargando historial...</p>
-        </div>
+        <p className="text-[#6B7280] font-mono">$ cargando historial<span className="animate-pulse">_</span></p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-500/20 border border-red-500 rounded-lg p-6 text-center">
-        <p className="text-red-400">{error}</p>
+      <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 p-6 text-center">
+        <p className="text-[#EF4444] font-mono">[ERROR] {error}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+          className="mt-4 px-4 py-2 bg-[#EF4444] hover:bg-[#EF4444]/80 text-white font-mono"
         >
-          Reintentar
+          $ reintentar
         </button>
       </div>
     );
@@ -123,27 +120,29 @@ const PaymentsHistory = () => {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">Historial de Pagos</h1>
-        <p className="text-slate-400">
-          Visualiza y analiza los pagos registrados
+        <h1 className="text-2xl font-bold text-white mb-1">
+          <span className="text-[#10B981]">&gt;</span> historial_pagos
+        </h1>
+        <p className="text-[#6B7280] text-sm">
+          // visualiza y analiza pagos registrados
         </p>
       </div>
 
       {/* Controles de período */}
       <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex gap-1 bg-[#111111] border border-[#1F1F1F] p-1">
           {[
-            { value: 'day', label: 'Día' },
-            { value: 'month', label: 'Mes' },
-            { value: 'year', label: 'Año' }
+            { value: 'day', label: '$ dia' },
+            { value: 'month', label: '$ mes' },
+            { value: 'year', label: '$ año' }
           ].map(p => (
             <button
               key={p.value}
               onClick={() => setPeriod(p.value)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 font-mono text-sm transition-colors ${
                 period === p.value
-                  ? 'bg-green-600 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  ? 'bg-[#10B981] text-[#0A0A0A]'
+                  : 'text-[#6B7280] hover:text-white hover:bg-[#1A1A1A]'
               }`}
             >
               {p.label}
@@ -154,18 +153,18 @@ const PaymentsHistory = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigatePeriod(-1)}
-            className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white"
+            className="p-2 bg-[#1A1A1A] border border-[#1F1F1F] hover:border-[#10B981] text-white"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className="px-4 py-2 bg-slate-800 rounded-lg text-white font-medium min-w-[200px] text-center">
+          <span className="px-4 py-2 bg-[#111111] border border-[#1F1F1F] text-white font-mono min-w-[200px] text-center">
             {formatPeriodLabel()}
           </span>
           <button
             onClick={() => navigatePeriod(1)}
-            className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white"
+            className="p-2 bg-[#1A1A1A] border border-[#1F1F1F] hover:border-[#10B981] text-white"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -173,96 +172,82 @@ const PaymentsHistory = () => {
           </button>
           <button
             onClick={() => setSelectedDate(new Date())}
-            className="px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white text-sm"
+            className="px-3 py-2 bg-[#10B981] hover:bg-[#10B981]/80 text-[#0A0A0A] text-sm font-mono"
           >
-            Hoy
+            $ hoy
           </button>
         </div>
       </div>
 
       {/* Cards de resumen */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-slate-400 text-sm">Total Pagos</span>
-            <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
+            <span className="text-[#6B7280] text-xs font-mono uppercase">// total_pagos</span>
+            <span className="text-[#10B981] font-mono">#</span>
           </div>
-          <div className="text-2xl font-bold text-white">{data?.current?.total || 0}</div>
-          <div className={`text-sm ${data?.comparison?.total >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {data?.comparison?.total >= 0 ? '+' : ''}{data?.comparison?.total || 0}% vs anterior
+          <div className="text-2xl font-bold text-white font-mono">{data?.current?.total || 0}</div>
+          <div className={`text-sm font-mono ${data?.comparison?.total >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+            [{data?.comparison?.total >= 0 ? '+' : ''}{data?.comparison?.total || 0}%]
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-slate-400 text-sm">Monto Total</span>
-            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
+            <span className="text-[#6B7280] text-xs font-mono uppercase">// monto_total</span>
+            <span className="text-[#3B82F6] font-mono">$</span>
           </div>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-white font-mono">
             Q{(data?.current?.totalMonto || 0).toLocaleString('es-GT', { minimumFractionDigits: 2 })}
           </div>
-          <div className={`text-sm ${data?.comparison?.monto >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {data?.comparison?.monto >= 0 ? '+' : ''}{data?.comparison?.monto || 0}% vs anterior
+          <div className={`text-sm font-mono ${data?.comparison?.monto >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+            [{data?.comparison?.monto >= 0 ? '+' : ''}{data?.comparison?.monto || 0}%]
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-slate-400 text-sm">Empresas</span>
-            <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
+            <span className="text-[#6B7280] text-xs font-mono uppercase">// empresas</span>
+            <span className="text-[#8B5CF6] font-mono">@</span>
           </div>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-white font-mono">
             {Object.keys(data?.current?.byEmpresa || {}).length}
           </div>
-          <div className="text-sm text-slate-400">empresas diferentes</div>
+          <div className="text-sm text-[#4B5563] font-mono">// diferentes</div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-slate-400 text-sm">Promedio/Pago</span>
-            <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </div>
+            <span className="text-[#6B7280] text-xs font-mono uppercase">// promedio</span>
+            <span className="text-[#F59E0B] font-mono">~</span>
           </div>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-white font-mono">
             Q{data?.current?.total > 0
               ? ((data?.current?.totalMonto || 0) / data.current.total).toLocaleString('es-GT', { minimumFractionDigits: 2 })
               : '0.00'}
           </div>
-          <div className="text-sm text-slate-400">por transacción</div>
+          <div className="text-sm text-[#4B5563] font-mono">// por transaccion</div>
         </div>
       </div>
 
       {/* Tabla de pagos */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-        <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white">Detalle de pagos</h3>
-          <div className="flex gap-2">
+      <div className="bg-[#111111] border border-[#1F1F1F] overflow-hidden">
+        <div className="p-4 border-b border-[#1F1F1F] flex items-center justify-between">
+          <h3 className="text-lg font-bold text-white">
+            <span className="text-[#10B981]">&gt;</span> detalle_pagos
+          </h3>
+          <div className="flex gap-1">
             <button
               onClick={() => setViewMode('table')}
-              className={`px-3 py-1 rounded text-sm ${viewMode === 'table' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}`}
+              className={`px-3 py-1 text-sm font-mono ${viewMode === 'table' ? 'bg-[#10B981] text-[#0A0A0A]' : 'bg-[#1A1A1A] text-[#6B7280] border border-[#1F1F1F]'}`}
             >
-              Tabla
+              $ tabla
             </button>
             <button
               onClick={() => setViewMode('cards')}
-              className={`px-3 py-1 rounded text-sm ${viewMode === 'cards' ? 'bg-green-600 text-white' : 'bg-slate-700 text-slate-300'}`}
+              className={`px-3 py-1 text-sm font-mono ${viewMode === 'cards' ? 'bg-[#10B981] text-[#0A0A0A]' : 'bg-[#1A1A1A] text-[#6B7280] border border-[#1F1F1F]'}`}
             >
-              Cards
+              $ cards
             </button>
           </div>
         </div>
@@ -270,27 +255,27 @@ const PaymentsHistory = () => {
         {viewMode === 'table' ? (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-700/50">
+              <thead className="bg-[#1A1A1A]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Empresa</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Fecha</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase">Producto</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase">Monto</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase">Imagen</th>
+                  <th className="px-4 py-3 text-left text-xs font-mono text-[#6B7280] uppercase">empresa</th>
+                  <th className="px-4 py-3 text-left text-xs font-mono text-[#6B7280] uppercase">fecha</th>
+                  <th className="px-4 py-3 text-left text-xs font-mono text-[#6B7280] uppercase">producto</th>
+                  <th className="px-4 py-3 text-right text-xs font-mono text-[#6B7280] uppercase">monto</th>
+                  <th className="px-4 py-3 text-center text-xs font-mono text-[#6B7280] uppercase">img</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-[#1F1F1F]">
                 {data?.current?.payments?.map((payment) => (
-                  <tr key={payment.id} className="hover:bg-slate-700/30">
+                  <tr key={payment.id} className="hover:bg-[#1A1A1A]">
                     <td className="px-4 py-3 text-white font-medium">{payment.empresa}</td>
-                    <td className="px-4 py-3 text-slate-300">{payment.fecha}</td>
-                    <td className="px-4 py-3 text-slate-300">{payment.producto}</td>
+                    <td className="px-4 py-3 text-[#FAFAFA] font-mono">{payment.fecha}</td>
+                    <td className="px-4 py-3 text-[#6B7280]">{payment.producto}</td>
                     <td className="px-4 py-3 text-right">
-                      <span className="text-green-400 font-semibold">
+                      <span className="text-[#10B981] font-mono font-bold">
                         Q{payment.monto?.toLocaleString('es-GT', { minimumFractionDigits: 2 })}
                       </span>
                       {payment.monedaOriginal === 'USD' && (
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-[#4B5563] font-mono">
                           (USD {payment.montoOriginal?.toLocaleString('es-GT', { minimumFractionDigits: 2 })})
                         </div>
                       )}
@@ -299,22 +284,20 @@ const PaymentsHistory = () => {
                       {payment.imageUrl ? (
                         <button
                           onClick={() => setSelectedImage(payment.imageUrl)}
-                          className="text-blue-400 hover:text-blue-300"
+                          className="text-[#3B82F6] hover:text-[#3B82F6]/80 font-mono text-sm"
                         >
-                          <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
+                          [img]
                         </button>
                       ) : (
-                        <span className="text-slate-600">-</span>
+                        <span className="text-[#4B5563] font-mono">--</span>
                       )}
                     </td>
                   </tr>
                 ))}
                 {(!data?.current?.payments || data.current.payments.length === 0) && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
-                      No hay pagos registrados en este período
+                    <td colSpan={5} className="px-4 py-8 text-center text-[#4B5563] font-mono">
+                      // no hay pagos en este periodo
                     </td>
                   </tr>
                 )}
@@ -324,38 +307,35 @@ const PaymentsHistory = () => {
         ) : (
           <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto">
             {data?.current?.payments?.map((payment) => (
-              <div key={payment.id} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+              <div key={payment.id} className="bg-[#1A1A1A] border border-[#1F1F1F] p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="text-white font-semibold">{payment.empresa}</div>
-                    <div className="text-sm text-slate-400">{payment.fecha}</div>
+                    <div className="text-sm text-[#6B7280] font-mono">{payment.fecha}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-green-400 font-bold">
+                    <div className="text-[#10B981] font-bold font-mono">
                       Q{payment.monto?.toLocaleString('es-GT', { minimumFractionDigits: 2 })}
                     </div>
                     {payment.monedaOriginal === 'USD' && (
-                      <div className="text-xs text-slate-500">USD {payment.montoOriginal}</div>
+                      <div className="text-xs text-[#4B5563] font-mono">USD {payment.montoOriginal}</div>
                     )}
                   </div>
                 </div>
-                <div className="text-sm text-slate-300 mb-3">{payment.producto}</div>
+                <div className="text-sm text-[#6B7280] mb-3">{payment.producto}</div>
                 {payment.imageUrl && (
                   <button
                     onClick={() => setSelectedImage(payment.imageUrl)}
-                    className="w-full py-2 bg-slate-600 hover:bg-slate-500 rounded text-sm text-slate-300 flex items-center justify-center gap-2"
+                    className="w-full py-2 bg-[#1F1F1F] hover:bg-[#3B82F6]/20 text-sm text-[#FAFAFA] flex items-center justify-center gap-2 font-mono"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Ver comprobante
+                    $ ver_comprobante
                   </button>
                 )}
               </div>
             ))}
             {(!data?.current?.payments || data.current.payments.length === 0) && (
-              <div className="col-span-full text-center text-slate-500 py-8">
-                No hay pagos registrados en este período
+              <div className="col-span-full text-center text-[#4B5563] py-8 font-mono">
+                // no hay pagos en este periodo
               </div>
             )}
           </div>

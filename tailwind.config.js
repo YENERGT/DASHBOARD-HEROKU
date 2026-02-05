@@ -4,32 +4,49 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class', // Habilita tema oscuro
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // Colores para tema oscuro
+        // Terminal Minimal Theme
         dark: {
-          bg: '#0f172a',        // Fondo principal
-          card: '#1e293b',      // Tarjetas
-          border: '#334155',    // Bordes
-          hover: '#475569',     // Hover
+          bg: '#0A0A0A',        // Fondo principal
+          card: '#111111',      // Tarjetas
+          border: '#1F1F1F',    // Bordes
+          hover: '#1A1A1A',     // Hover
+        },
+        terminal: {
+          green: '#10B981',     // Accent principal
+          blue: '#3B82F6',      // Links, acciones
+          purple: '#8B5CF6',    // Admin badge
+          amber: '#F59E0B',     // Warnings
+          red: '#EF4444',       // Errors, danger
+          cyan: '#06B6D4',      // Info
+          gray: '#6B7280',      // Text secundario
+          muted: '#4B5563',     // Text muted
         },
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#10B981',       // Terminal green
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
         },
-        success: '#10b981',   // Verde
-        danger: '#ef4444',    // Rojo
-        warning: '#f59e0b',   // Amarillo
+        success: '#10B981',
+        danger: '#EF4444',
+        warning: '#F59E0B',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Consolas', 'monospace'],
+      },
+      borderRadius: {
+        'none': '0',
       },
     },
   },

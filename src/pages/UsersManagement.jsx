@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 
@@ -158,13 +158,13 @@ function UsersManagement() {
   const getRoleBadgeColor = (role) => {
     switch (role) {
       case 'admin':
-        return 'bg-purple-500/20 text-purple-400 border-purple-500/50';
+        return 'bg-[#8B5CF6]/20 text-[#8B5CF6] border-[#8B5CF6]/50';
       case 'ventas':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
+        return 'bg-[#3B82F6]/20 text-[#3B82F6] border-[#3B82F6]/50';
       case 'bodega':
-        return 'bg-green-500/20 text-green-400 border-green-500/50';
+        return 'bg-[#10B981]/20 text-[#10B981] border-[#10B981]/50';
       default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
+        return 'bg-[#6B7280]/20 text-[#6B7280] border-[#6B7280]/50';
     }
   };
 
@@ -172,7 +172,7 @@ function UsersManagement() {
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <p className="text-[#6B7280] font-mono">$ verificando permisos<span className="animate-pulse">_</span></p>
       </div>
     );
   }
@@ -186,70 +186,70 @@ function UsersManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Gestión de Usuarios</h1>
-          <p className="text-slate-400 mt-1">Administra el acceso al sistema</p>
+          <h1 className="text-2xl font-bold text-white mb-1">
+            <span className="text-[#10B981]">&gt;</span> gestion_usuarios
+          </h1>
+          <p className="text-[#6B7280] text-sm">// administra el acceso al sistema</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+          className="bg-[#3B82F6] hover:bg-[#3B82F6]/80 text-white px-4 py-2 font-mono transition-colors flex items-center gap-2"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          Agregar Usuario
+          <span className="text-lg">+</span>
+          $ agregar_usuario
         </button>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg">
-          {error}
-          <button onClick={() => setError(null)} className="float-right text-red-400 hover:text-red-200">
-            &times;
+        <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] px-4 py-3 font-mono">
+          [ERROR] {error}
+          <button onClick={() => setError(null)} className="float-right text-[#EF4444] hover:text-[#EF4444]/80">
+            [x]
           </button>
         </div>
       )}
 
       {/* Users Table */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+      <div className="bg-[#111111] border border-[#1F1F1F] overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+            <p className="text-[#6B7280] font-mono">$ cargando usuarios<span className="animate-pulse">_</span></p>
           </div>
         ) : users.length === 0 ? (
-          <div className="text-center py-12 text-slate-400">
-            No hay usuarios registrados
+          <div className="text-center py-12 text-[#4B5563] font-mono">
+            // no hay usuarios registrados
           </div>
         ) : (
           <table className="w-full">
-            <thead className="bg-slate-700/50">
+            <thead className="bg-[#1A1A1A]">
               <tr>
-                <th className="text-left text-slate-300 font-medium px-6 py-4">Usuario</th>
-                <th className="text-left text-slate-300 font-medium px-6 py-4">Rol</th>
-                <th className="text-left text-slate-300 font-medium px-6 py-4">Estado</th>
-                <th className="text-left text-slate-300 font-medium px-6 py-4">Último acceso</th>
-                <th className="text-right text-slate-300 font-medium px-6 py-4">Acciones</th>
+                <th className="text-left text-[#6B7280] font-mono text-sm px-6 py-4">usuario</th>
+                <th className="text-left text-[#6B7280] font-mono text-sm px-6 py-4">rol</th>
+                <th className="text-left text-[#6B7280] font-mono text-sm px-6 py-4">estado</th>
+                <th className="text-left text-[#6B7280] font-mono text-sm px-6 py-4">ultimo_acceso</th>
+                <th className="text-right text-[#6B7280] font-mono text-sm px-6 py-4">acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700">
+            <tbody className="divide-y divide-[#1F1F1F]">
               {users.map((u) => (
-                <tr key={u.id} className="hover:bg-slate-700/30 transition-colors">
+                <tr key={u.id} className="hover:bg-[#1A1A1A] transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {u.photoUrl ? (
                         <img
                           src={u.photoUrl}
                           alt={u.displayName}
-                          className="w-10 h-10 rounded-full"
+                          className="w-10 h-10"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-slate-300 font-medium">
+                        <div className="w-10 h-10 bg-[#1F1F1F] flex items-center justify-center text-[#FAFAFA] font-mono font-bold">
                           {u.email.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <div>
                         <div className="text-white font-medium">{u.displayName || u.email}</div>
-                        <div className="text-slate-400 text-sm">{u.email}</div>
+                        <div className="text-[#6B7280] text-sm font-mono">{u.email}</div>
                       </div>
                     </div>
                   </td>
@@ -258,19 +258,19 @@ function UsersManagement() {
                       value={u.role}
                       onChange={(e) => handleUpdateRole(u.id, e.target.value)}
                       disabled={u.email === user?.email}
-                      className={`px-3 py-1 rounded-full text-sm font-medium border cursor-pointer ${getRoleBadgeColor(u.role)} bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
+                      className={`px-3 py-1 text-sm font-mono border cursor-pointer ${getRoleBadgeColor(u.role)} bg-transparent focus:outline-none focus:border-[#10B981] disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      <option value="admin" className="bg-slate-800">Admin</option>
-                      <option value="ventas" className="bg-slate-800">Ventas</option>
-                      <option value="bodega" className="bg-slate-800">Bodega</option>
+                      <option value="admin" className="bg-[#0A0A0A]">admin</option>
+                      <option value="ventas" className="bg-[#0A0A0A]">ventas</option>
+                      <option value="bodega" className="bg-[#0A0A0A]">bodega</option>
                     </select>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${u.active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {u.active ? 'Activo' : 'Inactivo'}
+                    <span className={`px-3 py-1 text-sm font-mono ${u.active ? 'bg-[#10B981]/20 text-[#10B981]' : 'bg-[#EF4444]/20 text-[#EF4444]'}`}>
+                      {u.active ? '[activo]' : '[inactivo]'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-slate-400">
+                  <td className="px-6 py-4 text-[#6B7280] font-mono text-sm">
                     {u.lastLogin
                       ? new Date(u.lastLogin).toLocaleDateString('es-GT', {
                           day: '2-digit',
@@ -279,7 +279,7 @@ function UsersManagement() {
                           hour: '2-digit',
                           minute: '2-digit'
                         })
-                      : 'Nunca'}
+                      : '// nunca'}
                   </td>
                   <td className="px-6 py-4 text-right">
                     {u.email !== user?.email && (
@@ -288,36 +288,27 @@ function UsersManagement() {
                           /* Usuario activo: mostrar botón de Inhabilitar */
                           <button
                             onClick={() => handleDeactivateUser(u.id, u.email)}
-                            className="text-yellow-400 hover:text-yellow-300 transition-colors p-2 flex items-center gap-1"
+                            className="text-[#F59E0B] hover:text-[#F59E0B]/80 transition-colors p-2 flex items-center gap-1 font-mono text-sm"
                             title="Inhabilitar usuario"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                            </svg>
-                            <span className="text-sm">Inhabilitar</span>
+                            $ inhabilitar
                           </button>
                         ) : (
                           /* Usuario inhabilitado: mostrar botones de Reactivar y Eliminar */
                           <>
                             <button
                               onClick={() => handleReactivateUser(u.id, u.email)}
-                              className="text-green-400 hover:text-green-300 transition-colors p-2 flex items-center gap-1"
+                              className="text-[#10B981] hover:text-[#10B981]/80 transition-colors p-2 flex items-center gap-1 font-mono text-sm"
                               title="Reactivar usuario"
                             >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              <span className="text-sm">Reactivar</span>
+                              $ reactivar
                             </button>
                             <button
                               onClick={() => handleDeleteUser(u.id, u.email)}
-                              className="text-red-400 hover:text-red-300 transition-colors p-2 flex items-center gap-1"
+                              className="text-[#EF4444] hover:text-[#EF4444]/80 transition-colors p-2 flex items-center gap-1 font-mono text-sm"
                               title="Eliminar permanentemente"
                             >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                              <span className="text-sm">Eliminar</span>
+                              $ rm --force
                             </button>
                           </>
                         )}
@@ -333,24 +324,24 @@ function UsersManagement() {
 
       {/* Modal: Agregar Usuario */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md">
-            <div className="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Agregar Usuario</h3>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#111111] border border-[#1F1F1F] w-full max-w-md">
+            <div className="px-6 py-4 border-b border-[#1F1F1F] flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">
+                <span className="text-[#10B981]">&gt;</span> agregar_usuario
+              </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="text-[#6B7280] hover:text-[#EF4444] transition-colors font-mono"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                [x]
               </button>
             </div>
 
             <form onSubmit={handleCreateUser} className="p-6 space-y-4">
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-2">
-                  Email de Google *
+                <label className="block text-[#6B7280] text-xs font-mono mb-2">
+                  // email_google *
                 </label>
                 <input
                   type="email"
@@ -358,44 +349,44 @@ function UsersManagement() {
                   value={newUser.email}
                   onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                   placeholder="usuario@gmail.com"
-                  className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-[#0A0A0A] border border-[#1F1F1F] text-white px-4 py-2 font-mono focus:outline-none focus:border-[#10B981]"
                 />
-                <p className="text-slate-500 text-xs mt-1">
-                  El usuario podrá hacer login con esta cuenta de Google
+                <p className="text-[#4B5563] text-xs mt-1 font-mono">
+                  // login con cuenta google
                 </p>
               </div>
 
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-2">
-                  Nombre (opcional)
+                <label className="block text-[#6B7280] text-xs font-mono mb-2">
+                  // nombre (opcional)
                 </label>
                 <input
                   type="text"
                   value={newUser.displayName}
                   onChange={(e) => setNewUser({ ...newUser, displayName: e.target.value })}
                   placeholder="Juan Pérez"
-                  className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-[#0A0A0A] border border-[#1F1F1F] text-white px-4 py-2 focus:outline-none focus:border-[#10B981]"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-2">
-                  Rol *
+                <label className="block text-[#6B7280] text-xs font-mono mb-2">
+                  // rol *
                 </label>
                 <select
                   value={newUser.role}
                   onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                  className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-[#0A0A0A] border border-[#1F1F1F] text-white px-4 py-2 font-mono focus:outline-none focus:border-[#10B981]"
                 >
-                  <option value="ventas">Ventas</option>
-                  <option value="bodega">Bodega</option>
-                  <option value="admin">Admin</option>
+                  <option value="ventas">ventas</option>
+                  <option value="bodega">bodega</option>
+                  <option value="admin">admin</option>
                 </select>
               </div>
 
               {error && (
-                <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-2 rounded-lg text-sm">
-                  {error}
+                <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] px-4 py-2 text-sm font-mono">
+                  [ERROR] {error}
                 </div>
               )}
 
@@ -403,16 +394,16 @@ function UsersManagement() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 bg-slate-600 hover:bg-slate-500 text-white py-2 rounded-lg font-medium transition-colors"
+                  className="flex-1 bg-[#1A1A1A] border border-[#1F1F1F] hover:border-[#EF4444] text-white py-2 font-mono transition-colors"
                 >
-                  Cancelar
+                  $ cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white py-2 rounded-lg font-medium transition-colors"
+                  className="flex-1 bg-[#10B981] hover:bg-[#10B981]/80 disabled:bg-[#1A1A1A] disabled:text-[#4B5563] disabled:cursor-not-allowed text-[#0A0A0A] py-2 font-mono font-bold transition-colors"
                 >
-                  {submitting ? 'Creando...' : 'Crear Usuario'}
+                  {submitting ? '$ creando_' : '$ crear'}
                 </button>
               </div>
             </form>

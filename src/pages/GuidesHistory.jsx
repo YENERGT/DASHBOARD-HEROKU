@@ -94,10 +94,7 @@ const GuidesHistory = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Cargando historial...</p>
-        </div>
+        <p className="text-[#6B7280] font-mono">$ cargando historial<span className="animate-pulse">_</span></p>
       </div>
     );
   }
@@ -105,13 +102,13 @@ const GuidesHistory = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-6 text-center">
-          <p className="text-red-400 mb-4">{error}</p>
+        <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 p-6 text-center">
+          <p className="text-[#EF4444] mb-4 font-mono">[ERROR] {error}</p>
           <button
             onClick={loadData}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-[#3B82F6] text-white font-mono hover:bg-[#3B82F6]/80 transition-colors"
           >
-            Reintentar
+            $ reintentar
           </button>
         </div>
       </div>
@@ -125,25 +122,27 @@ const GuidesHistory = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Historial de Guías</h1>
-          <p className="text-slate-400">
-            Análisis de envíos y notificaciones - {getPeriodLabel()}
+          <h1 className="text-2xl font-bold text-white mb-1">
+            <span className="text-[#10B981]">&gt;</span> historial_guias
+          </h1>
+          <p className="text-[#6B7280] text-sm">
+            // analisis de envios - {getPeriodLabel().toLowerCase()}
           </p>
         </div>
 
         {/* Period Selector */}
-        <div className="flex gap-2 bg-slate-800 rounded-lg p-1">
+        <div className="flex gap-1 bg-[#111111] border border-[#1F1F1F] p-1">
           {['day', 'month', 'year'].map(period => (
             <button
               key={period}
               onClick={() => setSelectedPeriod(period)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              className={`px-4 py-2 text-sm font-mono transition-all ${
                 selectedPeriod === period
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  ? 'bg-[#10B981] text-[#0A0A0A]'
+                  : 'text-[#6B7280] hover:text-white hover:bg-[#1A1A1A]'
               }`}
             >
-              {period === 'day' ? 'Día' : period === 'month' ? 'Mes' : 'Año'}
+              {period === 'day' ? '$ dia' : period === 'month' ? '$ mes' : '$ año'}
             </button>
           ))}
         </div>
@@ -155,37 +154,37 @@ const GuidesHistory = () => {
           type="date"
           value={selectedDate.toISOString().split('T')[0]}
           onChange={(e) => setSelectedDate(new Date(e.target.value))}
-          className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 bg-[#111111] border border-[#1F1F1F] text-white font-mono focus:outline-none focus:border-[#10B981]"
         />
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Envíos */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-slate-400 text-sm">Total Envíos</span>
-            <span className="text-2xl">📦</span>
+            <span className="text-[#6B7280] text-xs font-mono uppercase">// total_envios</span>
+            <span className="text-[#10B981] font-mono">#</span>
           </div>
-          <div className="text-3xl font-bold text-white mb-1">
+          <div className="text-3xl font-bold text-white mb-1 font-mono">
             {stats?.current?.total || 0}
           </div>
           <div className="flex items-center gap-2">
-            <span className={`text-sm font-medium ${
-              stats?.comparison?.total >= 0 ? 'text-green-400' : 'text-red-400'
+            <span className={`text-sm font-mono ${
+              stats?.comparison?.total >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'
             }`}>
-              {stats?.comparison?.total >= 0 ? '↑' : '↓'} {Math.abs(stats?.comparison?.total || 0)}%
+              [{stats?.comparison?.total >= 0 ? '+' : ''}{Math.abs(stats?.comparison?.total || 0)}%]
             </span>
-            <span className="text-slate-500 text-sm">vs {getPreviousPeriodLabel()}</span>
+            <span className="text-[#4B5563] text-sm font-mono">vs {getPreviousPeriodLabel().toLowerCase()}</span>
           </div>
         </div>
 
         {/* Por cada transporte */}
         {Object.entries(stats?.current?.byTransport || {}).map(([transport, count]) => (
-          <div key={transport} className="bg-slate-800 border border-slate-700 rounded-xl p-5">
+          <div key={transport} className="bg-[#111111] border border-[#1F1F1F] p-5">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-400 text-sm">{transport}</span>
-              <div className="w-10 h-10 bg-white rounded-lg p-1 flex items-center justify-center">
+              <span className="text-[#6B7280] text-xs font-mono">// {transport.toLowerCase().replace(' ', '_')}</span>
+              <div className="w-10 h-10 bg-white p-1 flex items-center justify-center">
                 <img
                   src={transportLogos[transport]}
                   alt={transport}
@@ -193,14 +192,14 @@ const GuidesHistory = () => {
                 />
               </div>
             </div>
-            <div className="text-3xl font-bold text-white mb-1">{count}</div>
+            <div className="text-3xl font-bold text-white mb-1 font-mono">{count}</div>
             <div className="flex items-center gap-2">
-              <span className={`text-sm font-medium ${
-                (stats?.comparison?.byTransport?.[transport] || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+              <span className={`text-sm font-mono ${
+                (stats?.comparison?.byTransport?.[transport] || 0) >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]'
               }`}>
-                {(stats?.comparison?.byTransport?.[transport] || 0) >= 0 ? '↑' : '↓'} {Math.abs(stats?.comparison?.byTransport?.[transport] || 0)}%
+                [{(stats?.comparison?.byTransport?.[transport] || 0) >= 0 ? '+' : ''}{Math.abs(stats?.comparison?.byTransport?.[transport] || 0)}%]
               </span>
-              <span className="text-slate-500 text-sm">vs {getPreviousPeriodLabel()}</span>
+              <span className="text-[#4B5563] text-sm font-mono">vs {getPreviousPeriodLabel().toLowerCase()}</span>
             </div>
           </div>
         ))}
@@ -208,50 +207,52 @@ const GuidesHistory = () => {
 
       {/* Timeline Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-xl font-semibold text-white">Timeline de Envíos</h2>
+        <h2 className="text-lg font-bold text-white">
+          <span className="text-[#10B981]">&gt;</span> timeline_envios
+        </h2>
 
         {/* Filter by Transport */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-1 flex-wrap">
           <button
             onClick={() => setFilterTransport('all')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            className={`px-3 py-1.5 text-sm font-mono transition-all ${
               filterTransport === 'all'
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                ? 'bg-[#10B981] text-[#0A0A0A]'
+                : 'bg-[#1A1A1A] text-[#6B7280] border border-[#1F1F1F] hover:border-[#10B981]'
             }`}
           >
-            Todos
+            $ todos
           </button>
           {Object.keys(transportLogos).map(transport => (
             <button
               key={transport}
               onClick={() => setFilterTransport(transport)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+              className={`px-3 py-1.5 text-sm font-mono transition-all flex items-center gap-2 ${
                 filterTransport === transport
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  ? 'bg-[#10B981] text-[#0A0A0A]'
+                  : 'bg-[#1A1A1A] text-[#6B7280] border border-[#1F1F1F] hover:border-[#10B981]'
               }`}
             >
               <img src={transportLogos[transport]} alt="" className="w-4 h-4 object-contain" />
-              {transport}
+              {transport.toLowerCase().replace(' ', '_')}
             </button>
           ))}
         </div>
       </div>
 
       {/* Timeline - Improved Layout */}
-      <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+      <div className="bg-[#111111] border border-[#1F1F1F] overflow-hidden">
         {filteredGuides.length > 0 ? (
-          <div className="divide-y divide-slate-700">
+          <div className="divide-y divide-[#1F1F1F]">
             {filteredGuides.map((guide) => (
               <div
                 key={guide.id}
-                className="p-4 hover:bg-slate-700/50 transition-colors"
+                className="p-4 hover:bg-[#1A1A1A] transition-colors"
               >
                 {/* Row Layout */}
                 <div className="flex items-start gap-4">
                   {/* Logo */}
-                  <div className="w-12 h-12 bg-white rounded-lg p-1.5 flex-shrink-0">
+                  <div className="w-12 h-12 bg-white p-1.5 flex-shrink-0">
                     <img
                       src={transportLogos[guide.transporte]}
                       alt={guide.transporte}
@@ -263,17 +264,17 @@ const GuidesHistory = () => {
                   <div className="flex-1 min-w-0">
                     {/* Top Row: Guide Number + Status + Date */}
                     <div className="flex items-center flex-wrap gap-2 mb-2">
-                      <span className="font-mono font-semibold text-blue-400 text-lg">
-                        {guide.numeroGuia || 'N/A'}
+                      <span className="font-mono font-semibold text-[#3B82F6] text-lg">
+                        #{guide.numeroGuia || 'N/A'}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={`px-2 py-0.5 text-xs font-mono ${
                         guide.estado === 'Enviado'
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-red-500/20 text-red-400'
+                          ? 'bg-[#10B981]/20 text-[#10B981]'
+                          : 'bg-[#EF4444]/20 text-[#EF4444]'
                       }`}>
-                        {guide.estado === 'Enviado' ? '✓ Enviado' : '✕ Fallido'}
+                        {guide.estado === 'Enviado' ? '[enviado]' : '[fallido]'}
                       </span>
-                      <span className="text-slate-500 text-sm ml-auto">
+                      <span className="text-[#4B5563] text-sm font-mono ml-auto">
                         {formatDate(guide.fechaEnvio)}
                       </span>
                     </div>
@@ -281,27 +282,27 @@ const GuidesHistory = () => {
                     {/* Info Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-2 text-sm">
                       <div>
-                        <span className="text-slate-500">Destinatario: </span>
+                        <span className="text-[#4B5563] font-mono">// dest: </span>
                         <span className="text-white">{guide.destinatario || 'Sin nombre'}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500">Teléfono: </span>
-                        <span className="text-slate-300 font-mono">{guide.telefono || 'N/A'}</span>
+                        <span className="text-[#4B5563] font-mono">// tel: </span>
+                        <span className="text-[#FAFAFA] font-mono">{guide.telefono || 'N/A'}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500">Pedido: </span>
-                        <span className="text-slate-300">{guide.numeroPedido || 'Sin identificar'}</span>
+                        <span className="text-[#4B5563] font-mono">// pedido: </span>
+                        <span className="text-[#FAFAFA]">{guide.numeroPedido || 'Sin identificar'}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500">Transporte: </span>
-                        <span className="text-slate-300">{guide.transporte}</span>
+                        <span className="text-[#4B5563] font-mono">// trans: </span>
+                        <span className="text-[#FAFAFA]">{guide.transporte}</span>
                       </div>
                     </div>
 
                     {/* Address Row */}
                     <div className="mt-2 text-sm">
-                      <span className="text-slate-500">Dirección: </span>
-                      <span className="text-slate-400">{guide.direccion || 'Sin dirección'}</span>
+                      <span className="text-[#4B5563] font-mono">// dir: </span>
+                      <span className="text-[#6B7280]">{guide.direccion || 'Sin dirección'}</span>
                     </div>
                   </div>
 
@@ -310,13 +311,12 @@ const GuidesHistory = () => {
                     {guide.imageUrl && (guide.imageUrl.startsWith('http') || guide.imageUrl.startsWith('data:image/')) ? (
                       <button
                         onClick={() => setSelectedImage(guide.imageUrl)}
-                        className="px-3 py-2 bg-slate-600 hover:bg-slate-500 text-slate-300 rounded-lg text-sm transition-colors flex items-center gap-2"
+                        className="px-3 py-2 bg-[#1A1A1A] border border-[#1F1F1F] hover:border-[#3B82F6] text-[#FAFAFA] text-sm transition-colors flex items-center gap-2 font-mono"
                       >
-                        <span>📷</span>
-                        <span className="hidden sm:inline">Ver</span>
+                        <span>[img]</span>
                       </button>
                     ) : (
-                      <span className="text-slate-600 text-xs">Sin imagen</span>
+                      <span className="text-[#4B5563] text-xs font-mono">--</span>
                     )}
                   </div>
                 </div>
@@ -325,8 +325,8 @@ const GuidesHistory = () => {
           </div>
         ) : (
           <div className="p-12 text-center">
-            <div className="text-6xl mb-4">📭</div>
-            <p className="text-slate-400">No hay guías en este período</p>
+            <div className="text-4xl mb-4 font-mono text-[#4B5563]">[empty]</div>
+            <p className="text-[#6B7280] font-mono">// no hay guias en este periodo</p>
           </div>
         )}
       </div>
@@ -338,22 +338,24 @@ const GuidesHistory = () => {
           onClick={() => setSelectedImage(null)}
         >
           <div
-            className="bg-slate-800 rounded-xl p-4 max-w-4xl max-h-[90vh] overflow-auto"
+            className="bg-[#111111] border border-[#1F1F1F] p-4 max-w-4xl max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white">Imagen de Guía</h3>
+              <h3 className="text-lg font-bold text-white">
+                <span className="text-[#10B981]">&gt;</span> imagen_guia
+              </h3>
               <button
                 onClick={() => setSelectedImage(null)}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="text-[#6B7280] hover:text-[#EF4444] transition-colors font-mono"
               >
-                ✕
+                [x]
               </button>
             </div>
             <img
               src={selectedImage}
               alt="Guía de envío"
-              className="max-w-full rounded-lg"
+              className="max-w-full"
             />
           </div>
         </div>

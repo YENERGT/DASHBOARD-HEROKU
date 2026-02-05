@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Card = ({
   title,
   value,
@@ -10,52 +8,54 @@ const Card = ({
   className = ''
 }) => {
   const getTrendColor = () => {
-    if (!trend) return 'text-gray-400';
-    return trend.isPositive ? 'text-green-500' : 'text-red-500';
+    if (trend === undefined || trend === null) return 'text-[#6B7280]';
+    return trend >= 0 ? 'text-[#10B981]' : 'text-[#EF4444]';
   };
 
   const getTrendIcon = () => {
-    if (!trend) return null;
-    return trend.isPositive ? '📈' : '📉';
+    if (trend === undefined || trend === null) return '';
+    return trend >= 0 ? '++' : '--';
+  };
+
+  const formatTrend = () => {
+    if (trend === undefined || trend === null) return '';
+    const sign = trend >= 0 ? '+' : '';
+    return `[${sign}${trend.toFixed(1)}%]`;
   };
 
   return (
-    <div className={`bg-dark-card border border-dark-border rounded-lg p-6 hover:border-primary-500 transition-all duration-200 ${className}`}>
+    <div className={`bg-[#111111] border border-[#1F1F1F] p-5 hover:border-[#10B981] transition-all duration-200 ${className}`}>
       {/* Header con icono y título */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <p className="text-gray-400 text-sm font-medium mb-1">{title}</p>
+          <p className="text-[#6B7280] text-xs font-medium">{title.toLowerCase().replace(/ /g, '_')}</p>
           {subtitle && (
-            <p className="text-gray-500 text-xs">{subtitle}</p>
+            <p className="text-[#4B5563] text-xs mt-0.5">{subtitle}</p>
           )}
         </div>
         {icon && (
-          <span className="text-2xl">{icon}</span>
+          <span className={`text-lg font-bold ${getTrendColor()}`}>{getTrendIcon() || icon}</span>
         )}
       </div>
 
       {/* Valor principal */}
-      <div className="mb-3">
-        <h3 className="text-3xl font-bold text-white">{value}</h3>
+      <div className="mb-2">
+        <h3 className="text-2xl font-bold text-white">{value}</h3>
       </div>
 
       {/* Comparación y tendencia */}
-      {trend && (
-        <div className="space-y-1">
-          <div className={`flex items-center gap-2 text-sm font-semibold ${getTrendColor()}`}>
-            <span>{getTrendIcon()}</span>
-            <span>{trend.percentage}%</span>
-            <span className="text-xs font-normal">
-              {trend.difference > 0 ? '+' : ''}{trend.difference.toLocaleString('es-GT', { style: 'currency', currency: 'GTQ' })}
-            </span>
+      <div className="space-y-1">
+        {trend !== undefined && trend !== null && (
+          <div className={`flex items-center gap-2 text-xs font-semibold ${getTrendColor()}`}>
+            <span>{formatTrend()}</span>
           </div>
-          {comparison && (
-            <p className="text-gray-500 text-xs">
-              {comparison}
-            </p>
-          )}
-        </div>
-      )}
+        )}
+        {comparison && (
+          <p className="text-[#4B5563] text-xs">
+            {comparison}
+          </p>
+        )}
+      </div>
     </div>
   );
 };

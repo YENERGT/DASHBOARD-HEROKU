@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../components/shared/Card';
 import Table from '../components/shared/Table';
 import PeriodSelector from '../components/shared/PeriodSelector';
@@ -6,7 +6,7 @@ import DateSelector from '../components/shared/DateSelector';
 import dataService from '../services/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../utils/calculations';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const MisVentas = () => {
   const { user } = useAuth();
@@ -76,24 +76,21 @@ const MisVentas = () => {
   if (loading || !metrics) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Cargando tus ventas...</p>
-        </div>
+        <p className="text-[#6B7280] font-mono">$ cargando ventas<span className="animate-pulse">_</span></p>
       </div>
     );
   }
 
   const tableColumns = [
     {
-      header: 'Fecha',
+      header: 'fecha',
       accessor: 'fecha',
       render: (value) => {
         const date = new Date(value);
         return (
-          <span className="text-gray-300">
+          <span className="text-[#FAFAFA] font-mono text-sm">
             {date.toLocaleDateString('es-GT', { day: '2-digit', month: 'short' })}
-            <span className="text-gray-500 ml-2 text-xs">
+            <span className="text-[#4B5563] ml-2 text-xs">
               {date.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}
             </span>
           </span>
@@ -101,30 +98,30 @@ const MisVentas = () => {
       }
     },
     {
-      header: 'Pedido',
+      header: 'pedido',
       accessor: 'pedido',
-      render: (value) => <span className="font-semibold text-primary-400">{value}</span>
+      render: (value) => <span className="font-semibold text-[#10B981]">#{value}</span>
     },
     {
-      header: 'Cliente',
+      header: 'cliente',
       accessor: 'nombreNit',
-      render: (value) => <span className="truncate max-w-xs block">{value}</span>
+      render: (value) => <span className="truncate max-w-xs block text-[#FAFAFA]">{value}</span>
     },
     {
-      header: 'Total',
+      header: 'total',
       accessor: 'totalGeneral',
-      render: (value) => <span className="font-semibold text-green-400">{formatCurrency(value)}</span>
+      render: (value) => <span className="font-semibold text-white">{formatCurrency(value)}</span>
     },
     {
-      header: 'Estado',
+      header: 'estado',
       accessor: 'estado',
       render: (value) => (
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+        <span className={`px-2 py-1 text-xs font-mono ${
           value === 'paid'
-            ? 'bg-green-500/20 text-green-400'
-            : 'bg-red-500/20 text-red-400'
+            ? 'bg-[#10B981]/20 text-[#10B981]'
+            : 'bg-[#EF4444]/20 text-[#EF4444]'
         }`}>
-          {value === 'paid' ? 'Pagado' : 'Anulado'}
+          {value === 'paid' ? '[pagado]' : '[anulado]'}
         </span>
       )
     }
@@ -156,9 +153,11 @@ const MisVentas = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Mis Ventas</h1>
-          <p className="text-gray-400">
-            Bienvenido, <span className="text-blue-400 font-medium">{user?.displayName}</span>
+          <h1 className="text-2xl font-bold text-white mb-1">
+            <span className="text-[#10B981]">&gt;</span> mis_ventas
+          </h1>
+          <p className="text-[#6B7280] text-sm">
+            // vendedor: <span className="text-[#3B82F6]">{user?.displayName}</span>
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto">
@@ -172,97 +171,101 @@ const MisVentas = () => {
       </div>
 
       {/* Métricas Principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
-          title="Total Ventas"
+          title="total_ventas"
           value={formatCurrency(metrics.current.total)}
-          icon="💰"
-          comparison={`vs ${periodLabel}: ${formatCurrency(metrics.previous.total)}`}
+          icon="$"
+          comparison={`// vs ${periodLabel}: ${formatCurrency(metrics.previous.total)}`}
           trend={metrics.comparison.total}
         />
         <Card
-          title="Facturas"
+          title="facturas"
           value={paidCount}
-          icon="📋"
-          comparison={`vs ${periodLabel}: ${metrics.previous.count}`}
+          icon="#"
+          comparison={`// vs ${periodLabel}: ${metrics.previous.count}`}
           trend={metrics.comparison.count}
         />
         <Card
-          title="Ticket Promedio"
+          title="ticket_promedio"
           value={formatCurrency(metrics.current.average)}
-          icon="🎯"
-          comparison={`vs ${periodLabel}: ${formatCurrency(metrics.previous.average)}`}
+          icon="~"
+          comparison={`// vs ${periodLabel}: ${formatCurrency(metrics.previous.average)}`}
           trend={metrics.comparison.average}
         />
         <Card
-          title="IVA Generado"
+          title="iva_generado"
           value={formatCurrency(metrics.current.totalIVA)}
-          icon="💳"
-          comparison={`vs ${periodLabel}: ${formatCurrency(metrics.previous.totalIVA)}`}
+          icon="%"
+          comparison={`// vs ${periodLabel}: ${formatCurrency(metrics.previous.totalIVA)}`}
           trend={metrics.comparison.totalIVA}
         />
       </div>
 
       {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Gráfico de Ventas por Día */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white mb-4">Ventas por Día</h2>
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> ventas_por_dia
+          </h2>
           {dailyData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={dailyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} />
-                <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `Q${(v/1000).toFixed(0)}k`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#1F1F1F" />
+                <XAxis dataKey="date" stroke="#6B7280" fontSize={12} />
+                <YAxis stroke="#6B7280" fontSize={12} tickFormatter={(v) => `Q${(v/1000).toFixed(0)}k`} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: '1px solid #334155',
-                    borderRadius: '8px',
-                    color: '#e2e8f0'
+                    backgroundColor: '#111111',
+                    border: '1px solid #1F1F1F',
+                    borderRadius: '0',
+                    color: '#FAFAFA'
                   }}
                   formatter={(value) => [formatCurrency(value), 'Total']}
                 />
-                <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill="#3B82F6" radius={[0, 0, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[300px] text-gray-500">
-              No hay datos para mostrar
+            <div className="flex items-center justify-center h-[300px] text-[#4B5563]">
+              // no hay datos para mostrar
             </div>
           )}
         </div>
 
         {/* Top Productos */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white mb-4">Mis Top Productos</h2>
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> top_productos
+          </h2>
           {topProducts.length > 0 ? (
             <div className="space-y-3">
               {topProducts.map((product, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-[#1A1A1A] border border-[#1F1F1F]"
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
-                      index === 1 ? 'bg-gray-400/20 text-gray-300' :
-                      index === 2 ? 'bg-amber-600/20 text-amber-500' :
-                      'bg-slate-600/20 text-slate-400'
+                    <span className={`w-8 h-8 flex items-center justify-center text-sm font-bold font-mono ${
+                      index === 0 ? 'bg-[#F59E0B]/20 text-[#F59E0B]' :
+                      index === 1 ? 'bg-[#6B7280]/20 text-[#6B7280]' :
+                      index === 2 ? 'bg-[#F59E0B]/10 text-[#F59E0B]/70' :
+                      'bg-[#1F1F1F] text-[#4B5563]'
                     }`}>
-                      {index + 1}
+                      #{index + 1}
                     </span>
                     <div>
                       <p className="text-white font-medium truncate max-w-[200px]">{product.nombre}</p>
-                      <p className="text-xs text-gray-500">{product.cantidad} vendidos</p>
+                      <p className="text-xs text-[#4B5563]">// {product.cantidad} vendidos</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[200px] text-gray-500">
-              No hay productos vendidos en este período
+            <div className="flex items-center justify-center h-[200px] text-[#4B5563]">
+              // no hay productos vendidos
             </div>
           )}
         </div>
@@ -272,25 +275,27 @@ const MisVentas = () => {
       <div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <div>
-            <h2 className="text-xl font-bold text-white">Historial de Ventas</h2>
-            <span className="text-sm text-gray-400">
-              {searchTerm ? `${filteredData.length} de ${metrics.current.data.length}` : metrics.current.data.length} registros
+            <h2 className="text-lg font-bold text-white">
+              <span className="text-[#10B981]">&gt;</span> historial_ventas
+            </h2>
+            <span className="text-sm text-[#4B5563]">
+              // {searchTerm ? `${filteredData.length} de ${metrics.current.data.length}` : metrics.current.data.length} registros
             </span>
           </div>
           {/* Buscador */}
           <div className="relative">
             <input
               type="text"
-              placeholder="Buscar por pedido, NIT o cliente..."
+              placeholder="$ buscar pedido, NIT, cliente..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setVisibleCount(25); // Resetear paginación al buscar
+                setVisibleCount(25);
               }}
-              className="w-full md:w-80 px-4 py-2 pl-10 bg-dark-card border border-dark-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full md:w-80 px-4 py-2 pl-10 bg-[#111111] border border-[#1F1F1F] text-white placeholder-[#4B5563] focus:outline-none focus:border-[#10B981] font-mono text-sm"
             />
             <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#4B5563]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -300,7 +305,7 @@ const MisVentas = () => {
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#4B5563] hover:text-white"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -318,20 +323,22 @@ const MisVentas = () => {
               <div className="mt-4 text-center">
                 <button
                   onClick={handleLoadMore}
-                  className="px-6 py-3 bg-primary-500/20 text-primary-400 rounded-lg hover:bg-primary-500/30 transition-colors font-medium"
+                  className="px-6 py-3 bg-[#10B981]/20 text-[#10B981] hover:bg-[#10B981]/30 transition-colors font-mono"
                 >
-                  Ver más ({filteredData.length - visibleCount} restantes)
+                  $ ver_mas --restantes {filteredData.length - visibleCount}
                 </button>
               </div>
             )}
           </>
         ) : (
-          <div className="bg-dark-card border border-dark-border rounded-lg p-12 text-center">
-            <div className="text-6xl mb-4">{searchTerm ? '🔍' : '📋'}</div>
-            <p className="text-gray-400">
+          <div className="bg-[#111111] border border-[#1F1F1F] p-12 text-center">
+            <p className="text-[#4B5563] font-mono text-lg mb-2">
+              {searchTerm ? '$ grep --no-results' : '$ ls --empty'}
+            </p>
+            <p className="text-[#4B5563] text-sm">
               {searchTerm
-                ? `No se encontraron ventas con "${searchTerm}"`
-                : 'No tienes ventas registradas en este período'
+                ? `// no se encontraron ventas con "${searchTerm}"`
+                : '// no tienes ventas en este periodo'
               }
             </p>
           </div>

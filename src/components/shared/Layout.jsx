@@ -13,7 +13,6 @@ const Layout = ({ children }) => {
     return false;
   });
 
-  // Detectar si es móvil
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -24,7 +23,6 @@ const Layout = ({ children }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Escuchar cambios en localStorage para sincronizar estado de colapso
   useEffect(() => {
     const handleStorage = () => {
       setSidebarCollapsed(localStorage.getItem('sidebarCollapsed') === 'true');
@@ -32,7 +30,6 @@ const Layout = ({ children }) => {
 
     window.addEventListener('storage', handleStorage);
 
-    // También verificar periódicamente para cambios locales
     const interval = setInterval(() => {
       const currentValue = localStorage.getItem('sidebarCollapsed') === 'true';
       if (currentValue !== sidebarCollapsed) {
@@ -46,11 +43,17 @@ const Layout = ({ children }) => {
     };
   }, [sidebarCollapsed]);
 
-  // Calcular margen izquierdo basado en estado del sidebar
-  const mainMargin = isMobile ? 'ml-0' : (sidebarCollapsed ? 'ml-16' : 'ml-64');
+  const mainMargin = isMobile ? 'ml-0' : (sidebarCollapsed ? 'ml-16' : 'ml-60');
+
+  const getRoleBadge = () => {
+    const role = user?.role;
+    if (role === 'admin') return 'bg-[#8B5CF6]';
+    if (role === 'ventas') return 'bg-[#3B82F6]';
+    return 'bg-[#10B981]';
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
@@ -62,50 +65,38 @@ const Layout = ({ children }) => {
       <div className={`transition-all duration-300 ${mainMargin}`}>
         {/* Header móvil */}
         {isMobile && (
-          <header className="sticky top-0 z-30 bg-slate-900 border-b border-slate-700">
+          <header className="sticky top-0 z-30 bg-[#0A0A0A] border-b border-[#1F1F1F]">
             <div className="flex items-center justify-between px-4 py-3">
               {/* Botón hamburger */}
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                className="p-2 text-[#6B7280] hover:text-white hover:bg-[#1A1A1A] transition-colors"
               >
                 <MenuIcon className="w-6 h-6" />
               </button>
 
               {/* Logo centro */}
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-lg">
-                  📈
-                </div>
-                <span className="font-bold text-white">Dashboard</span>
+                <span className="text-[#10B981] text-xl font-bold">&gt;_</span>
+                <span className="font-bold text-white">terminal.db</span>
               </div>
 
               {/* Avatar usuario */}
-              <div className="w-8 h-8">
-                {user?.photoUrl ? (
-                  <img
-                    src={user.photoUrl}
-                    alt={user.displayName}
-                    className="w-8 h-8 rounded-full"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-medium">
-                    {user?.email?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                )}
+              <div className={`w-8 h-8 ${getRoleBadge()} flex items-center justify-center text-[#0A0A0A] font-bold text-sm`}>
+                {user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
               </div>
             </div>
           </header>
         )}
 
-        {/* Header desktop - más compacto */}
+        {/* Header desktop */}
         {!isMobile && (
-          <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700">
+          <header className="sticky top-0 z-30 bg-[#0A0A0A]/90 backdrop-blur-sm border-b border-[#1F1F1F]">
             <div className="flex items-center justify-between px-6 py-3">
               {/* Fecha actual */}
               <div>
-                <p className="text-sm text-slate-400">
-                  {new Date().toLocaleDateString('es-GT', {
+                <p className="text-sm text-[#6B7280]">
+                  // {new Date().toLocaleDateString('es-GT', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -117,8 +108,8 @@ const Layout = ({ children }) => {
               {/* Info del sistema */}
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <p className="text-xs text-slate-500">Sistema FEL Guatemala</p>
-                  <p className="text-xs text-slate-600">v1.0.0</p>
+                  <p className="text-xs text-[#4B5563]">sistema_fel_guatemala</p>
+                  <p className="text-xs text-[#10B981]">v1.0.0</p>
                 </div>
               </div>
             </div>
@@ -126,16 +117,16 @@ const Layout = ({ children }) => {
         )}
 
         {/* Contenido principal */}
-        <main className="p-4 md:p-6 lg:p-8">
+        <main className="p-4 md:p-6">
           {children}
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-slate-800 mt-8">
-          <div className="px-4 md:px-6 lg:px-8 py-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600">
-              <p>© 2025 Dashboard Heroku - Sistema FEL Guatemala</p>
-              <p>Grupo Revisa</p>
+        <footer className="border-t border-[#1F1F1F] mt-8">
+          <div className="px-4 md:px-6 py-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#4B5563]">
+              <p>// dashboard_heroku - sistema_fel_guatemala</p>
+              <p className="text-[#10B981]">&copy; {new Date().getFullYear()} grupo_revisa</p>
             </div>
           </div>
         </footer>
@@ -144,7 +135,6 @@ const Layout = ({ children }) => {
   );
 };
 
-// Icono de menú hamburger
 const MenuIcon = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />

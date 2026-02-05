@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSearchParams, Navigate } from 'react-router-dom';
 
@@ -13,38 +12,46 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        {/* Logo / Título */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Dashboard FEL</h1>
-          <p className="text-slate-400">Sistema de Facturación Electrónica</p>
-        </div>
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        {/* Login Card */}
+        <div className="bg-[#0F0F0F] border border-[#1F1F1F] p-10">
+          {/* Logo / Título */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <span className="text-[#10B981] text-3xl font-bold">&gt;</span>
+              <h1 className="text-3xl font-bold text-white">Dashboard FEL</h1>
+            </div>
+            <p className="text-[#6B7280] text-sm">// sistema de facturacion electronica</p>
+          </div>
 
-        {/* Card de Login */}
-        <div className="bg-slate-800 rounded-xl p-8 shadow-xl border border-slate-700">
-          <h2 className="text-2xl font-semibold text-white text-center mb-6">
+          <h2 className="text-xl font-semibold text-white text-center mb-2">
             Iniciar Sesión
           </h2>
+          <p className="text-[#6B7280] text-xs text-center mb-6">
+            $ auth --google
+          </p>
 
           {/* Mensaje de error */}
           {error === 'unauthorized' && (
-            <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-6 text-sm">
-              <p className="font-medium">Acceso denegado</p>
-              <p>No tienes permiso para acceder. Contacta al administrador.</p>
+            <div className="bg-[#EF4444]/10 border border-[#EF4444] p-4 mb-6">
+              <p className="text-[#EF4444] font-semibold text-sm">[ERROR] acceso_denegado</p>
+              <p className="text-[#EF4444]/80 text-xs mt-1">
+                // no tienes permiso para acceder. contacta al administrador.
+              </p>
             </div>
           )}
 
           {loading ? (
             <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+              <div className="animate-spin h-8 w-8 border-2 border-[#10B981] border-t-transparent"></div>
             </div>
           ) : (
             <>
               {/* Botón de Google */}
               <button
                 onClick={login}
-                className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+                className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-[#0A0A0A] font-medium py-3 px-4 transition-colors duration-200"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -64,20 +71,25 @@ function Login() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                Continuar con Google
+                $ auth --google
               </button>
 
-              <p className="text-slate-500 text-sm text-center mt-6">
-                Solo usuarios autorizados pueden acceder
+              <p className="text-[#4B5563] text-xs text-center mt-6">
+                // solo usuarios autorizados pueden acceder
               </p>
             </>
           )}
         </div>
 
         {/* Footer */}
-        <p className="text-slate-600 text-sm text-center mt-6">
-          &copy; {new Date().getFullYear()} Grupo Revisa - Dashboard FEL
-        </p>
+        <div className="text-center mt-8">
+          <p className="text-[#4B5563] text-xs">
+            Grupo Revisa - Dashboard FEL
+          </p>
+          <p className="text-[#10B981] text-xs mt-1">
+            &copy; {new Date().getFullYear()}
+          </p>
+        </div>
       </div>
     </div>
   );

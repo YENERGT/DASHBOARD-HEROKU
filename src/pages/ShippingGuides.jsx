@@ -189,9 +189,11 @@ const ShippingGuides = () => {
     <div className="max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">Guías de Envío</h1>
-        <p className="text-slate-400">
-          Procesa imágenes de guías y envía notificaciones por WhatsApp
+        <h1 className="text-2xl font-bold text-white mb-1">
+          <span className="text-[#10B981]">&gt;</span> guias_envio
+        </h1>
+        <p className="text-[#6B7280] text-sm">
+          // procesa imagenes y envia whatsapp
         </p>
       </div>
 
@@ -199,23 +201,23 @@ const ShippingGuides = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between max-w-2xl">
           {[
-            { num: 1, label: 'Transporte' },
-            { num: 2, label: 'Imagen' },
-            { num: 3, label: 'Revisar' },
-            { num: 4, label: 'Enviar' }
+            { num: 1, label: 'transporte' },
+            { num: 2, label: 'imagen' },
+            { num: 3, label: 'revisar' },
+            { num: 4, label: 'enviar' }
           ].map((s, idx) => (
             <div key={s.num} className="flex items-center">
               <div className={`
-                w-10 h-10 rounded-full flex items-center justify-center font-bold
-                ${step >= s.num ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400'}
+                w-10 h-10 flex items-center justify-center font-bold font-mono
+                ${step >= s.num ? 'bg-[#10B981] text-[#0A0A0A]' : 'bg-[#1A1A1A] text-[#6B7280] border border-[#1F1F1F]'}
               `}>
-                {step > s.num ? '✓' : s.num}
+                {step > s.num ? '++' : `#${s.num}`}
               </div>
-              <span className={`ml-2 text-sm hidden sm:inline ${step >= s.num ? 'text-white' : 'text-slate-500'}`}>
+              <span className={`ml-2 text-sm hidden sm:inline font-mono ${step >= s.num ? 'text-white' : 'text-[#4B5563]'}`}>
                 {s.label}
               </span>
               {idx < 3 && (
-                <div className={`w-12 sm:w-20 h-1 mx-2 ${step > s.num ? 'bg-blue-600' : 'bg-slate-700'}`} />
+                <div className={`w-12 sm:w-20 h-0.5 mx-2 ${step > s.num ? 'bg-[#10B981]' : 'bg-[#1F1F1F]'}`} />
               )}
             </div>
           ))}
@@ -224,42 +226,40 @@ const ShippingGuides = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-400">
+        <div className="mb-6 p-4 bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] font-mono">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {error}
+            [ERROR] {error}
           </div>
         </div>
       )}
 
       {/* Step 1: Seleccionar Transporte */}
       {step === 1 && (
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-          <h2 className="text-xl font-semibold text-white mb-6">Selecciona el transporte</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
+          <h2 className="text-lg font-bold text-white mb-6">
+            <span className="text-[#10B981]">&gt;</span> seleccionar_transporte
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {transports.map(t => (
               <button
                 key={t.id}
                 onClick={() => handleSelectTransport(t.id)}
                 className={`
-                  p-4 rounded-xl border-2 transition-all duration-200
-                  hover:scale-105 hover:shadow-lg flex flex-col items-center justify-center
+                  p-4 border transition-all duration-200 flex flex-col items-center justify-center
                   ${transport === t.id
-                    ? 'border-blue-500 bg-blue-500/20'
-                    : 'border-slate-600 bg-slate-700/50 hover:border-slate-500'
+                    ? 'border-[#10B981] bg-[#10B981]/10'
+                    : 'border-[#1F1F1F] bg-[#1A1A1A] hover:border-[#3B82F6]'
                   }
                 `}
               >
-                <div className="w-full h-24 bg-white rounded-lg flex items-center justify-center p-3 mb-4">
+                <div className="w-full h-24 bg-white flex items-center justify-center p-3 mb-4">
                   <img
                     src={t.logo}
                     alt={t.name}
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <div className="text-lg font-semibold text-white">{t.name}</div>
+                <div className="text-sm font-mono text-white">{t.name}</div>
               </button>
             ))}
           </div>
@@ -268,43 +268,43 @@ const ShippingGuides = () => {
 
       {/* Step 2: Cargar Imagen */}
       {step === 2 && (
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">
-              Cargar imagen de guías - {transportInfo?.name}
+            <h2 className="text-lg font-bold text-white">
+              <span className="text-[#10B981]">&gt;</span> cargar_imagen --{transportInfo?.name.toLowerCase().replace(' ', '_')}
             </h2>
-            <button onClick={goBack} className="text-slate-400 hover:text-white">
-              ← Cambiar transporte
+            <button onClick={goBack} className="text-[#6B7280] hover:text-white font-mono text-sm">
+              $ cd ..
             </button>
           </div>
 
           {/* Área de carga */}
           <div className="mb-6">
             {!imagePreview ? (
-              <div className="border-2 border-dashed border-slate-600 rounded-xl p-12 text-center">
-                <div className="text-6xl mb-4">📷</div>
-                <p className="text-slate-400 mb-6">
-                  Toma una foto o carga una imagen de las guías de envío
+              <div className="border-2 border-dashed border-[#1F1F1F] p-12 text-center">
+                <div className="text-4xl mb-4 font-mono text-[#4B5563]">[img]</div>
+                <p className="text-[#6B7280] mb-6 font-mono">
+                  // toma una foto o carga una imagen de las guías
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
                     onClick={() => cameraInputRef.current?.click()}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center justify-center gap-2"
+                    className="px-6 py-3 bg-[#3B82F6] hover:bg-[#3B82F6]/80 text-white font-mono text-sm flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Tomar Foto
+                    $ tomar_foto
                   </button>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-lg font-medium flex items-center justify-center gap-2"
+                    className="px-6 py-3 bg-[#1A1A1A] border border-[#1F1F1F] hover:border-[#3B82F6] text-white font-mono text-sm flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    Cargar Imagen
+                    $ cargar_imagen
                   </button>
                 </div>
                 <input
@@ -325,7 +325,7 @@ const ShippingGuides = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="relative rounded-xl overflow-hidden bg-slate-900">
+                <div className="relative overflow-hidden bg-[#0A0A0A] border border-[#1F1F1F]">
                   <img
                     src={imagePreview}
                     alt="Preview"
@@ -336,7 +336,7 @@ const ShippingGuides = () => {
                       setImagePreview(null);
                       setImageBase64(null);
                     }}
-                    className="absolute top-4 right-4 p-2 bg-red-500 hover:bg-red-600 rounded-full text-white"
+                    className="absolute top-4 right-4 p-2 bg-[#EF4444] hover:bg-[#EF4444]/80 text-white"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -346,7 +346,7 @@ const ShippingGuides = () => {
                 <button
                   onClick={processImage}
                   disabled={loading}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-[#10B981] hover:bg-[#10B981]/80 disabled:bg-[#1A1A1A] disabled:text-[#4B5563] disabled:cursor-not-allowed text-[#0A0A0A] font-mono font-bold flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -354,15 +354,10 @@ const ShippingGuides = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Procesando imagen...
+                      $ procesando<span className="animate-pulse">_</span>
                     </>
                   ) : (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                      Procesar Imagen
-                    </>
+                    <>$ procesar_imagen</>
                   )}
                 </button>
               </div>
@@ -373,42 +368,42 @@ const ShippingGuides = () => {
 
       {/* Step 3: Revisar Guías */}
       {step === 3 && (
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">
-              Revisar guías detectadas ({guides.length})
+            <h2 className="text-lg font-bold text-white">
+              <span className="text-[#10B981]">&gt;</span> revisar_guias --count {guides.length}
             </h2>
-            <button onClick={goBack} className="text-slate-400 hover:text-white">
-              ← Cambiar imagen
+            <button onClick={goBack} className="text-[#6B7280] hover:text-white font-mono text-sm">
+              $ cd ..
             </button>
           </div>
 
           {/* Controles */}
-          <div className="flex items-center justify-between mb-4 p-3 bg-slate-700/50 rounded-lg">
+          <div className="flex items-center justify-between mb-4 p-3 bg-[#1A1A1A] border border-[#1F1F1F]">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={guides.every(g => g.selected)}
                 onChange={toggleAllGuides}
-                className="w-5 h-5 rounded border-slate-500 bg-slate-600 text-blue-600 focus:ring-blue-500"
+                className="w-5 h-5 border-[#1F1F1F] bg-[#0A0A0A] text-[#10B981] focus:ring-[#10B981]"
               />
-              <span className="text-slate-300">Seleccionar todas</span>
+              <span className="text-[#FAFAFA] font-mono text-sm">$ select --all</span>
             </label>
-            <span className="text-slate-400">
-              {selectedCount} de {guides.length} seleccionadas
+            <span className="text-[#6B7280] font-mono text-sm">
+              [{selectedCount}/{guides.length}]
             </span>
           </div>
 
           {/* Lista de guías */}
           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-            {guides.map((guide, index) => (
+            {guides.map((guide) => (
               <div
                 key={guide.id}
                 className={`
-                  p-4 rounded-lg border transition-all
+                  p-4 border transition-all
                   ${guide.selected
-                    ? 'border-blue-500 bg-blue-500/10'
-                    : 'border-slate-600 bg-slate-700/50'
+                    ? 'border-[#10B981] bg-[#10B981]/10'
+                    : 'border-[#1F1F1F] bg-[#1A1A1A]'
                   }
                 `}
               >
@@ -417,58 +412,58 @@ const ShippingGuides = () => {
                     type="checkbox"
                     checked={guide.selected}
                     onChange={() => toggleGuideSelection(guide.id)}
-                    className="mt-1 w-5 h-5 rounded border-slate-500 bg-slate-600 text-blue-600 focus:ring-blue-500"
+                    className="mt-1 w-5 h-5 border-[#1F1F1F] bg-[#0A0A0A] text-[#10B981] focus:ring-[#10B981]"
                   />
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <div>
-                      <label className="text-xs text-slate-500">No. Guía</label>
+                      <label className="text-xs text-[#4B5563] font-mono">// no_guia</label>
                       <input
                         type="text"
                         value={guide.numeroGuia}
                         onChange={(e) => updateGuide(guide.id, 'numeroGuia', e.target.value)}
-                        className="w-full mt-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="w-full mt-1 px-3 py-2 bg-[#0A0A0A] border border-[#1F1F1F] text-white text-sm font-mono focus:border-[#10B981] focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-slate-500">Destinatario</label>
+                      <label className="text-xs text-[#4B5563] font-mono">// destinatario</label>
                       <input
                         type="text"
                         value={guide.destinatario}
                         onChange={(e) => updateGuide(guide.id, 'destinatario', e.target.value)}
-                        className="w-full mt-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="w-full mt-1 px-3 py-2 bg-[#0A0A0A] border border-[#1F1F1F] text-white text-sm focus:border-[#10B981] focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-slate-500">Teléfono</label>
+                      <label className="text-xs text-[#4B5563] font-mono">// telefono</label>
                       <input
                         type="text"
                         value={guide.telefono}
                         onChange={(e) => updateGuide(guide.id, 'telefono', e.target.value)}
-                        className="w-full mt-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="w-full mt-1 px-3 py-2 bg-[#0A0A0A] border border-[#1F1F1F] text-white text-sm font-mono focus:border-[#10B981] focus:outline-none"
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className="text-xs text-slate-500">Dirección</label>
+                      <label className="text-xs text-[#4B5563] font-mono">// direccion</label>
                       <input
                         type="text"
                         value={guide.direccion}
                         onChange={(e) => updateGuide(guide.id, 'direccion', e.target.value)}
-                        className="w-full mt-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="w-full mt-1 px-3 py-2 bg-[#0A0A0A] border border-[#1F1F1F] text-white text-sm focus:border-[#10B981] focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-slate-500">No. Pedido</label>
+                      <label className="text-xs text-[#4B5563] font-mono">// no_pedido</label>
                       <input
                         type="text"
                         value={guide.numeroPedido}
                         onChange={(e) => updateGuide(guide.id, 'numeroPedido', e.target.value)}
-                        className="w-full mt-1 px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="w-full mt-1 px-3 py-2 bg-[#0A0A0A] border border-[#1F1F1F] text-white text-sm font-mono focus:border-[#10B981] focus:outline-none"
                       />
                     </div>
                   </div>
                   <button
                     onClick={() => removeGuide(guide.id)}
-                    className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded"
+                    className="p-2 text-[#EF4444] hover:bg-[#EF4444]/20"
                     title="Eliminar"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -484,19 +479,19 @@ const ShippingGuides = () => {
           <div className="mt-6 flex gap-4">
             <button
               onClick={resetProcess}
-              className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-lg font-medium"
+              className="px-6 py-3 bg-[#1A1A1A] border border-[#1F1F1F] hover:border-[#EF4444] text-[#FAFAFA] font-mono"
             >
-              Cancelar
+              $ cancelar
             </button>
             <button
               onClick={sendWhatsAppMessages}
               disabled={selectedCount === 0 || loading}
-              className="flex-1 py-3 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium flex items-center justify-center gap-2"
+              className="flex-1 py-3 bg-[#10B981] hover:bg-[#10B981]/80 disabled:bg-[#1A1A1A] disabled:text-[#4B5563] disabled:cursor-not-allowed text-[#0A0A0A] font-mono font-bold flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
               </svg>
-              Enviar {selectedCount} mensaje{selectedCount !== 1 ? 's' : ''} por WhatsApp
+              $ enviar_whatsapp --count {selectedCount}
             </button>
           </div>
         </div>
@@ -504,34 +499,35 @@ const ShippingGuides = () => {
 
       {/* Step 4: Resultados de envío */}
       {step === 4 && (
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-          <h2 className="text-xl font-semibold text-white mb-4">
-            {loading ? 'Enviando mensajes...' : 'Resultados del envío'}
+        <div className="bg-[#111111] border border-[#1F1F1F] p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> {loading ? 'enviando' : 'resultados_envio'}
+            {loading && <span className="animate-pulse">_</span>}
           </h2>
 
           {loading ? (
             <div className="text-center py-12">
-              <svg className="animate-spin w-12 h-12 mx-auto text-blue-500 mb-4" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin w-12 h-12 mx-auto text-[#10B981] mb-4" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <p className="text-slate-400">Enviando mensajes por WhatsApp...</p>
+              <p className="text-[#6B7280] font-mono">$ enviando mensajes por whatsapp<span className="animate-pulse">_</span></p>
             </div>
           ) : sendResults && (
             <>
               {/* Resumen */}
               <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="p-4 bg-green-500/20 border border-green-500 rounded-lg text-center">
-                  <div className="text-3xl font-bold text-green-400">{sendResults.summary.sent}</div>
-                  <div className="text-sm text-green-400">Enviados</div>
+                <div className="p-4 bg-[#10B981]/10 border border-[#10B981]/30 text-center">
+                  <div className="text-3xl font-bold text-[#10B981] font-mono">{sendResults.summary.sent}</div>
+                  <div className="text-sm text-[#10B981] font-mono">// enviados</div>
                 </div>
-                <div className="p-4 bg-red-500/20 border border-red-500 rounded-lg text-center">
-                  <div className="text-3xl font-bold text-red-400">{sendResults.summary.failed}</div>
-                  <div className="text-sm text-red-400">Fallidos</div>
+                <div className="p-4 bg-[#EF4444]/10 border border-[#EF4444]/30 text-center">
+                  <div className="text-3xl font-bold text-[#EF4444] font-mono">{sendResults.summary.failed}</div>
+                  <div className="text-sm text-[#EF4444] font-mono">// fallidos</div>
                 </div>
-                <div className="p-4 bg-slate-700 border border-slate-600 rounded-lg text-center">
-                  <div className="text-3xl font-bold text-slate-300">{sendResults.summary.skipped}</div>
-                  <div className="text-sm text-slate-400">Omitidos</div>
+                <div className="p-4 bg-[#1A1A1A] border border-[#1F1F1F] text-center">
+                  <div className="text-3xl font-bold text-[#6B7280] font-mono">{sendResults.summary.skipped}</div>
+                  <div className="text-sm text-[#4B5563] font-mono">// omitidos</div>
                 </div>
               </div>
 
@@ -541,43 +537,37 @@ const ShippingGuides = () => {
                   <div
                     key={guide.id}
                     className={`
-                      p-3 rounded-lg flex items-center justify-between
-                      ${guide.status === 'sent' ? 'bg-green-500/10 border border-green-500/30' :
-                        guide.status === 'failed' ? 'bg-red-500/10 border border-red-500/30' :
-                        'bg-slate-700/50 border border-slate-600'}
+                      p-3 flex items-center justify-between
+                      ${guide.status === 'sent' ? 'bg-[#10B981]/10 border border-[#10B981]/30' :
+                        guide.status === 'failed' ? 'bg-[#EF4444]/10 border border-[#EF4444]/30' :
+                        'bg-[#1A1A1A] border border-[#1F1F1F]'}
                     `}
                   >
                     <div className="flex items-center gap-3">
-                      {guide.status === 'sent' ? (
-                        <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white">
-                          ✓
-                        </div>
-                      ) : guide.status === 'failed' ? (
-                        <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white">
-                          ✕
-                        </div>
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center text-white">
-                          -
-                        </div>
-                      )}
+                      <div className={`w-8 h-8 flex items-center justify-center font-mono font-bold
+                        ${guide.status === 'sent' ? 'bg-[#10B981]/20 text-[#10B981]' :
+                          guide.status === 'failed' ? 'bg-[#EF4444]/20 text-[#EF4444]' :
+                          'bg-[#1F1F1F] text-[#4B5563]'}
+                      `}>
+                        {guide.status === 'sent' ? '++' : guide.status === 'failed' ? '--' : '..'}
+                      </div>
                       <div>
                         <div className="text-white font-medium">{guide.destinatario}</div>
-                        <div className="text-sm text-slate-400">{guide.telefono}</div>
+                        <div className="text-sm text-[#6B7280] font-mono">{guide.telefono}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className={`text-sm ${
-                        guide.status === 'sent' ? 'text-green-400' :
-                        guide.status === 'failed' ? 'text-red-400' :
-                        'text-slate-500'
+                      <div className={`text-sm font-mono ${
+                        guide.status === 'sent' ? 'text-[#10B981]' :
+                        guide.status === 'failed' ? 'text-[#EF4444]' :
+                        'text-[#4B5563]'
                       }`}>
-                        {guide.status === 'sent' ? 'Enviado' :
-                         guide.status === 'failed' ? 'Fallido' :
-                         'Omitido'}
+                        [{guide.status === 'sent' ? 'enviado' :
+                         guide.status === 'failed' ? 'fallido' :
+                         'omitido'}]
                       </div>
                       {guide.error && (
-                        <div className="text-xs text-red-400">{guide.error}</div>
+                        <div className="text-xs text-[#EF4444] font-mono">{guide.error}</div>
                       )}
                     </div>
                   </div>
@@ -587,9 +577,9 @@ const ShippingGuides = () => {
               {/* Botón para nuevo proceso */}
               <button
                 onClick={resetProcess}
-                className="mt-6 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+                className="mt-6 w-full py-3 bg-[#3B82F6] hover:bg-[#3B82F6]/80 text-white font-mono font-bold"
               >
-                Procesar nuevas guías
+                $ procesar_nuevas_guias
               </button>
             </>
           )}

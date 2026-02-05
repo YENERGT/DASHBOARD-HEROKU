@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../components/shared/Card';
 import Table from '../components/shared/Table';
 import PeriodSelector from '../components/shared/PeriodSelector';
@@ -54,23 +54,10 @@ const FELDashboard = () => {
   if (!metrics) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Cargando...</p>
+        <p className="text-[#6B7280] font-mono">$ cargando dashboard<span className="animate-pulse">_</span></p>
       </div>
     );
   }
-
-  const getPeriodLabel = () => {
-    switch(selectedPeriod) {
-      case 'day':
-        return 'Hoy';
-      case 'month':
-        return 'Este Mes';
-      case 'year':
-        return 'Este Año';
-      default:
-        return '';
-    }
-  };
 
   const getPreviousPeriodLabel = () => {
     switch(selectedPeriod) {
@@ -139,81 +126,67 @@ const FELDashboard = () => {
     }
   };
 
-  // Obtener el título de la gráfica según el período
-  const getChartTitle = () => {
-    switch(selectedPeriod) {
-      case 'day':
-        return 'Análisis de Facturas por Hora';
-      case 'month':
-        return 'Análisis de Facturas por Día';
-      case 'year':
-        return 'Análisis de Facturas por Mes';
-      default:
-        return 'Análisis de Facturas';
-    }
-  };
-
   const invoiceTableColumns = [
     {
-      header: 'Pedido',
+      header: 'pedido',
       accessor: 'pedido',
-      render: (value) => <span className="font-mono text-primary-400">{value}</span>
+      render: (value) => <span className="font-mono text-[#10B981]">#{value}</span>
     },
     {
-      header: 'Cliente',
+      header: 'cliente',
       accessor: 'nombreNit',
-      render: (value) => <span className="truncate max-w-xs block">{value}</span>
+      render: (value) => <span className="truncate max-w-xs block text-[#FAFAFA]">{value}</span>
     },
     {
-      header: 'NIT',
+      header: 'nit',
       accessor: 'nit',
-      render: (value) => <span className="font-mono text-sm">{value}</span>
+      render: (value) => <span className="font-mono text-sm text-[#6B7280]">{value}</span>
     },
     {
-      header: 'Total',
+      header: 'total',
       accessor: 'totalGeneral',
-      render: (value) => <span className="font-semibold">{formatCurrency(value)}</span>
+      render: (value) => <span className="font-semibold text-white">{formatCurrency(value)}</span>
     },
     {
-      header: 'IVA',
+      header: 'iva',
       accessor: 'totalIVA',
-      render: (value) => <span className="text-sm">{formatCurrency(value)}</span>
+      render: (value) => <span className="text-sm text-[#F59E0B]">{formatCurrency(value)}</span>
     },
     {
-      header: 'Estado',
+      header: 'estado',
       accessor: 'estado',
       render: (value) => (
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+        <span className={`px-2 py-1 text-xs font-mono ${
           value === 'paid'
-            ? 'bg-green-500/20 text-green-400'
-            : 'bg-red-500/20 text-red-400'
+            ? 'bg-[#10B981]/20 text-[#10B981]'
+            : 'bg-[#EF4444]/20 text-[#EF4444]'
         }`}>
-          {value === 'paid' ? '✅ Paid' : '❌ Anulado'}
+          {value === 'paid' ? '[pagado]' : '[anulado]'}
         </span>
       )
     },
     {
-      header: 'Fecha',
+      header: 'fecha',
       accessor: 'fecha',
       render: (value) => {
         const date = new Date(value);
         return (
-          <div className="text-sm">
-            <div>{date.toLocaleDateString('es-GT')}</div>
-            <div className="text-xs text-gray-500">{date.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}</div>
+          <div className="text-sm font-mono">
+            <div className="text-[#FAFAFA]">{date.toLocaleDateString('es-GT')}</div>
+            <div className="text-xs text-[#4B5563]">{date.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}</div>
           </div>
         );
       }
     },
     {
-      header: 'Acciones',
+      header: 'acciones',
       accessor: 'pdfUrl',
       render: (value, row) => (
         <button
           onClick={() => setPdfModal({ isOpen: true, url: value, invoiceNumber: row.pedido })}
-          className="text-primary-400 hover:text-primary-300 transition-colors cursor-pointer"
+          className="text-[#3B82F6] hover:text-[#60A5FA] transition-colors cursor-pointer font-mono text-sm"
         >
-          📄 Ver PDF
+          $ ver_pdf
         </button>
       )
     }
@@ -242,27 +215,27 @@ const FELDashboard = () => {
     {
       header: '#',
       accessor: 'index',
-      render: (value, row, index) => <span className="text-gray-500">{index + 1}</span>
+      render: (_, _row, index) => <span className="text-[#4B5563] font-mono">#{index + 1}</span>
     },
     {
-      header: 'Cliente',
+      header: 'cliente',
       accessor: 'nombre',
-      render: (value) => <span className="font-medium">{value}</span>
+      render: (value) => <span className="font-medium text-[#FAFAFA]">{value}</span>
     },
     {
-      header: 'NIT',
+      header: 'nit',
       accessor: 'nit',
-      render: (value) => <span className="font-mono text-sm">{value}</span>
+      render: (value) => <span className="font-mono text-sm text-[#6B7280]">{value}</span>
     },
     {
-      header: 'Compras',
+      header: 'compras',
       accessor: 'count',
-      render: (value) => <span className="font-semibold">{value}</span>
+      render: (value) => <span className="font-semibold text-white">{value}</span>
     },
     {
-      header: 'Total Gastado',
+      header: 'total_gastado',
       accessor: 'total',
-      render: (value) => <span className="font-bold text-primary-400">{formatCurrency(value)}</span>
+      render: (value) => <span className="font-bold text-[#10B981]">{formatCurrency(value)}</span>
     }
   ];
 
@@ -272,9 +245,11 @@ const FELDashboard = () => {
       <div className="flex flex-col gap-3 md:gap-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2">Dashboard FEL</h1>
-            <p className="text-sm md:text-base text-gray-400">
-              Análisis de ingresos y facturación - {metrics.current.period.label}
+            <h1 className="text-2xl font-bold text-white mb-1">
+              <span className="text-[#10B981]">&gt;</span> dashboard_fel
+            </h1>
+            <p className="text-sm text-[#6B7280]">
+              // {metrics.current.period.label}
             </p>
           </div>
           <PeriodSelector
@@ -294,63 +269,63 @@ const FELDashboard = () => {
       </div>
 
       {/* Métricas Principales con Comparativas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
-          title={`Ingresos ${getPeriodLabel()}`}
+          title="ingresos_totales"
           value={formatCurrency(metrics.current.total)}
-          icon="💰"
-          comparison={`${getPreviousPeriodLabel()}: ${formatCurrency(metrics.previous.total)}`}
+          icon="$"
+          comparison={`// vs ${getPreviousPeriodLabel().toLowerCase()}: ${formatCurrency(metrics.previous.total)}`}
           trend={metrics.comparison.total}
         />
         <Card
-          title="Total Facturas"
+          title="total_facturas"
           value={metrics.current.count}
-          icon="📊"
-          comparison={`${getPreviousPeriodLabel()}: ${metrics.previous.count} facturas`}
+          icon="#"
+          comparison={`// vs ${getPreviousPeriodLabel().toLowerCase()}: ${metrics.previous.count}`}
           trend={metrics.comparison.count}
         />
         <Card
-          title="IVA Total"
+          title="iva_total"
           value={formatCurrency(metrics.current.totalIVA)}
-          icon="💳"
-          comparison={`${getPreviousPeriodLabel()}: ${formatCurrency(metrics.previous.totalIVA)}`}
+          icon="%"
+          comparison={`// vs ${getPreviousPeriodLabel().toLowerCase()}: ${formatCurrency(metrics.previous.totalIVA)}`}
           trend={metrics.comparison.totalIVA}
         />
         <Card
-          title="Ingresos sin IVA"
+          title="ingresos_sin_iva"
           value={formatCurrency(metrics.current.totalSinIVA)}
-          icon="📈"
-          subtitle={`Promedio: ${formatCurrency(metrics.current.average)}`}
+          icon="~"
+          subtitle={`// promedio: ${formatCurrency(metrics.current.average)}`}
         />
       </div>
 
       {/* Gráficas Comparativas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Gráfica de Ingresos Comparativos */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-4 md:p-6">
-          <h2 className="text-lg md:text-xl font-bold text-white mb-4">
-            Comparativa de Ingresos: {getPeriodLabel()} vs {getPreviousPeriodLabel()}
+        <div className="bg-[#111111] border border-[#1F1F1F] p-4 md:p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> comparativa_ingresos
           </h2>
           <div className="overflow-x-auto -mx-4 md:mx-0">
             <div className="min-w-[400px] md:min-w-0 px-4 md:px-0">
               <ResponsiveContainer width="100%" height={250} className="md:!h-[300px]">
             <BarChart data={comparisonData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="name" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1F1F1F" />
+              <XAxis dataKey="name" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #334155',
-                  borderRadius: '8px',
-                  color: '#e2e8f0'
+                  backgroundColor: '#111111',
+                  border: '1px solid #1F1F1F',
+                  borderRadius: '0',
+                  color: '#FAFAFA'
                 }}
                 formatter={(value) => formatCurrency(value)}
               />
-              <Legend wrapperStyle={{ color: '#e2e8f0' }} />
-              <Bar dataKey="Ingresos Totales" fill="#0ea5e9" />
-              <Bar dataKey="Ingresos sin IVA" fill="#10b981" />
-              <Bar dataKey="IVA" fill="#f59e0b" />
+              <Legend wrapperStyle={{ color: '#FAFAFA' }} />
+              <Bar dataKey="Ingresos Totales" fill="#3B82F6" />
+              <Bar dataKey="Ingresos sin IVA" fill="#10B981" />
+              <Bar dataKey="IVA" fill="#F59E0B" />
             </BarChart>
           </ResponsiveContainer>
             </div>
@@ -358,22 +333,24 @@ const FELDashboard = () => {
         </div>
 
         {/* Gráfica de Facturas */}
-        <div className="bg-dark-card border border-dark-border rounded-lg p-4 md:p-6">
-          <h2 className="text-lg md:text-xl font-bold text-white mb-4">{getChartTitle()}</h2>
+        <div className="bg-[#111111] border border-[#1F1F1F] p-4 md:p-6">
+          <h2 className="text-lg font-bold text-white mb-4">
+            <span className="text-[#10B981]">&gt;</span> analisis_facturas
+          </h2>
           <div className="overflow-x-auto -mx-4 md:mx-0">
             <div className="min-w-[400px] md:min-w-0 px-4 md:px-0">
               <ResponsiveContainer width="100%" height={250} className="md:!h-[300px]">
             <LineChart data={invoiceAnalysisData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey={getXAxisKey()} stroke="#94a3b8" />
-              <YAxis yAxisId="left" stroke="#94a3b8" />
-              <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1F1F1F" />
+              <XAxis dataKey={getXAxisKey()} stroke="#6B7280" />
+              <YAxis yAxisId="left" stroke="#6B7280" />
+              <YAxis yAxisId="right" orientation="right" stroke="#6B7280" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #334155',
-                  borderRadius: '8px',
-                  color: '#e2e8f0'
+                  backgroundColor: '#111111',
+                  border: '1px solid #1F1F1F',
+                  borderRadius: '0',
+                  color: '#FAFAFA'
                 }}
                 formatter={(value, name) => {
                   if (name === 'Monto') {
@@ -382,9 +359,9 @@ const FELDashboard = () => {
                   return value;
                 }}
               />
-              <Legend wrapperStyle={{ color: '#e2e8f0' }} />
-              <Line yAxisId="left" type="monotone" dataKey="Facturas" stroke="#8b5cf6" strokeWidth={2} />
-              <Line yAxisId="right" type="monotone" dataKey="Monto" stroke="#ec4899" strokeWidth={2} />
+              <Legend wrapperStyle={{ color: '#FAFAFA' }} />
+              <Line yAxisId="left" type="monotone" dataKey="Facturas" stroke="#8B5CF6" strokeWidth={2} />
+              <Line yAxisId="right" type="monotone" dataKey="Monto" stroke="#10B981" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
             </div>
@@ -394,7 +371,9 @@ const FELDashboard = () => {
 
       {/* Top 10 Clientes */}
       <div>
-        <h2 className="text-lg md:text-xl font-bold text-white mb-4">Top 10 Clientes por Monto</h2>
+        <h2 className="text-lg font-bold text-white mb-4">
+          <span className="text-[#10B981]">&gt;</span> top_clientes --limit 10
+        </h2>
         <div className="overflow-x-auto -mx-4 md:mx-0">
           <div className="inline-block min-w-full align-middle px-4 md:px-0">
             <Table columns={clientTableColumns} data={topClients} />
@@ -405,39 +384,36 @@ const FELDashboard = () => {
       {/* Tabla Detallada de Facturas */}
       <div>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-4">
-          <h2 className="text-lg md:text-xl font-bold text-white">
-            Facturas Detalladas - {getPeriodLabel()}
+          <h2 className="text-lg font-bold text-white">
+            <span className="text-[#10B981]">&gt;</span> facturas_detalladas
           </h2>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            <label htmlFor="searchNIT" className="text-gray-400 text-sm hidden sm:block">
-              Buscar:
-            </label>
             <input
               id="searchNIT"
               type="text"
               value={searchNIT}
               onChange={(e) => setSearchNIT(e.target.value)}
-              placeholder="NIT o Pedido..."
-              className="px-3 md:px-4 py-2 text-sm md:text-base bg-dark-card border border-dark-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-full sm:w-auto"
+              placeholder="$ grep nit|pedido..."
+              className="px-3 md:px-4 py-2 text-sm bg-[#111111] border border-[#1F1F1F] text-white placeholder-[#4B5563] focus:outline-none focus:border-[#10B981] w-full sm:w-auto font-mono"
             />
             {searchNIT && (
               <button
                 onClick={() => setSearchNIT('')}
-                className="px-3 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-sm md:text-base"
+                className="px-3 py-2 bg-[#EF4444]/20 text-[#EF4444] hover:bg-[#EF4444]/30 transition-colors text-sm font-mono"
                 title="Limpiar búsqueda"
               >
-                ✕
+                x
               </button>
             )}
           </div>
         </div>
-        <div className="text-xs md:text-sm text-gray-400 mb-2">
+        <div className="text-xs md:text-sm text-[#4B5563] mb-2 font-mono">
           {searchNIT ? (
             <>
-              Mostrando <span className="font-semibold text-primary-400">{getFilteredInvoices().length}</span> resultado(s) para: <span className="font-mono text-primary-400">{searchNIT}</span>
+              // resultados: <span className="text-[#10B981]">{getFilteredInvoices().length}</span> | query: <span className="text-[#10B981]">{searchNIT}</span>
             </>
           ) : (
-            <>Mostrando las últimas 20 transacciones</>
+            <>// mostrando ultimas 20 transacciones</>
           )}
         </div>
         <div className="overflow-x-auto -mx-4 md:mx-0">
