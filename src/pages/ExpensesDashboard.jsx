@@ -225,14 +225,14 @@ const ExpensesDashboard = () => {
           title="ingresos"
           value={formatCurrency(invoicesData?.current.total || 0)}
           subtitle={`// ${invoicesData?.current.count || 0} facturas`}
-          trend={invoicesData?.comparison.total}
+          trend={invoicesData?.comparison.total?.percentage}
           icon="$"
         />
         <Card
           title="gastos"
           value={formatCurrency(expensesData?.current.total || 0)}
           subtitle={`// ${expensesData?.current.count || 0} transacciones`}
-          trend={expensesData?.comparison.total}
+          trend={expensesData?.comparison.total?.percentage}
           icon="-"
         />
         <Card

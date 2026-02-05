@@ -177,28 +177,28 @@ const MisVentas = () => {
           value={formatCurrency(metrics.current.total)}
           icon="$"
           comparison={`// vs ${periodLabel}: ${formatCurrency(metrics.previous.total)}`}
-          trend={metrics.comparison.total}
+          trend={metrics.comparison.total?.percentage}
         />
         <Card
           title="facturas"
           value={paidCount}
           icon="#"
           comparison={`// vs ${periodLabel}: ${metrics.previous.count}`}
-          trend={metrics.comparison.count}
+          trend={metrics.comparison.count?.percentage}
         />
         <Card
           title="ticket_promedio"
           value={formatCurrency(metrics.current.average)}
           icon="~"
           comparison={`// vs ${periodLabel}: ${formatCurrency(metrics.previous.average)}`}
-          trend={metrics.comparison.average}
+          trend={metrics.comparison.average?.percentage}
         />
         <Card
           title="iva_generado"
           value={formatCurrency(metrics.current.totalIVA)}
           icon="%"
           comparison={`// vs ${periodLabel}: ${formatCurrency(metrics.previous.totalIVA)}`}
-          trend={metrics.comparison.totalIVA}
+          trend={metrics.comparison.totalIVA?.percentage}
         />
       </div>
 

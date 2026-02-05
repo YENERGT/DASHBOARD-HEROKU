@@ -275,21 +275,21 @@ const FELDashboard = () => {
           value={formatCurrency(metrics.current.total)}
           icon="$"
           comparison={`// vs ${getPreviousPeriodLabel().toLowerCase()}: ${formatCurrency(metrics.previous.total)}`}
-          trend={metrics.comparison.total}
+          trend={metrics.comparison.total?.percentage}
         />
         <Card
           title="total_facturas"
           value={metrics.current.count}
           icon="#"
           comparison={`// vs ${getPreviousPeriodLabel().toLowerCase()}: ${metrics.previous.count}`}
-          trend={metrics.comparison.count}
+          trend={metrics.comparison.count?.percentage}
         />
         <Card
           title="iva_total"
           value={formatCurrency(metrics.current.totalIVA)}
           icon="%"
           comparison={`// vs ${getPreviousPeriodLabel().toLowerCase()}: ${formatCurrency(metrics.previous.totalIVA)}`}
-          trend={metrics.comparison.totalIVA}
+          trend={metrics.comparison.totalIVA?.percentage}
         />
         <Card
           title="ingresos_sin_iva"

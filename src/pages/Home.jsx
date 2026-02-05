@@ -112,28 +112,28 @@ const Home = () => {
           value={formatCurrency(metrics.current.total)}
           icon="$"
           comparison={`// vs ayer: ${formatCurrency(metrics.previous.total)}`}
-          trend={metrics.comparison.total}
+          trend={metrics.comparison.total?.percentage}
         />
         <Card
           title="facturas_emitidas"
           value={metrics.current.count}
           icon="#"
           comparison={`// vs ayer: ${metrics.previous.count} facturas`}
-          trend={metrics.comparison.count}
+          trend={metrics.comparison.count?.percentage}
         />
         <Card
           title="iva_recaudado"
           value={formatCurrency(metrics.current.totalIVA)}
           icon="%"
           comparison={`// vs ayer: ${formatCurrency(metrics.previous.totalIVA)}`}
-          trend={metrics.comparison.totalIVA}
+          trend={metrics.comparison.totalIVA?.percentage}
         />
         <Card
           title="ticket_promedio"
           value={formatCurrency(metrics.current.average)}
           icon="~"
           comparison={`// vs ayer: ${formatCurrency(metrics.previous.average)}`}
-          trend={metrics.comparison.average}
+          trend={metrics.comparison.average?.percentage}
         />
       </div>
 
